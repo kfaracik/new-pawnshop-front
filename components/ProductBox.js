@@ -42,7 +42,7 @@ const WhiteBox = styled(Link)`
     transition: transform 0.3s ease;
   }
   &:hover img {
-    transform: scale(1.05); // Slight zoom effect on hover for better appearance
+    transform: scale(1.05);
   }
 `;
 
@@ -56,7 +56,7 @@ const Title = styled(Link)`
   margin-bottom: 8px;
   transition: color 0.3s ease;
   &:hover {
-    color: #2c3e50; // Darker shade for a more professional look
+    color: #2c3e50;
   }
 `;
 
@@ -67,11 +67,11 @@ const ProductInfoBox = styled.div`
 const Price = styled.div`
   font-size: 1.25rem;
   font-weight: 600;
-  color: #34495e; // More elegant shade of dark gray
+  color: #34495e;
   margin-top: 10px;
   transition: transform 0.3s ease;
   &:hover {
-    transform: scale(1.05); // Slight scale effect to highlight price
+    transform: scale(1.05);
   }
 `;
 
