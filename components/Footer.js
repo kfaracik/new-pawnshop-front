@@ -2,7 +2,8 @@ export default function Footer() {
   return (
     <footer style={styles.footer}>
       <div style={styles.container}>
-        <p>&copy; 2024 Lombard</p>
+        <p>Copyright &copy; 2024 - All Rights Reserved
+        </p>
       </div>
     </footer>
   );
