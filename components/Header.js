@@ -151,10 +151,9 @@ export default function Header() {
           <StyledNav mobileNavActive={mobileNavActive}>
             <NavLink href="/">Home</NavLink>
             <NavLink href="/products">Produkty</NavLink>
-            {/* TODO aukcje */}
-            <NavLink href="/products">Aukcje</NavLink>
+            <NavLink href="/auctions">Aukcje</NavLink>
             <NavLink href="/account">Konto</NavLink>
-            <NavLink href="/categories">Kontakt</NavLink>
+            <NavLink href="/contact">Kontakt</NavLink>
             <CartLink href="/cart">
               Cart <CartCount>{cartProducts.length}</CartCount>
             </CartLink>

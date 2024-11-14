@@ -1,27 +1,17 @@
 import Center from "@/components/Center";
 import { mongooseConnect } from "@/lib/mongoose";
 import { Product } from "@/models/Product";
+import { Category } from "@/models/Category"; // Assuming you have this model
 import ProductsGrid from "@/components/ProductsGrid";
 import Title from "@/components/Title";
 import PageContainer from "@/components/PageContainer";
 
-export default function ProductsPage({ products }) {
+export default function AuctionsPage({ products }) {
   return (
     <PageContainer>
       <Center>
-        <Title>Wszystkie produkty</Title>
-        <ProductsGrid products={products} />
+        <Title>Aktywne aukcje</Title>
       </Center>
     </PageContainer>
   );
-}
-
-export async function getServerSideProps() {
-  await mongooseConnect();
-  const products = await Product.find({}, null, { sort: { _id: -1 } });
-  return {
-    props: {
-      products: JSON.parse(JSON.stringify(products)),
-    },
-  };
 }
