@@ -102,7 +102,7 @@ export default function ContactPage() {
               <ContactIcon>
                 <FaPhone />
               </ContactIcon>
-              <span>+48 123 456 789</span>
+              <span>+48 515 671 666</span>
             </ContactInfo>
             <ContactInfo>
               <ContactIcon>

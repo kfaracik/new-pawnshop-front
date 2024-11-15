@@ -76,8 +76,10 @@ const Price = styled.div`
 `;
 
 export default function ProductBox({ _id, title, description, price, images }) {
-  const url = '/product/' + _id;
+  const url = "/product/" + _id;
   const imageUrl = images?.[0];
+
+  // TODO: add loading (skeleton loader)
 
   return (
     <ProductWrapper>
@@ -85,7 +87,12 @@ export default function ProductBox({ _id, title, description, price, images }) {
         {imageUrl ? (
           <img src={imageUrl} alt={title} />
         ) : (
-          <img src={'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg'} alt={title} />
+          <img
+            src={
+              "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
+            }
+            alt={title}
+          />
         )}
       </WhiteBox>
       <ProductInfoBox>

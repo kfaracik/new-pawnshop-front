@@ -2,7 +2,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import Center from "@/components/Center";
 import { useContext, useState } from "react";
-import { CartContext } from "@/components/CartContext";
+// import { CartContext } from "@/components/CartContext";
 import BarsIcon from "@/components/icons/Bars";
 
 const StyledHeader = styled.header`
@@ -25,7 +25,7 @@ const Wrapper = styled.div`
   width: 100%;
 `;
 
-const Logo = styled(Link)`
+const LogoLink = styled(Link)`
   color: #fff;
   text-decoration: none;
   font-size: 2rem;
@@ -129,7 +129,7 @@ const NavButton = styled.button`
 `;
 
 export default function Header() {
-  const { cartProducts } = useContext(CartContext);
+  // const { cartProducts } = useContext(CartContext);
   const [mobileNavActive, setMobileNavActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -139,7 +139,7 @@ export default function Header() {
     <StyledHeader>
       <Center>
         <Wrapper>
-          <Logo href="/">Lombard</Logo>
+          <LogoLink href="/">Nowy Lombard</LogoLink>
           <SearchInputWrapper>
             <SearchInput
               type="text"
@@ -152,11 +152,11 @@ export default function Header() {
             <NavLink href="/">Home</NavLink>
             <NavLink href="/products">Produkty</NavLink>
             <NavLink href="/auctions">Aukcje</NavLink>
-            <NavLink href="/account">Konto</NavLink>
+            {/* <NavLink href="/account">Konto</NavLink> */}
             <NavLink href="/contact">Kontakt</NavLink>
-            <CartLink href="/cart">
+            {/* <CartLink href="/cart">
               Cart <CartCount>{cartProducts.length}</CartCount>
-            </CartLink>
+            </CartLink> */}
           </StyledNav>
           <NavButton onClick={() => setMobileNavActive((prev) => !prev)}>
             <BarsIcon />
