@@ -94,7 +94,7 @@ const NavLink = styled(Link)`
   font-size: 1rem;
   padding: 10px;
   text-transform: uppercase;
-  border-bottom: ${(props) => (props.active ? "2px solid #000" : "none")};
+  border-bottom: ${(props) => (props.active ? "2px solid #e74c3c" : "none")};
   transition: color 0.3s ease, border-color 0.3s ease;
   &:hover {
     color: #fff;
