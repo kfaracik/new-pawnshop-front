@@ -1,8 +1,8 @@
 import Link from "next/link";
 import styled from "styled-components";
+import { useRouter } from "next/router";
+import { useState } from "react";
 import Center from "@/components/Center";
-import { useContext, useState } from "react";
-// import { CartContext } from "@/components/CartContext";
 import BarsIcon from "@/components/icons/Bars";
 
 const StyledHeader = styled.header`
@@ -17,12 +17,14 @@ const StyledHeader = styled.header`
 
 const Wrapper = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  max-width: 1400px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 0 20px;
   width: 100%;
+  box-sizing: border-box;
+  transition: padding-right 0.3s ease;
 `;
 
 const LogoLink = styled(Link)`
@@ -52,7 +54,7 @@ const SearchInput = styled.input`
   width: 100%;
   min-width: 200px;
   padding: 10px 20px;
-  padding-left: 35px; /* Space for the search icon */
+  padding-left: 35px; /* Zwiększamy lewy padding, aby zostawić miejsce na ikonę */
   background-color: #333;
   border: 2px solid #444;
   border-radius: 30px;
@@ -92,27 +94,14 @@ const NavLink = styled(Link)`
   font-size: 1rem;
   padding: 10px;
   text-transform: uppercase;
-  transition: color 0.3s ease;
+  border-bottom: ${(props) => (props.active ? "2px solid #000" : "none")};
+  transition: color 0.3s ease, border-color 0.3s ease;
   &:hover {
     color: #fff;
   }
   @media screen and (max-width: 768px) {
     font-size: 1.2rem;
   }
-`;
-
-const CartLink = styled(NavLink)`
-  display: flex;
-  align-items: center;
-  gap: 5px;
-`;
-
-const CartCount = styled.span`
-  background-color: #e74c3c;
-  border-radius: 50%;
-  padding: 2px 8px;
-  color: white;
-  font-size: 0.9rem;
 `;
 
 const NavButton = styled.button`
@@ -129,34 +118,49 @@ const NavButton = styled.button`
 `;
 
 export default function Header() {
-  // const { cartProducts } = useContext(CartContext);
+  const router = useRouter();
   const [mobileNavActive, setMobileNavActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
     <StyledHeader>
       <Center>
         <Wrapper>
-          <LogoLink href="/">Nowy Lombard</LogoLink>
+          <LogoLink href="/">
+            Nowy <br /> Lombard
+          </LogoLink>
           <SearchInputWrapper>
-            <SearchInput
-              type="text"
-              placeholder="Wyszukaj produkty..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
+            <form onSubmit={handleSearchSubmit}>
+              <SearchInput
+                type="text"
+                placeholder="Wyszukaj produkty..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+            </form>
           </SearchInputWrapper>
           <StyledNav mobileNavActive={mobileNavActive}>
-            <NavLink href="/">Home</NavLink>
-            <NavLink href="/products">Produkty</NavLink>
-            <NavLink href="/auctions">Aukcje</NavLink>
-            {/* <NavLink href="/account">Konto</NavLink> */}
-            <NavLink href="/contact">Kontakt</NavLink>
-            {/* <CartLink href="/cart">
-              Cart <CartCount>{cartProducts.length}</CartCount>
-            </CartLink> */}
+            <NavLink href="/" active={router.pathname === "/"}>
+              Home
+            </NavLink>
+            <NavLink href="/products" active={router.pathname === "/products"}>
+              Produkty
+            </NavLink>
+            <NavLink href="/auctions" active={router.pathname === "/auctions"}>
+              Aukcje
+            </NavLink>
+            <NavLink href="/contact" active={router.pathname === "/contact"}>
+              Kontakt
+            </NavLink>
           </StyledNav>
           <NavButton onClick={() => setMobileNavActive((prev) => !prev)}>
             <BarsIcon />
