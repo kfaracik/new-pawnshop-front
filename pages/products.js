@@ -1,30 +1,76 @@
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import Center from "@/components/Center";
-import { mongooseConnect } from "@/lib/mongoose";
-import { Product } from "@/models/Product";
-import ProductsGrid from "@/components/ProductsGrid";
 import Title from "@/components/Title";
 import PageContainer from "@/components/PageContainer";
+import { mongooseConnect } from "@/lib/mongoose";
+import { Product } from "@/models/Product";
+import ProductList from "@/components/ProductList";
 
-export default function ProductsPage({ products }) {
+export default function ProductsPage({ initialProducts, totalProducts }) {
+  const [products, setProducts] = useState(initialProducts);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const productsPerPage = 10;
+  const totalPages = Math.ceil(totalProducts / productsPerPage);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      const response = await fetch(
+        `/api/products?page=${page}&isAuction=false`
+      );
+      const data = await response.json();
+      setProducts(data.products);
+      setLoading(false);
+    };
+
+    if (page > 1) {
+      fetchProducts();
+    }
+  }, [page]);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    router.push(`/products?page=${newPage}`, undefined, { shallow: true });
+  };
+
   return (
     <PageContainer>
       <Center>
         <Title>Wszystkie produkty</Title>
-        <ProductsGrid products={products} />
+        <ProductList
+          loading={loading}
+          products={products}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </Center>
     </PageContainer>
   );
 }
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+  const { query } = context;
+  const page = parseInt(query.page) || 1;
+  const productsPerPage = 10;
+
   await mongooseConnect();
-  const products = await Product.find({ isAuction: { $ne: true } }, null, {
+
+  const filter = { isAuction: { $ne: true } };
+  const totalProducts = await Product.countDocuments(filter);
+  const products = await Product.find(filter, null, {
+    skip: (page - 1) * productsPerPage,
+    limit: productsPerPage,
     sort: { _id: -1 },
   });
 
   return {
     props: {
-      products: JSON.parse(JSON.stringify(products)),
+      initialProducts: JSON.parse(JSON.stringify(products)),
+      totalProducts,
     },
   };
 }

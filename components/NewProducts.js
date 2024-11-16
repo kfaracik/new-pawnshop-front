@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import Center from "@/components/Center";
-import ProductsGrid from "@/components/ProductsGrid";
+import ProductList from "@/components/ProductList";
 
 const Title = styled.h2`
   font-size: 2rem;
@@ -16,7 +16,10 @@ export default function NewProducts({ products }) {
   return (
     <Center>
       <Title>Nowości</Title>
-      <ProductsGrid products={products} />
+      <ProductList
+        products={products}
+        totalPages={1}
+      />
     </Center>
   );
 }

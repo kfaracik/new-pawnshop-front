@@ -80,23 +80,30 @@ const ProductList = ({
             ))
           : (products || []).map((product) => {
               const imageUrl = product.images?.[0];
+              const url = product.isAuction
+                ? product.auctionLink
+                : `/product/${product._id}`;
               return (
-                <ImageListItem
+                <a
+                  href={url}
+                  style={{ textDecoration: "none" }}
                   key={product._id}
-                  sx={{
-                    borderRadius: "5px",
-                    overflow: "hidden",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                    cursor: "pointer",
-                    animation: `${fadeIn} 0.3s ease-out`,
-                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                    "&:hover": {
-                      transform: "scale(1.05)",
-                      boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)",
-                    },
-                  }}
                 >
-                  <a href={`/product/${product._id}`}>
+                  <ImageListItem
+                    key={product._id}
+                    sx={{
+                      borderRadius: "5px",
+                      overflow: "hidden",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                      cursor: "pointer",
+                      animation: `${fadeIn} 0.3s ease-out`,
+                      transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                      "&:hover": {
+                        transform: "scale(1.05)",
+                        boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)",
+                      },
+                    }}
+                  >
                     <img
                       src={
                         imageUrl ||
@@ -112,46 +119,41 @@ const ProductList = ({
                         transition: "transform 0.3s ease",
                       }}
                     />
-                  </a>
-                  <ImageListItemBar
-                    title={
-                      <Typography
-                        variant="body1"
-                        sx={{
-                          fontFamily: "'Roboto', sans-serif",
-                          fontWeight: "bold",
-                          color: "#fff",
-                          display: "block",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {highlightQuery(
-                          truncateTitle(product.title, 40),
-                          searchQuery
-                        )}
-                      </Typography>
-                    }
-                    subtitle={
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontFamily: "'Roboto Slab', serif",
-                          color: "#e74c3c",
-                          fontSize: "1.2rem",
-                        }}
-                      >
-                        {product.price.toFixed(2)} zł
-                      </Typography>
-                    }
-                    actionIcon={
-                      product.isAuction && (
-                        <a
-                          href={product.auctionLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
+
+                    <ImageListItemBar
+                      title={
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            fontFamily: "'Roboto', sans-serif",
+                            fontWeight: "bold",
+                            color: "#fff",
+                            display: "block",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
                         >
+                          {highlightQuery(
+                            truncateTitle(product.title, 40),
+                            searchQuery
+                          )}
+                        </Typography>
+                      }
+                      subtitle={
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontFamily: "'Roboto Slab', serif",
+                            color: "#e74c3c",
+                            fontSize: "1.2rem",
+                          }}
+                        >
+                          {product.price.toFixed(2)} zł
+                        </Typography>
+                      }
+                      actionIcon={
+                        product.isAuction && (
                           <IconButton
                             sx={{
                               color: "rgba(255, 255, 255, 0.54)",
@@ -160,31 +162,33 @@ const ProductList = ({
                           >
                             <RiAuctionFill />
                           </IconButton>
-                        </a>
-                      )
-                    }
-                    sx={{
-                      position: "absolute",
-                      bottom: 4,
-                      width: "100%",
-                      background: "rgba(0, 0, 0, 0.65)",
-                      padding: "10px",
-                    }}
-                  />
-                </ImageListItem>
+                        )
+                      }
+                      sx={{
+                        position: "absolute",
+                        bottom: 4,
+                        width: "100%",
+                        background: "rgba(0, 0, 0, 0.65)",
+                        padding: "10px",
+                      }}
+                    />
+                  </ImageListItem>
+                </a>
               );
             })}
       </ImageList>
-      <Pagination
-        count={totalPages}
-        onChange={(_, page) => onPageChange(page)}
-        sx={{
-          marginTop: 2,
-          display: "flex",
-          justifyContent: "center",
-          fontFamily: "'Inter', sans-serif",
-        }}
-      />
+      {totalPages > 1 && (
+        <Pagination
+          count={totalPages}
+          onChange={(_, page) => onPageChange(page)}
+          sx={{
+            marginTop: 2,
+            display: "flex",
+            justifyContent: "center",
+            fontFamily: "'Inter', sans-serif",
+          }}
+        />
+      )}
     </div>
   );
 };

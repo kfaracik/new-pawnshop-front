@@ -38,8 +38,6 @@ export default function SearchPage({ initialProducts, totalProducts }) {
     });
   };
 
-  console.log({ products });
-
   return (
     <PageContainer>
       {searchQuery && (
@@ -47,7 +45,6 @@ export default function SearchPage({ initialProducts, totalProducts }) {
           Wyniki wyszukiwania dla: <strong>{searchQuery}</strong>
         </h2>
       )}
-
       <ProductList
         loading={loading}
         products={products}
@@ -61,7 +58,7 @@ export default function SearchPage({ initialProducts, totalProducts }) {
 export async function getServerSideProps(context) {
   const { query } = context;
   const searchQuery = query.query || "";
-  const productsPerPage = 10;
+  const productsPerPage = 12;
   const page = parseInt(query.page) || 1;
 
   await mongooseConnect();
