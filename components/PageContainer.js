@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import styled from "styled-components";
 import Center from "@/components/Center";
 import Footer from "@/components/Footer";
+import PageLoader from "./PageLoader";
 
 const Container = styled.div`
   min-height: 100vh;
@@ -22,12 +23,12 @@ const FooterWrapper = styled.footer`
   width: 100%;
 `;
 
-export default function PageContainer({ children }) {
+export default function PageContainer({ children, loading }) {
   return (
     <Container>
       <Header />
       <MainContent>
-        <Center>{children}</Center>
+        {loading ? <PageLoader /> : <Center>{children}</Center>}
       </MainContent>
       <FooterWrapper>
         <Footer />

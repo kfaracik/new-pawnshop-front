@@ -1,23 +1,26 @@
-import {createGlobalStyle} from "styled-components";
-import {CartContextProvider} from "@/components/CartContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createGlobalStyle } from "styled-components";
+import { CartContextProvider } from "@/components/CartContext";
 
 const GlobalStyles = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-  body{
+  body {
     background-color: #eee;
-    padding:0;
-    margin:0;
+    padding: 0;
+    margin: 0;
     font-family: 'Poppins', sans-serif;
   }
 `;
 
+const queryClient = new QueryClient();
+
 export default function App({ Component, pageProps }) {
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <GlobalStyles />
       <CartContextProvider>
         <Component {...pageProps} />
       </CartContextProvider>
-    </>
+    </QueryClientProvider>
   );
 }

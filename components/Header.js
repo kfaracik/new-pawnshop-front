@@ -54,7 +54,7 @@ const SearchInput = styled.input`
   width: 100%;
   min-width: 200px;
   padding: 10px 20px;
-  padding-left: 35px; /* Zwiększamy lewy padding, aby zostawić miejsce na ikonę */
+  padding-left: 35px;
   background-color: #333;
   border: 2px solid #444;
   border-radius: 30px;
