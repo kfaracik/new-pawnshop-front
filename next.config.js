@@ -4,6 +4,9 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
-}
+  images: {
+    domains: ["www.apple.com"], // TODO: tmp
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
