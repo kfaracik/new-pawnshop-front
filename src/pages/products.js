@@ -1,52 +1,46 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Center from "components/Center";
 import Title from "components/Title";
 import PageContainer from "components/PageContainer";
 import ProductList from "components/ProductList";
+import { useProducts } from "services/api/productApi";
 
-// TODO: refactor
+const PRODUCTS_PER_PAGE = 8;
+
 export default function ProductsPage() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [totalProducts, setTotalProducts] = useState(0); // Dodajemy totalProducts
-  const [page, setPage] = useState(1);
   const router = useRouter();
+  const [page, setPage] = useState(1);
 
-  const productsPerPage = 10;
-  const totalPages = Math.ceil(totalProducts / productsPerPage);
+  const { data, isLoading, isError, error } = useProducts(
+    page,
+    PRODUCTS_PER_PAGE
+  );
 
-  // Funkcja do pobierania produktów z API
-  const fetchProducts = async () => {
-    setLoading(true);
-    console.log("GET PRODUCTS");
-    const response = await fetch("http://127.0.0.1:8888/api/products");
-
-    console.log({ response, body: response.body });
-    const data = await response.json();
-    setProducts(data.products);
-    setTotalProducts(data.totalProducts); // Ustawiamy liczbę wszystkich produktów
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchProducts(); // Pobieramy produkty po pierwszym renderowaniu
-  }, [page, router.query]); // Zależności to page i query
+  const totalPages = Math.ceil((data?.total || 0) / PRODUCTS_PER_PAGE);
 
   const handlePageChange = (newPage) => {
-    // setPage(newPage);
-    // router.push(`/products?page=${newPage}`, undefined, { shallow: true }); // Zaktualizowane URL bez przeładowania strony
+    if (newPage !== page) {
+      setPage(newPage);
+      router.push(`/products?page=${newPage}`, undefined, { shallow: true });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
+  if (isError) {
+    return <div>Error: {error?.message}</div>;
+  }
+
   return (
-    <PageContainer loading={loading}>
+    <PageContainer loading={isLoading}>
       <Center>
         <Title>Wszystkie produkty</Title>
         <ProductList
-          loading={loading}
-          products={products}
+          products={data?.products || []}
+          loading={isLoading}
           totalPages={totalPages}
           onPageChange={handlePageChange}
+          selectedPage={page}
         />
       </Center>
     </PageContainer>
