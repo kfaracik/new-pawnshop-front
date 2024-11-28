@@ -20,7 +20,7 @@ const ProductList = ({
   loading,
   totalPages,
   onPageChange,
-  selectedPage = 1,
+  selectedPage,
   searchQuery = "",
 }) => {
   const [columns, setColumns] = useState(2);
@@ -181,7 +181,7 @@ const ProductList = ({
       </ImageList>
       {totalPages > 1 && (
         <Pagination
-          page={selectedPage}
+          page={selectedPage ?? 1}
           count={totalPages}
           onChange={(_, page) => onPageChange(page)}
           sx={{
