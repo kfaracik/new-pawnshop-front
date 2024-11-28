@@ -90,6 +90,8 @@ export default function Slogan() {
           <Column>
             <IconWrapper>
               <FaDollarSign />
+              <FaDollarSign />
+              <FaDollarSign />
             </IconWrapper>
           </Column>
         </ColumnsWrapper>
