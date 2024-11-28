@@ -1,35 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import PageContainer from "components/PageContainer";
 import ProductList from "components/ProductList";
-import { mongooseConnect } from "lib/mongoose";
-import { Product } from "services/models/Product";
+import { useSearchProducts } from "services/api/searchProductApi";
 
-export default function SearchPage({ initialProducts, totalProducts }) {
-  const router = useRouter();
-  const [products, setProducts] = useState(initialProducts);
+const PRODUCTS_PER_PAGE = 8;
+
+export default function SearchPage() {
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-
-  const productsPerPage = 10;
-  const totalPages = Math.ceil(totalProducts / productsPerPage);
+  const router = useRouter();
   const searchQuery = router.query.query || "";
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      const response = await fetch(
-        `/api/products?page=${page}&query=${searchQuery}`
-      );
-      const data = await response.json();
-      setProducts(data.products);
-      setLoading(false);
-    };
+  const { data, isLoading } = useSearchProducts(
+    searchQuery,
+    page,
+    PRODUCTS_PER_PAGE
+  );
 
-    if (page > 1 || searchQuery) {
-      fetchProducts();
-    }
-  }, [page, searchQuery]);
+  const totalPages = Math.ceil(
+    data?.pagination.totalProducts / PRODUCTS_PER_PAGE
+  );
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
@@ -39,44 +29,19 @@ export default function SearchPage({ initialProducts, totalProducts }) {
   };
 
   return (
-    <PageContainer loading={false}>
+    <PageContainer loading={isLoading}>
       {searchQuery && (
         <h2>
           Wyniki wyszukiwania dla: <strong>{searchQuery}</strong>
         </h2>
       )}
       <ProductList
-        loading={loading}
-        products={products}
+        loading={isLoading}
+        products={data?.products || []}
         totalPages={totalPages}
+        selectedPage={page}
         onPageChange={handlePageChange}
       />
     </PageContainer>
   );
-}
-
-// TODO: fix api
-export async function getServerSideProps(context) {
-  const { query } = context;
-  const searchQuery = query.query || "";
-  const productsPerPage = 12;
-  const page = parseInt(query.page) || 1;
-
-  await mongooseConnect();
-
-  const filter = searchQuery
-    ? { title: { $regex: searchQuery, $options: "i" } }
-    : {};
-  const totalProducts = await Product.countDocuments(filter);
-  const products = await Product.find(filter, null, {
-    skip: (page - 1) * productsPerPage,
-    limit: productsPerPage,
-  });
-
-  return {
-    props: {
-      initialProducts: JSON.parse(JSON.stringify(products)),
-      totalProducts,
-    },
-  };
 }
