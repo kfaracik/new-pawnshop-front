@@ -58,7 +58,7 @@ const SocialIcons = styled.div`
     font-size: 1.5rem;
 
     &:hover {
-      color: #0d6efd;
+      color: #e74c3c;
     }
   }
 `;
@@ -122,9 +122,6 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <FaStore />
-            </a>
-            <a href="https://olx.pl" target="_blank" rel="noopener noreferrer">
               <FaStore />
             </a>
             <a
