@@ -5,37 +5,47 @@ import Title from "components/Title";
 import PageContainer from "components/PageContainer";
 import ProductList from "components/ProductList";
 
-// TODO: refactor
+const PRODUCTS_PER_PAGE = 8;
+
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [totalProducts, setTotalProducts] = useState(0); // Dodajemy totalProducts
+  const [totalProducts, setTotalProducts] = useState(0);
   const [page, setPage] = useState(1);
   const router = useRouter();
 
-  const productsPerPage = 10;
-  const totalPages = Math.ceil(totalProducts / productsPerPage);
+  const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
 
-  // Funkcja do pobierania produktów z API
   const fetchProducts = async () => {
     setLoading(true);
-    console.log("GET PRODUCTS");
-    const response = await fetch("http://127.0.0.1:8888/api/products");
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8888/api/products?page=${page}&limit=${PRODUCTS_PER_PAGE}`
+      );
+      const data = await response.json();
 
-    console.log({ response, body: response.body });
-    const data = await response.json();
-    setProducts(data.products);
-    setTotalProducts(data.totalProducts); // Ustawiamy liczbę wszystkich produktów
-    setLoading(false);
+      setProducts(data.products);
+      setTotalProducts(data.total);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchProducts(); // Pobieramy produkty po pierwszym renderowaniu
-  }, [page, router.query]); // Zależności to page i query
+    fetchProducts();
+  }, [page]);
 
   const handlePageChange = (newPage) => {
-    // setPage(newPage);
-    // router.push(`/products?page=${newPage}`, undefined, { shallow: true }); // Zaktualizowane URL bez przeładowania strony
+    if (newPage !== page) {
+      setPage(newPage);
+      router.push(
+        `/products?page=${newPage}&limit=${PRODUCTS_PER_PAGE}`,
+        undefined,
+        { shallow: true }
+      );
+    }
   };
 
   return (
@@ -43,10 +53,11 @@ export default function ProductsPage() {
       <Center>
         <Title>Wszystkie produkty</Title>
         <ProductList
-          loading={loading}
           products={products}
+          loading={loading}
           totalPages={totalPages}
           onPageChange={handlePageChange}
+          selectedPage={page}
         />
       </Center>
     </PageContainer>
