@@ -3,7 +3,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import { useRouter } from "next/router";
 import Center from "components/Center";
-import { FaOpencart, FaShoppingCart } from "react-icons/fa";
+import { FaOpencart } from "react-icons/fa";
 import BarsIcon from "assets/icons/Bars";
 
 const StyledHeader = styled.header`
@@ -188,9 +188,6 @@ export default function Header() {
             </NavLink>
             <NavLink href="/products" active={router.pathname === "/products"}>
               Produkty
-            </NavLink>
-            <NavLink href="/auctions" active={router.pathname === "/auctions"}>
-              Aukcje
             </NavLink>
             <NavLink href="/contact" active={router.pathname === "/contact"}>
               Kontakt
