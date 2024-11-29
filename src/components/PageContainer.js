@@ -13,9 +13,13 @@ const Container = styled.div`
 `;
 
 const MainContent = styled.main`
-  flex-grow: 1;
   width: 100%;
   padding-bottom: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 85vh;
+  background-color: #f8f9fa;
 `;
 
 export default function PageContainer({ children, loading = false }) {
