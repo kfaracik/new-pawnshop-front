@@ -1,124 +1,106 @@
-import React, { useState } from "react";
-import { useRouter } from "next/router";
+import React, { useEffect } from "react";
 import styled from "styled-components";
+import { useRouter } from "next/router";
 import PageContainer from "components/PageContainer";
-import { registerUser, loginUser } from "services/api/authApi";
+import { useUserData } from "services/api/useUserApi";
+import AuthForm from "components/AuthForm";
+import { FaRegSadTear } from "react-icons/fa";
+import { clearAuthToken } from "utils/cookies";
 
-const FormWrapper = styled.div`
-  background-color: #ffffff;
-  padding: 2rem;
-  border-radius: 12px;
+const ProfileWrapper = styled.div`
+  text-align: center;
+  margin-top: 3rem;
+  position: relative;
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+
+  h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #212529;
+  }
+
+  button {
+    font-size: 1rem;
+    color: #6c757d;
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
+
+const DetailsWrapper = styled.div`
+  margin-top: 1.5rem;
+  margin-top: 50px;
+  padding: 1.5rem;
+  background-color: #adb5bd;
+  border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
-  width: 100%;
   text-align: center;
 `;
 
-const StyledInput = styled.input`
-  width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-  outline: none;
-
-  &:focus {
-    border-color: #e74c3c;
-  }
+const IconWrapper = styled.div`
+  font-size: 3.5rem;
+  color: #495057;
+  margin: 1.5rem 0;
 `;
 
-const StyledButton = styled.button`
-  width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  background-color: #ee7668;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    opacity: 0.7;
-  }
-
-  &:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
-  }
+const StyledParagraph = styled.p`
+  font-size: 1.25rem;
+  color: #495057;
+  font-weight: 500;
+  width: 40vh;
 `;
 
-const ToggleButton = styled.button`
-  background: none;
-  color: #e74c3c;
-  border: none;
-  cursor: pointer;
-  font-size: 0.9rem;
-  text-decoration: underline;
-  margin-top: 0.5rem;
-
-  &:hover {
-    opacity: 0.7;
-  }
-`;
-
-export default function AccountPage() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const AccountPage = () => {
+  const { data, error, isLoading } = useUserData();
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const requestData = { email, password };
-
-    try {
-      let response;
-      if (isLogin) {
-        response = await loginUser(requestData);
-      } else {
-        response = await registerUser(requestData);
-      }
-
-      document.cookie = `token=${response.token}; path=/`;
-      alert(response.message);
-      router.push("/");
-    } catch (error) {
-      alert(error.message || "Something went wrong");
-    }
+  const handleLogout = () => {
+    clearAuthToken();
+    router.reload();
   };
 
+  useEffect(() => {
+    if (error?.response?.status === 401) {
+      handleLogout();
+    }
+  }, [error]);
+
+  if (!data) {
+    return (
+      <PageContainer loading={isLoading}>
+        <AuthForm />
+      </PageContainer>
+    );
+  }
+
   return (
-    <PageContainer>
-      <FormWrapper>
-        <h1>{isLogin ? "Login" : "Register"}</h1>
-        <form onSubmit={handleSubmit}>
-          <StyledInput
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <StyledInput
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <StyledButton type="submit">
-            {isLogin ? "Login" : "Register"}
-          </StyledButton>
-        </form>
-        <ToggleButton onClick={() => setIsLogin(!isLogin)}>
-          {isLogin ? "Go to Register" : "Go to Login"}
-        </ToggleButton>
-      </FormWrapper>
+    <PageContainer loading={isLoading}>
+      <ProfileWrapper>
+        <Header>
+          <h1>User Profile </h1>
+          <button onClick={handleLogout}>Logout</button>
+        </Header>
+        <p>Email: {data.email}</p>
+        <DetailsWrapper>
+          <IconWrapper>
+            <FaRegSadTear />
+          </IconWrapper>
+          <StyledParagraph>No order history</StyledParagraph>
+        </DetailsWrapper>
+      </ProfileWrapper>
     </PageContainer>
   );
-}
+};
+
+export default AccountPage;
