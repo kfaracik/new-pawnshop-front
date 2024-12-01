@@ -168,7 +168,6 @@ const ProductList = ({
                       }
                       sx={{
                         position: "absolute",
-                        bottom: 4,
                         width: "100%",
                         background: "rgba(0, 0, 0, 0.65)",
                         padding: "10px",
