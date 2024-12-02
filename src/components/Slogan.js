@@ -10,39 +10,45 @@ const Bg = styled.div`
   background-color: #222;
   border-radius: 8px;
   color: #fff;
-  padding: 50px 20px;
+  padding: 20px;
   width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
 `;
 
 const Title = styled.h1`
   margin: 0;
   font-weight: bold;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   color: #fff;
+  text-align: center;
+
   @media screen and (min-width: 768px) {
     font-size: 2.5rem;
+    text-align: left;
   }
 `;
 
 const Desc = styled.p`
   color: #bbb;
-  font-size: 1rem;
+  font-size: 0.9rem;
   margin-top: 15px;
-  line-height: 1.5;
+  line-height: 1.4;
+  text-align: center;
+
+  @media screen and (min-width: 768px) {
+    font-size: 1rem;
+    text-align: left;
+  }
 `;
 
 const ColumnsWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr;
-  gap: 40px;
-  width: 100%;
+  gap: 20px;
 
   @media screen and (min-width: 768px) {
     grid-template-columns: 1.5fr 1fr;
+    gap: 40px;
   }
 `;
 
@@ -50,23 +56,37 @@ const Column = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;  /* Zmienione na center, aby ikona była wyśrodkowana */
+  align-items: center;
+  padding: 0 10px;
+
+  @media screen and (min-width: 768px) {
+    align-items: flex-start;
+    padding: 0;
+  }
 `;
 
 const ButtonWrapper = styled.div`
-  margin-top: 20px;  /* Zmniejszyłem margines */
+  margin-top: 15px;
   display: flex;
-  justify-content: center; /* Wyrównanie przycisku do środka */
+  justify-content: center;
   width: 100%;
+
+  @media screen and (min-width: 768px) {
+    justify-content: flex-start;
+  }
 `;
 
 const IconWrapper = styled.div`
-  font-size: 5rem;  /* Zwiększyłem rozmiar ikony */
+  font-size: 3rem;
   color: #ffcc00;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 20px; /* Dodano margines między ikoną a tytułem */
+
+  @media screen and (min-width: 768px) {
+    font-size: 5rem;
+    margin-top: 20px;
+  }
 `;
 
 export default function Slogan() {
