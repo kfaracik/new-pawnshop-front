@@ -1,6 +1,6 @@
-import { mongooseConnect } from "lib/mongoose";
-import { Product } from "services/models/Product";
-import { Order } from "services/models/Order";
+// import { mongooseConnect } from "lib/mongoose";
+// import { Product } from "services/models/Product";
+// import { Order } from "services/models/Order";
 
 // const stripe = require("stripe")(process.env.STRIPE_SK);
 

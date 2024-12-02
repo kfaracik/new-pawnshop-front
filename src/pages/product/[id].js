@@ -1,15 +1,15 @@
 import React, { useState } from "react";
+import { useRouter } from "next/router";
 import styled from "styled-components";
 import Link from "next/link";
 import Modal from "react-modal";
-import { mongooseConnect } from "lib/mongoose";
-import { Product } from "services/models/Product";
 import PageContainer from "components/PageContainer";
 import Center from "components/Center";
 import Title from "components/Title";
 import WhiteBox from "components/WhiteBox";
 import Button from "components/Button";
 import CartIcon from "assets/icons/CartIcon";
+import { useProduct } from "services/api/useProductApi";
 
 const ColWrapper = styled.div`
   display: grid;
@@ -96,100 +96,95 @@ const Chip = styled.div`
   }
 `;
 
-// TODO: fix img
-export default function ProductPage({ product }) {
-  // const { addProduct } = useContext(CartContext);
+const ProductPage = () => {
+  const { query } = useRouter();
+  const { id } = query;
+
+  const { data: product, isLoading } = useProduct(id);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  function handleAddToCart() {
-    setIsModalOpen(true);
-  }
-
-  function closeModal() {
-    setIsModalOpen(false);
-  }
+  const handleAddToCart = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   return (
-    <PageContainer loading={false}>
-      <Center>
-        <ColWrapper>
-          <WhiteBox>
-            <ImagesWrapper>
-              {product.images.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`${product.title} - ${index + 1}`}
-                />
-              ))}
-            </ImagesWrapper>
-          </WhiteBox>
-          <div>
-            <Chip primary>
-              <Link href="/contact">Produkt dostępny w naszym punkcie!</Link>
-            </Chip>
+    <PageContainer loading={isLoading}>
+      {!!product ? (
+        <>
+          <Center>
+            <ColWrapper>
+              <WhiteBox>
+                <ImagesWrapper>
+                  {product.images.map((image, index) => (
+                    <img
+                      key={index}
+                      src={image}
+                      alt={`${product.title} - ${index + 1}`}
+                    />
+                  ))}
+                </ImagesWrapper>
+              </WhiteBox>
+              <div>
+                <Chip primary>
+                  <Link href="/contact">
+                    Produkt dostępny w naszym punkcie!
+                  </Link>
+                </Chip>
 
-            <Title>{product.title}</Title>
-            <Price>{product.price} zł</Price>
-            <Description
-              dangerouslySetInnerHTML={{ __html: product.description }}
-            />
-            <Button
-              primary
-              onClick={handleAddToCart}
-              style={{
-                fontSize: "1.2rem",
-                padding: "15px 30px",
-              }}
-            >
-              <CartIcon />
-              Dodaj do koszyka
-            </Button>
-          </div>
-        </ColWrapper>
-      </Center>
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={closeModal}
-        style={{
-          content: {
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "rgba(255, 255, 255, 0.9)",
-            borderRadius: "12px",
-            padding: "20px",
-            maxWidth: "400px",
-            maxHeight: "400px",
-            margin: "auto",
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-          },
-          overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.75)",
-          },
-        }}
-      >
-        <ModalContent>
-          <h2>Produkt dostępny w naszym punkcie!</h2>
-          <p>
-            Ten produkt można odebrać tylko w naszym punkcie. Skontaktuj się z
-            nami, aby uzyskać więcej informacji.
-          </p>
-          <Link href="/contact">Przejdź do strony kontaktowej</Link>
-        </ModalContent>
-      </Modal>
+                <Title>{product.title}</Title>
+                <Price>{product.price.toFixed(2)} zł</Price>
+                <Description
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+                <Button
+                  primary
+                  onClick={handleAddToCart}
+                  style={{
+                    fontSize: "1.2rem",
+                    padding: "15px 30px",
+                  }}
+                >
+                  <CartIcon />
+                  Dodaj do koszyka
+                </Button>
+              </div>
+            </ColWrapper>
+          </Center>
+          <Modal
+            isOpen={isModalOpen}
+            onRequestClose={closeModal}
+            style={{
+              content: {
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                borderRadius: "12px",
+                padding: "20px",
+                maxWidth: "400px",
+                maxHeight: "400px",
+                margin: "auto",
+                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+              },
+              overlay: {
+                backgroundColor: "rgba(0, 0, 0, 0.75)",
+              },
+            }}
+          >
+            <ModalContent>
+              <h2>Produkt dostępny w naszym punkcie!</h2>
+              <p>
+                Ten produkt można odebrać tylko w naszym punkcie. Skontaktuj się
+                z nami, aby uzyskać więcej informacji.
+              </p>
+              <Link href="/contact">Przejdź do strony kontaktowej</Link>
+            </ModalContent>
+          </Modal>
+        </>
+      ) : (
+        <div>Product not found</div>
+      )}
     </PageContainer>
   );
-}
+};
 
-// TODO: fix api
-export async function getServerSideProps(context) {
-  await mongooseConnect();
-  const { id } = context.query;
-  const product = await Product.findById(id);
-  return {
-    props: {
-      product: JSON.parse(JSON.stringify(product)),
-    },
-  };
-}
+export default ProductPage;

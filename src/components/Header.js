@@ -26,8 +26,10 @@ const Wrapper = styled.div`
   width: 100%;
   box-sizing: border-box;
   transition: padding-right 0.3s ease;
-  @media screen and (max-width: 768px) {
-    padding-right: 40px;
+
+  @media screen and (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
   }
 `;
 
@@ -39,9 +41,11 @@ const LogoLink = styled(Link)`
   letter-spacing: 1px;
   text-transform: uppercase;
   margin-right: 40px;
-  @media screen and (max-width: 768px) {
+
+  @media screen and (max-width: 600px) {
     font-size: 1.5rem;
-    margin-right: 20px;
+    margin-right: 0;
+    margin-bottom: 15px;
   }
 `;
 
@@ -53,8 +57,10 @@ const SearchInputWrapper = styled.div`
   width: 100%;
   max-width: 400px;
   margin-right: 40px;
-  @media screen and (max-width: 768px) {
-    margin-right: 20px;
+
+  @media screen and (max-width: 600px) {
+    margin-right: 0;
+    margin-bottom: 20px;
   }
 `;
 
@@ -70,15 +76,19 @@ const SearchInput = styled.input`
   font-size: 1rem;
   outline: none;
   transition: border-color 0.3s ease, background-color 0.3s ease;
+
   &:focus {
     background-color: #222;
     border-color: #e74c3c;
   }
+
   ::placeholder {
     color: #bbb;
   }
-  @media screen and (max-width: 768px) {
+
+  @media screen and (max-width: 600px) {
     font-size: 1rem;
+    padding: 12px 20px;
   }
 `;
 
@@ -86,7 +96,8 @@ const StyledNav = styled.nav`
   display: flex;
   gap: 20px;
   align-items: center;
-  @media screen and (max-width: 768px) {
+
+  @media screen and (max-width: 600px) {
     display: ${(props) => (props.mobileNavActive ? "block" : "none")};
     position: fixed;
     top: 0;
@@ -108,10 +119,12 @@ const NavLink = styled(Link)`
   text-transform: uppercase;
   border-bottom: ${(props) => (props.active ? "2px solid #e74c3c" : "none")};
   transition: color 0.3s ease, border-color 0.3s ease;
+
   &:hover {
     color: #fff;
   }
-  @media screen and (max-width: 768px) {
+
+  @media screen and (max-width: 600px) {
     font-size: 1.2rem;
     padding: 15px;
   }
@@ -125,7 +138,11 @@ const NavButton = styled.button`
   color: #fff;
   cursor: pointer;
   z-index: 10;
-  @media screen and (min-width: 768px) {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+
+  @media screen and (min-width: 600px) {
     display: none;
   }
 `;
@@ -145,6 +162,7 @@ const CartIcon = styled(FaOpencart)`
   color: #fff;
   cursor: pointer;
   transition: color 0.3s ease;
+
   &:hover {
     color: #e74c3c;
   }
@@ -164,7 +182,6 @@ export default function Header() {
     }
   };
 
-  // TODO: make it responsive
   return (
     <StyledHeader>
       <Center>
@@ -183,18 +200,10 @@ export default function Header() {
             </form>
           </SearchInputWrapper>
           <StyledNav mobileNavActive={mobileNavActive}>
-            <NavLink href="/" active={router.pathname === "/"}>
-              Home
-            </NavLink>
-            <NavLink href="/products" active={router.pathname === "/products"}>
-              Produkty
-            </NavLink>
-            <NavLink href="/contact" active={router.pathname === "/contact"}>
-              Kontakt
-            </NavLink>
-            <NavLink href="/account" active={router.pathname === "/account"}>
-              Konto
-            </NavLink>
+            <NavLink href="/" active={router.pathname === "/"}>Home</NavLink>
+            <NavLink href="/products" active={router.pathname === "/products"}>Produkty</NavLink>
+            <NavLink href="/contact" active={router.pathname === "/contact"}>Kontakt</NavLink>
+            <NavLink href="/account" active={router.pathname === "/account"}>Konto</NavLink>
             <NavLink href="/cart" active={router.pathname === "/cart"}>
               <CartIconWrapper>
                 <CartIcon />

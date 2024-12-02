@@ -5,6 +5,7 @@ import { registerUser, loginUser } from "services/api/authApi";
 
 const StyledInput = styled.input`
   width: 100%;
+  max-width: 400px;
   padding: 0.75rem;
   margin-bottom: 1rem;
   border: 1px solid #ddd;
@@ -20,6 +21,7 @@ const StyledInput = styled.input`
 
 const StyledButton = styled.button`
   width: 100%;
+  max-width: 400px;
   padding: 0.75rem;
   margin-bottom: 1rem;
   background-color: #ee7668;
@@ -79,7 +81,10 @@ const AuthForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form
+      onSubmit={handleSubmit}
+      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+    >
       <StyledInput
         type="email"
         placeholder="Email"

@@ -5,6 +5,7 @@ const fetchProducts = async (page, limit) => {
   const response = await axiosInstance.get(`/products`, {
     params: { page, limit },
   });
+
   return response.data;
 };
 

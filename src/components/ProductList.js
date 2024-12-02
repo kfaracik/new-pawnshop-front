@@ -67,7 +67,9 @@ const ProductList = ({
         gap={16}
         sx={{
           width: "100%",
-          padding: "25px",
+          maxWidth: "100vw",
+          boxSizing: "border-box",
+          padding: "2%",
           display: "grid",
           gridTemplateColumns: `repeat(${columns}, 1fr)`,
           alignItems: "stretch",
@@ -89,8 +91,8 @@ const ProductList = ({
               return (
                 <a
                   href={url}
-                  style={{ textDecoration: "none" }}
                   key={product._id}
+                  style={{ textDecoration: "none" }}
                 >
                   <ImageListItem
                     key={product._id}
