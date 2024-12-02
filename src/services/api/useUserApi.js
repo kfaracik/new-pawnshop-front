@@ -22,5 +22,6 @@ export const useUserData = () => {
   return useQuery({
     queryKey: ["userData"],
     queryFn: fetchUserData,
+    retry: 1,
   });
 };

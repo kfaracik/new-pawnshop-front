@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import axiosInstance from "lib/axiosInstance";
 import styled from "styled-components";
 import Link from "next/link";
 import Modal from "react-modal";
-import { mongooseConnect } from "lib/mongoose";
-import { Product } from "services/models/Product";
 import PageContainer from "components/PageContainer";
 import Center from "components/Center";
 import Title from "components/Title";
@@ -11,6 +11,7 @@ import WhiteBox from "components/WhiteBox";
 import Button from "components/Button";
 import CartIcon from "assets/icons/CartIcon";
 
+// Styled Components
 const ColWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr;
@@ -96,21 +97,38 @@ const Chip = styled.div`
   }
 `;
 
-// TODO: fix img
-export default function ProductPage({ product }) {
-  // const { addProduct } = useContext(CartContext);
+const ProductPage = () => {
+  const { query } = useRouter();
+  const { id } = query;
+
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  function handleAddToCart() {
-    setIsModalOpen(true);
-  }
+  useEffect(() => {
+    if (id) {
+      axiosInstance
+        .get(`/products/${id}`)
+        .then((response) => {
+          setProduct(response.data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error fetching product:", error);
+          setLoading(false);
+        });
+    }
+  }, [id]);
 
-  function closeModal() {
-    setIsModalOpen(false);
-  }
+  const handleAddToCart = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  // if (loading) return <div>Loading...</div>;
+
+  if (!product) return <div>Product not found</div>;
 
   return (
-    <PageContainer loading={false}>
+    <PageContainer loading={loading}>
       <Center>
         <ColWrapper>
           <WhiteBox>
@@ -130,7 +148,7 @@ export default function ProductPage({ product }) {
             </Chip>
 
             <Title>{product.title}</Title>
-            <Price>{product.price} zł</Price>
+            <Price>{product.price.toFixed(2)} zł</Price>
             <Description
               dangerouslySetInnerHTML={{ __html: product.description }}
             />
@@ -180,16 +198,6 @@ export default function ProductPage({ product }) {
       </Modal>
     </PageContainer>
   );
-}
+};
 
-// TODO: fix api
-export async function getServerSideProps(context) {
-  await mongooseConnect();
-  const { id } = context.query;
-  const product = await Product.findById(id);
-  return {
-    props: {
-      product: JSON.parse(JSON.stringify(product)),
-    },
-  };
-}
+export default ProductPage;

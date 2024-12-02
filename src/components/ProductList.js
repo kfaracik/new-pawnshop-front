@@ -89,8 +89,8 @@ const ProductList = ({
               return (
                 <a
                   href={url}
-                  style={{ textDecoration: "none" }}
                   key={product._id}
+                  style={{ textDecoration: "none" }}
                 >
                   <ImageListItem
                     key={product._id}
