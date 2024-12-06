@@ -3,7 +3,7 @@ import Image from "next/image";
 import Center from "components/Center";
 import styled from "styled-components";
 import ButtonLink from "components/ButtonLink";
-import { FaDollarSign } from "react-icons/fa"; // Ikona pieniędzy
+import { FaDollarSign } from "react-icons/fa";
 
 const Bg = styled.div`
   margin-top: 20px;
