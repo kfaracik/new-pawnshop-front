@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Link from "next/link";
 import styled from "styled-components";
 import { useRouter } from "next/router";
 import Center from "components/Center";
 import { FaOpencart } from "react-icons/fa";
 import BarsIcon from "assets/icons/Bars";
+import { CartContext } from "./CartContext";
 
 const StyledHeader = styled.header`
   background-color: #111;
@@ -26,10 +27,8 @@ const Wrapper = styled.div`
   width: 100%;
   box-sizing: border-box;
   transition: padding-right 0.3s ease;
-
-  @media screen and (max-width: 600px) {
-    flex-direction: column;
-    align-items: flex-start;
+  @media screen and (max-width: 768px) {
+    padding-right: 40px;
   }
 `;
 
@@ -41,11 +40,9 @@ const LogoLink = styled(Link)`
   letter-spacing: 1px;
   text-transform: uppercase;
   margin-right: 40px;
-
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 768px) {
     font-size: 1.5rem;
-    margin-right: 0;
-    margin-bottom: 15px;
+    margin-right: 20px;
   }
 `;
 
@@ -57,10 +54,8 @@ const SearchInputWrapper = styled.div`
   width: 100%;
   max-width: 400px;
   margin-right: 40px;
-
-  @media screen and (max-width: 600px) {
-    margin-right: 0;
-    margin-bottom: 20px;
+  @media screen and (max-width: 768px) {
+    margin-right: 20px;
   }
 `;
 
@@ -76,19 +71,15 @@ const SearchInput = styled.input`
   font-size: 1rem;
   outline: none;
   transition: border-color 0.3s ease, background-color 0.3s ease;
-
   &:focus {
     background-color: #222;
     border-color: #e74c3c;
   }
-
   ::placeholder {
     color: #bbb;
   }
-
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 768px) {
     font-size: 1rem;
-    padding: 12px 20px;
   }
 `;
 
@@ -96,8 +87,7 @@ const StyledNav = styled.nav`
   display: flex;
   gap: 20px;
   align-items: center;
-
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 768px) {
     display: ${(props) => (props.mobileNavActive ? "block" : "none")};
     position: fixed;
     top: 0;
@@ -119,12 +109,10 @@ const NavLink = styled(Link)`
   text-transform: uppercase;
   border-bottom: ${(props) => (props.active ? "2px solid #e74c3c" : "none")};
   transition: color 0.3s ease, border-color 0.3s ease;
-
   &:hover {
-    color: #fff;
+    color: #e74c3c;
   }
-
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 768px) {
     font-size: 1.2rem;
     padding: 15px;
   }
@@ -138,11 +126,7 @@ const NavButton = styled.button`
   color: #fff;
   cursor: pointer;
   z-index: 10;
-  position: absolute;
-  top: 20px;
-  right: 20px;
-
-  @media screen and (min-width: 600px) {
+  @media screen and (min-width: 768px) {
     display: none;
   }
 `;
@@ -162,16 +146,30 @@ const CartIcon = styled(FaOpencart)`
   color: #fff;
   cursor: pointer;
   transition: color 0.3s ease;
-
   &:hover {
     color: #e74c3c;
   }
+`;
+
+const Badge = styled.div`
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  padding: 5px;
+  font-size: 12px;
+  font-weight: bold;
 `;
 
 export default function Header() {
   const router = useRouter();
   const [mobileNavActive, setMobileNavActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { getCartItemCount } = useContext(CartContext);
+
+  const cartItemCount = getCartItemCount();
 
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
 
@@ -200,13 +198,22 @@ export default function Header() {
             </form>
           </SearchInputWrapper>
           <StyledNav mobileNavActive={mobileNavActive}>
-            <NavLink href="/" active={router.pathname === "/"}>Home</NavLink>
-            <NavLink href="/products" active={router.pathname === "/products"}>Produkty</NavLink>
-            <NavLink href="/contact" active={router.pathname === "/contact"}>Kontakt</NavLink>
-            <NavLink href="/account" active={router.pathname === "/account"}>Konto</NavLink>
+            <NavLink href="/" active={router.pathname === "/"}>
+              Home
+            </NavLink>
+            <NavLink href="/products" active={router.pathname === "/products"}>
+              Produkty
+            </NavLink>
+            <NavLink href="/contact" active={router.pathname === "/contact"}>
+              Kontakt
+            </NavLink>
+            <NavLink href="/account" active={router.pathname === "/account"}>
+              Konto
+            </NavLink>
             <NavLink href="/cart" active={router.pathname === "/cart"}>
               <CartIconWrapper>
                 <CartIcon />
+                {cartItemCount > 0 && <Badge>{cartItemCount}</Badge>}
               </CartIconWrapper>
             </NavLink>
           </StyledNav>
