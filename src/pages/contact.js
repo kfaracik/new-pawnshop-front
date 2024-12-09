@@ -130,7 +130,7 @@ export default function ContactPage() {
   };
 
   const handleMessageSend = () => {
-    // TODO
+    // TODO: add logic here
   };
 
   return (
