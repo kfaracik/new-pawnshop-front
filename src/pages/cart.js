@@ -125,9 +125,10 @@ const FullWidthButton = styled(Button)`
   padding: 15px;
   font-size: 16px;
   transition: background-color 0.3s ease;
+  background: #ee7668;
 
   &:hover {
-    background-color: #e0e0e0;
+    background-color: #e74c3c;
   }
 
   &:active {
@@ -198,112 +199,109 @@ const CartPage = () => {
   }
 
   return (
-    <>
-      <Header />
-      <Center>
-        <ColumnsWrapper>
-          <Box>
-            <Title>Twój Koszyk</Title>
-            {!cartProducts.length ? (
-              <EmptyCartMessage>Twój koszyk jest pusty.</EmptyCartMessage>
-            ) : (
-              <Table>
-                <thead>
-                  <tr>
-                    <th>Produkt</th>
-                    <th>Ilość</th>
-                    <th>Cena</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map((product) => {
-                    const productInCart = cartProducts.find(
-                      (item) => item.productId === product._id
-                    );
-                    return (
-                      <ProductRow key={product._id}>
-                        <td>
-                          <ProductImage>
-                            <img src={product.images[0]} alt={product.title} />
-                          </ProductImage>
-                          {product.title}
-                        </td>
-                        <td>
-                          <QuantityWrapper>
-                            <Button onClick={() => removeProduct(product._id)}>
-                              -
-                            </Button>
-                            <span>{productInCart?.quantity}</span>
-                            <Button onClick={() => addProduct(product._id)}>
-                              +
-                            </Button>
-                          </QuantityWrapper>
-                        </td>
-                        <td>
-                          {(product.price * productInCart?.quantity).toFixed(2)}{" "}
-                          zł
-                        </td>
-                      </ProductRow>
-                    );
-                  })}
-                </tbody>
-              </Table>
-            )}
-            {cartProducts.length > 0 && (
-              <TotalPrice>Razem: {calculateTotal().toFixed(2)} zł</TotalPrice>
-            )}
-          </Box>
-          {!!cartProducts.length && (
-            <Box>
-              <Title>Szczegóły zamówienia</Title>
-              <OrderForm>
-                <Input
-                  type="text"
-                  placeholder="Imię"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <InputGroup>
-                  <Input
-                    type="text"
-                    placeholder="Miasto"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                  />
-                  <Input
-                    type="text"
-                    placeholder="Kod pocztowy"
-                    value={postalCode}
-                    onChange={(e) => setPostalCode(e.target.value)}
-                  />
-                </InputGroup>
-                <Input
-                  type="text"
-                  placeholder="Adres"
-                  value={streetAddress}
-                  onChange={(e) => setStreetAddress(e.target.value)}
-                />
-                <Input
-                  type="text"
-                  placeholder="Kraj"
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                />
-                <FullWidthButton onClick={handlePayment}>
-                  Przejdź do płatności
-                </FullWidthButton>
-              </OrderForm>
-            </Box>
+    <PageContainer>
+      <ColumnsWrapper>
+        <Box>
+          <Title>Twój Koszyk</Title>
+          {!cartProducts.length ? (
+            <EmptyCartMessage>Twój koszyk jest pusty.</EmptyCartMessage>
+          ) : (
+            <Table>
+              <thead>
+                <tr>
+                  <th>Produkt</th>
+                  <th>Ilość</th>
+                  <th>Cena</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((product) => {
+                  const productInCart = cartProducts.find(
+                    (item) => item.productId === product._id
+                  );
+                  return (
+                    <ProductRow key={product._id}>
+                      <td>
+                        <ProductImage>
+                          <img src={product.images[0]} alt={product.title} />
+                        </ProductImage>
+                        {product.title}
+                      </td>
+                      <td>
+                        <QuantityWrapper>
+                          <Button onClick={() => removeProduct(product._id)}>
+                            -
+                          </Button>
+                          <span>{productInCart?.quantity}</span>
+                          <Button onClick={() => addProduct(product._id)}>
+                            +
+                          </Button>
+                        </QuantityWrapper>
+                      </td>
+                      <td>
+                        {(product.price * productInCart?.quantity).toFixed(2)}{" "}
+                        zł
+                      </td>
+                    </ProductRow>
+                  );
+                })}
+              </tbody>
+            </Table>
           )}
-        </ColumnsWrapper>
-      </Center>
-    </>
+          {cartProducts.length > 0 && (
+            <TotalPrice>Razem: {calculateTotal().toFixed(2)} zł</TotalPrice>
+          )}
+        </Box>
+        {!!cartProducts.length && (
+          <Box>
+            <Title>Szczegóły zamówienia</Title>
+            <OrderForm>
+              <Input
+                type="text"
+                placeholder="Imię"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <InputGroup>
+                <Input
+                  type="text"
+                  placeholder="Miasto"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
+                <Input
+                  type="text"
+                  placeholder="Kod pocztowy"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                />
+              </InputGroup>
+              <Input
+                type="text"
+                placeholder="Adres"
+                value={streetAddress}
+                onChange={(e) => setStreetAddress(e.target.value)}
+              />
+              <Input
+                type="text"
+                placeholder="Kraj"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+              />
+              <FullWidthButton onClick={handlePayment}>
+                Przejdź do płatności
+              </FullWidthButton>
+            </OrderForm>
+          </Box>
+        )}
+      </ColumnsWrapper>
+    </PageContainer>
   );
 };
 
