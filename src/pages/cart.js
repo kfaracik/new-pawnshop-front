@@ -26,6 +26,7 @@ const Box = styled.div`
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   padding: 40px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: fit-content;
 
   &:hover {
     transform: translateY(-5px);
@@ -38,6 +39,7 @@ const Title = styled.h2`
   font-weight: 600;
   margin-bottom: 25px;
   color: #333;
+  text-align: center;
 `;
 
 const EmptyCartMessage = styled.p`
@@ -63,6 +65,7 @@ const ProductImage = styled.div`
   height: 80px;
   border-radius: 10px;
   overflow: hidden;
+  margin: 0 auto;
   img {
     width: 100%;
     height: 100%;
@@ -73,6 +76,7 @@ const ProductImage = styled.div`
 const QuantityWrapper = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   transition: transform 0.3s ease;
 
@@ -126,6 +130,8 @@ const FullWidthButton = styled(Button)`
   font-size: 16px;
   transition: background-color 0.3s ease;
   background: #ee7668;
+  text-align: center;
+  margin: 0 auto;
 
   &:hover {
     background-color: #e74c3c;
@@ -137,8 +143,7 @@ const FullWidthButton = styled(Button)`
 `;
 
 const CartPage = () => {
-  const { cartProducts, addProduct, removeProduct, clearCart } =
-    useContext(CartContext);
+  const { cartProducts, addProduct, removeProduct } = useContext(CartContext);
   const [products, setProducts] = useState([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -209,9 +214,9 @@ const CartPage = () => {
             <Table>
               <thead>
                 <tr>
-                  <th>Produkt</th>
-                  <th>Ilość</th>
-                  <th>Cena</th>
+                  <th style={{ textAlign: "center" }}>Produkt</th>
+                  <th style={{ textAlign: "center" }}>Ilość</th>
+                  <th style={{ textAlign: "center" }}>Cena</th>
                 </tr>
               </thead>
               <tbody>
@@ -220,14 +225,20 @@ const CartPage = () => {
                     (item) => item.productId === product._id
                   );
                   return (
-                    <ProductRow key={product._id}>
-                      <td>
+                    <ProductRow key={product._id} style={{ padding: "5px" }}>
+                      <td style={{ textAlign: "center" }}>
                         <ProductImage>
-                          <img src={product.images[0]} alt={product.title} />
+                          <img
+                            src={
+                              product.images[0] ||
+                              "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
+                            }
+                            alt={product.title}
+                          />
                         </ProductImage>
                         {product.title}
                       </td>
-                      <td>
+                      <td style={{ textAlign: "center" }}>
                         <QuantityWrapper>
                           <Button onClick={() => removeProduct(product._id)}>
                             -
@@ -238,7 +249,7 @@ const CartPage = () => {
                           </Button>
                         </QuantityWrapper>
                       </td>
-                      <td>
+                      <td style={{ textAlign: "center" }}>
                         {(product.price * productInCart?.quantity).toFixed(2)}{" "}
                         zł
                       </td>
@@ -295,7 +306,7 @@ const CartPage = () => {
                 onChange={(e) => setCountry(e.target.value)}
               />
               <FullWidthButton onClick={handlePayment}>
-                Przejdź do płatności
+                <th style={{ textAlign: "center" }}>Przejdź do płatności</th>
               </FullWidthButton>
             </OrderForm>
           </Box>
