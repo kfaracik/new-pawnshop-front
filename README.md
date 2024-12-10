@@ -1,19 +1,22 @@
 # **New Pawnshop Project Documentation**
 
 ## **Project Overview**
-The *New Pawnshop Project* is a modern web application built with **Next.js** and **React** to manage pawnshop operations efficiently. It provides a robust interface for handling product listings, user management, and transactions. The backend leverages **Node.js** and **Express**, integrated with a **MongoDB** database for scalable data storage. The frontend utilizes **Next.js** for server-side rendering and routing, ensuring fast load times and improved SEO.
+
+The _New Pawnshop Project_ is a modern web application built with **Next.js** and **React** to manage pawnshop operations efficiently. It provides a robust interface for handling product listings, user management, and transactions. The backend leverages **Node.js** and **Express**, integrated with a **MongoDB** database for scalable data storage. The frontend utilizes **Next.js** for server-side rendering and routing, ensuring fast load times and improved SEO.
 
 ---
 
 ## **Deployed Link**
+
 The project is deployed and accessible at:  
-[**New Pawnshop Application**](https://https-github-com-kfaracik-new-pawnshop.onrender.com/)  
-*(Replace with the actual URL)*  
+[**New Pawnshop Application**](https://https-github-com-kfaracik-new-pawnshop.onrender.com/)
 
 ---
 
 ## **Technology Stack**
+
 ### **Frontend**
+
 - **Framework:** Next.js
 - **Styling:** Styled-components, CSS Modules
 - **State Management:** React Query
@@ -21,6 +24,7 @@ The project is deployed and accessible at:
 - **Icons:** Custom SVGs
 
 ### **Backend**
+
 - **Framework:** Express.js
 - **Authentication:** JSON Web Tokens (JWT)
 - **Database:** MongoDB (via Mongoose)
@@ -28,6 +32,7 @@ The project is deployed and accessible at:
 - **Environment Variables:** Managed with dotenv
 
 ### **Tooling**
+
 - **TypeScript:** Strongly-typed development
 - **Nodemon:** Backend development monitoring
 - **Bcrypt:** Password hashing for user security
@@ -37,7 +42,9 @@ The project is deployed and accessible at:
 ---
 
 ## **Project Structure**
+
 ### **Frontend Structure (Next.js)**
+
 ```plaintext
 src/
 ├── components/        # Reusable UI components
@@ -63,6 +70,7 @@ src/
 ```
 
 ### **Backend Structure (Express.js)**
+
 ```plaintext
 src/
 ├── controllers/       # Business logic for routes
@@ -89,13 +97,16 @@ src/
 ---
 
 ## **Features**
+
 ### **Frontend**
+
 1. **Dynamic Product Pages:** Using Next.js dynamic routing for seamless product detail rendering.
 2. **Responsive Design:** Styled-components ensure mobile and desktop optimization.
 3. **Optimized API Integration:** React Query handles caching and re-fetching data efficiently.
 4. **User Interaction:** Features such as adding items to a cart, modal displays, and product navigation.
 
 ### **Backend**
+
 1. **Secure Authentication:** JWT-based authentication for secure user login and session management.
 2. **Comprehensive API:** RESTful API with endpoints for managing products, users, and transactions.
 3. **Scalable Database Design:** MongoDB ensures high performance with schema-based models via Mongoose.
@@ -104,19 +115,23 @@ src/
 ---
 
 ## **Development Workflow**
+
 ### **Setting Up Locally**
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/your-repo/new-pawnshop
    cd new-pawnshop
    ```
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Set environment variables:
    Create a `.env` file at the root and add the following:
+
    ```
    MONGO_URI=your-mongo-uri
    JWT_SECRET=your-jwt-secret
@@ -134,12 +149,14 @@ src/
      ```
 
 ### **Testing**
+
 - Add Jest and testing libraries to ensure component and API reliability.
 - Use Swagger to verify API correctness.
 
 ---
 
 ## **Future Enhancements**
+
 1. **Real-time Notifications:** Integrate WebSocket for transaction updates.
 2. **Role-based Access Control (RBAC):** Implement admin and user-level permissions.
 3. **Payment Integration:** Enable secure payment gateways for online transactions.
@@ -148,6 +165,7 @@ src/
 ---
 
 ## **Contact**
+
 For further information or support, please contact the development team:  
 **Email:** support@newpawnshop.com  
 **GitHub Repository:** [New Pawnshop Project](#)
