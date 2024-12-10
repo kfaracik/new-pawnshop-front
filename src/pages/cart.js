@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
-import Header from "components/Header";
 import Center from "components/Center";
 import Button from "components/Button";
 import Table from "components/Table";
@@ -132,6 +131,9 @@ const FullWidthButton = styled(Button)`
   background: #ee7668;
   text-align: center;
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     background-color: #e74c3c;
@@ -143,7 +145,8 @@ const FullWidthButton = styled(Button)`
 `;
 
 const CartPage = () => {
-  const { cartProducts, addProduct, removeProduct } = useContext(CartContext);
+  const { cartProducts, addProduct, removeProduct } =
+    useContext(CartContext);
   const [products, setProducts] = useState([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -172,6 +175,10 @@ const CartPage = () => {
   }, [cartProducts]);
 
   const handlePayment = async () => {
+    if (!name || !email || !city || !postalCode || !streetAddress || !country) {
+      alert("Proszę wypełnić wszystkie pola.");
+      return;
+    }
     // TODO: Payment logic here
     setIsSuccess(true);
     // TODO: Order logic here
@@ -184,7 +191,8 @@ const CartPage = () => {
     }, 0);
 
   const onCloseConfirmOrderPress = () => {
-    // TODO: update state
+    setIsSuccess(false);
+    // TODO: update state eg. clearCart();
   };
 
   if (isSuccess) {
@@ -295,7 +303,7 @@ const CartPage = () => {
               </InputGroup>
               <Input
                 type="text"
-                placeholder="Adres"
+                placeholder="Adres ulicy"
                 value={streetAddress}
                 onChange={(e) => setStreetAddress(e.target.value)}
               />
@@ -306,7 +314,7 @@ const CartPage = () => {
                 onChange={(e) => setCountry(e.target.value)}
               />
               <FullWidthButton onClick={handlePayment}>
-                <th style={{ textAlign: "center" }}>Przejdź do płatności</th>
+                Przejdź do płatności
               </FullWidthButton>
             </OrderForm>
           </Box>
