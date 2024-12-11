@@ -145,7 +145,7 @@ const ModalContent = styled.div`
   }
 
   button {
-    background-color: #ff5722;
+    background-color: #e74c3c;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -154,6 +154,7 @@ const ModalContent = styled.div`
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s;
+    margin: 10px;
 
     &:hover {
       background-color: #e64a19;
@@ -161,21 +162,8 @@ const ModalContent = styled.div`
   }
 `;
 
-const Chip = styled.div`
-  display: inline-block;
-  background: #f5f5f5;
-  color: #333;
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 12px;
-  padding: 10px 20px;
-  margin-top: 20px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
-
 const ProductPage = () => {
-  const { query } = useRouter();
+  const { query, push } = useRouter();
   const { id } = query;
   const { data: product, isLoading } = useProduct(id);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -197,15 +185,20 @@ const ProductPage = () => {
 
   const closeImageModal = () => setIsImageModalOpen(false);
 
-  const goToCart = () => {};
+  const goToCart = () => {
+    push("/cart");
+  };
 
   const showNextImage = () => {
-    setSelectedImageIndex((prevIndex) => (prevIndex + 1) % product.images.length);
+    setSelectedImageIndex(
+      (prevIndex) => (prevIndex + 1) % product.images.length
+    );
   };
 
   const showPrevImage = () => {
-    setSelectedImageIndex((prevIndex) =>
-      (prevIndex - 1 + product.images.length) % product.images.length
+    setSelectedImageIndex(
+      (prevIndex) =>
+        (prevIndex - 1 + product.images.length) % product.images.length
     );
   };
 
@@ -213,104 +206,99 @@ const ProductPage = () => {
     <PageContainer loading={isLoading}>
       {!!product ? (
         <>
-          <Center>
-            <ColWrapper>
-              <WhiteBox>
-                <ImagesWrapper>
-                  {product.images.map((image, index) => (
-                    <img
-                      key={index}
-                      src={image}
-                      alt={`${product.title} - ${index + 1}`}
-                      onClick={() => handleImageClick(index)}
-                    />
-                  ))}
-                </ImagesWrapper>
-              </WhiteBox>
-              <div>
-                <Chip>Produkt dostępny w naszym punkcie!</Chip>
-                <Title>{product.title}</Title>
-                <Price>{product.price.toFixed(2)} zł</Price>
-                <Description
-                  dangerouslySetInnerHTML={{ __html: product.description }}
-                />
-                <Button
-                  primary
-                  onClick={handleAddToCart}
-                  style={{
-                    fontSize: "1.2rem",
-                    padding: "15px 30px",
-                  }}
-                >
-                  <CartIcon /> Dodaj do koszyka
-                </Button>
-              </div>
-            </ColWrapper>
-          </Center>
+          <ColWrapper>
+            <WhiteBox>
+              <ImagesWrapper>
+                {product.images.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`${product.title} - ${index + 1}`}
+                    onClick={() => handleImageClick(index)}
+                  />
+                ))}
+              </ImagesWrapper>
+            </WhiteBox>
+            <div>
+              <Title>{product.title}</Title>
+              <Price>{product.price.toFixed(2)} zł</Price>
+              <Description
+                dangerouslySetInnerHTML={{ __html: product.description }}
+              />
+              <Button
+                primary
+                onClick={handleAddToCart}
+                style={{
+                  fontSize: "1.2rem",
+                  padding: "15px 30px",
+                }}
+              >
+                <CartIcon /> Dodaj do koszyka
+              </Button>
+            </div>
+          </ColWrapper>
           <Modal
             isOpen={isModalOpen}
             onRequestClose={closeModal}
+            contentLabel="Product Added Modal"
             style={{
-              content: {
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                borderRadius: "12px",
-                padding: "20px",
-                maxWidth: "400px",
-                maxHeight: "400px",
-                margin: "auto",
-                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-              },
               overlay: {
-                backgroundColor: "rgba(0, 0, 0, 0.75)",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+              },
+              content: {
+                borderRadius: "12px",
+                maxWidth: "500px",
+                margin: "auto",
+                padding: "20px",
+                textAlign: "center",
+                position: "relative",
+                marginTop: "100px",
               },
             }}
           >
             <ModalContent>
-              <h2>Dodano do koszyka</h2>
-              <p>Możesz teraz przejść do koszyka i sfinalizować zamówienie.</p>
+              <h2>Dodano do koszyka!</h2>
+              <p>{product.title} został pomyślnie dodany do Twojego koszyka.</p>
               <button onClick={goToCart}>Przejdź do koszyka</button>
+              <button onClick={closeModal}>Kontynuuj zakupy</button>
             </ModalContent>
           </Modal>
-          <Modal
-            isOpen={isImageModalOpen}
-            onRequestClose={closeImageModal}
-            style={{
-              content: {
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "rgba(0, 0, 0, 0.9)",
-                borderRadius: "12px",
-                padding: "0",
-                maxWidth: "90%",
-                maxHeight: "90%",
-                margin: "auto",
-              },
-              overlay: {
-                backgroundColor: "rgba(0, 0, 0, 0.75)",
-              },
-            }}
-          >
-            <FullscreenImageContainer>
-              <CloseButton onClick={closeImageModal}>&times;</CloseButton>
-              <NavigationButton className="prev" onClick={showPrevImage}>
-                &#8249;
-              </NavigationButton>
-              <FullscreenImage
-                src={product.images[selectedImageIndex]}
-                alt="Fullscreen image"
-              />
-              <NavigationButton className="next" onClick={showNextImage}>
-                &#8250;
-              </NavigationButton>
-            </FullscreenImageContainer>
-          </Modal>
+          {isImageModalOpen && (
+            <Modal
+              isOpen={isImageModalOpen}
+              onRequestClose={closeImageModal}
+              contentLabel="Fullscreen Image Modal"
+              style={{
+                overlay: {
+                  backgroundColor: "rgba(0, 0, 0, 0.8)",
+                },
+                content: {
+                  backgroundColor: "transparent",
+                  border: "none",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                },
+              }}
+            >
+              <FullscreenImageContainer>
+                <NavigationButton className="prev" onClick={showPrevImage}>
+                  ‹
+                </NavigationButton>
+                <FullscreenImage
+                  src={product.images[selectedImageIndex]}
+                  alt={`${product.title} - ${selectedImageIndex + 1}`}
+                />
+                <NavigationButton className="next" onClick={showNextImage}>
+                  ›
+                </NavigationButton>
+                <CloseButton onClick={closeImageModal}>×</CloseButton>
+              </FullscreenImageContainer>
+            </Modal>
+          )}
         </>
       ) : (
-        <div>Nie znaleziono produktu</div>
+        <Center>Ładowanie danych produktu...</Center>
       )}
     </PageContainer>
   );
