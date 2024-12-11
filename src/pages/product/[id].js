@@ -46,11 +46,67 @@ const ImagesWrapper = styled.div`
   }
 `;
 
+const FullscreenImageContainer = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+`;
+
 const FullscreenImage = styled.img`
   max-width: 90%;
   max-height: 90%;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: ${keyframes`
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  `} 0.3s ease forwards;
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+`;
+
+const NavigationButton = styled.button`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: white;
+  font-size: 2rem;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 50%;
+  z-index: 2;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  &.prev {
+    left: 10px;
+  }
+
+  &.next {
+    right: 10px;
+  }
 `;
 
 const Description = styled.div`
@@ -124,7 +180,7 @@ const ProductPage = () => {
   const { data: product, isLoading } = useProduct(id);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { addProduct } = useContext(CartContext);
 
   const handleAddToCart = () => {
@@ -134,14 +190,24 @@ const ProductPage = () => {
 
   const closeModal = () => setIsModalOpen(false);
 
-  const handleImageClick = (image) => {
-    setSelectedImage(image);
+  const handleImageClick = (index) => {
+    setSelectedImageIndex(index);
     setIsImageModalOpen(true);
   };
 
   const closeImageModal = () => setIsImageModalOpen(false);
 
   const goToCart = () => {};
+
+  const showNextImage = () => {
+    setSelectedImageIndex((prevIndex) => (prevIndex + 1) % product.images.length);
+  };
+
+  const showPrevImage = () => {
+    setSelectedImageIndex((prevIndex) =>
+      (prevIndex - 1 + product.images.length) % product.images.length
+    );
+  };
 
   return (
     <PageContainer loading={isLoading}>
@@ -156,7 +222,7 @@ const ProductPage = () => {
                       key={index}
                       src={image}
                       alt={`${product.title} - ${index + 1}`}
-                      onClick={() => handleImageClick(image)}
+                      onClick={() => handleImageClick(index)}
                     />
                   ))}
                 </ImagesWrapper>
@@ -228,7 +294,19 @@ const ProductPage = () => {
               },
             }}
           >
-            {selectedImage && <FullscreenImage src={selectedImage} alt="Fullscreen image" />}
+            <FullscreenImageContainer>
+              <CloseButton onClick={closeImageModal}>&times;</CloseButton>
+              <NavigationButton className="prev" onClick={showPrevImage}>
+                &#8249;
+              </NavigationButton>
+              <FullscreenImage
+                src={product.images[selectedImageIndex]}
+                alt="Fullscreen image"
+              />
+              <NavigationButton className="next" onClick={showNextImage}>
+                &#8250;
+              </NavigationButton>
+            </FullscreenImageContainer>
           </Modal>
         </>
       ) : (
