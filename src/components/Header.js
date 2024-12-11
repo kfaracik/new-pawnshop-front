@@ -60,13 +60,11 @@ const SearchInputWrapper = styled.div`
 `;
 
 const SearchInput = styled.input`
-  width: 100%;
   min-width: 200px;
-  padding: 10px 20px;
-  padding-left: 35px;
+  padding: 12px 15px;
   background-color: #333;
-  border: 2px solid #444;
-  border-radius: 30px;
+  border: 1px solid #444;
+  border-radius: 5px;
   color: #fff;
   font-size: 1rem;
   outline: none;
