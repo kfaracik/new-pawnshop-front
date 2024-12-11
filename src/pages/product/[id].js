@@ -46,6 +46,13 @@ const ImagesWrapper = styled.div`
   }
 `;
 
+const FullscreenImage = styled.img`
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+`;
+
 const Description = styled.div`
   font-size: 1rem;
   padding-top: 20px;
@@ -100,7 +107,7 @@ const ModalContent = styled.div`
 
 const Chip = styled.div`
   display: inline-block;
-  background: linear-gradient(45deg, #e0e0e0, #f5f5f5);
+  background: #f5f5f5;
   color: #333;
   font-size: 1rem;
   font-weight: bold;
@@ -116,6 +123,8 @@ const ProductPage = () => {
   const { id } = query;
   const { data: product, isLoading } = useProduct(id);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const { addProduct } = useContext(CartContext);
 
   const handleAddToCart = () => {
@@ -124,6 +133,13 @@ const ProductPage = () => {
   };
 
   const closeModal = () => setIsModalOpen(false);
+
+  const handleImageClick = (image) => {
+    setSelectedImage(image);
+    setIsImageModalOpen(true);
+  };
+
+  const closeImageModal = () => setIsImageModalOpen(false);
 
   const goToCart = () => {};
 
@@ -140,6 +156,7 @@ const ProductPage = () => {
                       key={index}
                       src={image}
                       alt={`${product.title} - ${index + 1}`}
+                      onClick={() => handleImageClick(image)}
                     />
                   ))}
                 </ImagesWrapper>
@@ -190,6 +207,28 @@ const ProductPage = () => {
               <p>Możesz teraz przejść do koszyka i sfinalizować zamówienie.</p>
               <button onClick={goToCart}>Przejdź do koszyka</button>
             </ModalContent>
+          </Modal>
+          <Modal
+            isOpen={isImageModalOpen}
+            onRequestClose={closeImageModal}
+            style={{
+              content: {
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(0, 0, 0, 0.9)",
+                borderRadius: "12px",
+                padding: "0",
+                maxWidth: "90%",
+                maxHeight: "90%",
+                margin: "auto",
+              },
+              overlay: {
+                backgroundColor: "rgba(0, 0, 0, 0.75)",
+              },
+            }}
+          >
+            {selectedImage && <FullscreenImage src={selectedImage} alt="Fullscreen image" />}
           </Modal>
         </>
       ) : (
