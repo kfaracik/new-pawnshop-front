@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useRouter } from "next/router";
-import styled from "styled-components";
-import Link from "next/link";
+import styled, { keyframes } from "styled-components";
 import Modal from "react-modal";
 import PageContainer from "components/PageContainer";
 import Center from "components/Center";
@@ -10,6 +9,7 @@ import WhiteBox from "components/WhiteBox";
 import Button from "components/Button";
 import CartIcon from "assets/icons/CartIcon";
 import { useProduct } from "services/api/useProductApi";
+import { CartContext } from "components/CartContext";
 
 const ColWrapper = styled.div`
   display: grid;
@@ -23,9 +23,10 @@ const ColWrapper = styled.div`
 `;
 
 const Price = styled.span`
-  font-size: 1.8rem;
+  font-size: 2rem;
   color: #ff5722;
-  font-family: "Roboto", sans-serif;
+  font-weight: bold;
+  margin-top: 20px;
 `;
 
 const ImagesWrapper = styled.div`
@@ -46,20 +47,31 @@ const ImagesWrapper = styled.div`
 `;
 
 const Description = styled.div`
-  font-family: "Roboto", sans-serif;
   font-size: 1rem;
   padding-top: 20px;
   line-height: 1.5;
   color: #555;
 `;
 
+const slideIn = keyframes`
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+`;
+
 const ModalContent = styled.div`
   text-align: center;
   color: #333;
+  animation: ${slideIn} 0.4s ease forwards;
 
   h2 {
-    font-size: 1.6rem;
-    font-family: "Roboto", sans-serif;
+    font-size: 1.8rem;
+    font-weight: bold;
     margin-bottom: 20px;
   }
 
@@ -69,42 +81,51 @@ const ModalContent = styled.div`
     line-height: 1.5;
   }
 
-  a {
-    color: #0070f3;
-    text-decoration: underline;
+  button {
+    background-color: #ff5722;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
     font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: #e64a19;
+    }
   }
 `;
 
 const Chip = styled.div`
   display: inline-block;
-  background: linear-gradient(45deg, #e0e0e0, #f5f5f5);
+  background: #f5f5f5;
   color: #333;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: bold;
   border-radius: 12px;
-  padding: 8px 16px;
+  padding: 10px 20px;
   margin-top: 20px;
-  cursor: ${(props) => (props.primary ? "default" : "pointer")};
   text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-  a {
-    text-decoration: none;
-    color: #333;
-    font-weight: bold;
-  }
 `;
 
 const ProductPage = () => {
   const { query } = useRouter();
   const { id } = query;
-
   const { data: product, isLoading } = useProduct(id);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { addProduct } = useContext(CartContext);
 
-  const handleAddToCart = () => setIsModalOpen(true);
+  const handleAddToCart = () => {
+    setIsModalOpen(true);
+    addProduct(id);
+  };
+
   const closeModal = () => setIsModalOpen(false);
+
+  const goToCart = () => {};
 
   return (
     <PageContainer loading={isLoading}>
@@ -124,12 +145,7 @@ const ProductPage = () => {
                 </ImagesWrapper>
               </WhiteBox>
               <div>
-                <Chip primary>
-                  <Link href="/contact">
-                    Produkt dostępny w naszym punkcie!
-                  </Link>
-                </Chip>
-
+                <Chip>Produkt dostępny w naszym punkcie!</Chip>
                 <Title>{product.title}</Title>
                 <Price>{product.price.toFixed(2)} zł</Price>
                 <Description
@@ -143,8 +159,7 @@ const ProductPage = () => {
                     padding: "15px 30px",
                   }}
                 >
-                  <CartIcon />
-                  Dodaj do koszyka
+                  <CartIcon /> Dodaj do koszyka
                 </Button>
               </div>
             </ColWrapper>
@@ -171,17 +186,14 @@ const ProductPage = () => {
             }}
           >
             <ModalContent>
-              <h2>Produkt dostępny w naszym punkcie!</h2>
-              <p>
-                Ten produkt można odebrać tylko w naszym punkcie. Skontaktuj się
-                z nami, aby uzyskać więcej informacji.
-              </p>
-              <Link href="/contact">Przejdź do strony kontaktowej</Link>
+              <h2>Dodano do koszyka</h2>
+              <p>Możesz teraz przejść do koszyka i sfinalizować zamówienie.</p>
+              <button onClick={goToCart}>Przejdź do koszyka</button>
             </ModalContent>
           </Modal>
         </>
       ) : (
-        <div>Product not found</div>
+        <div>Nie znaleziono produktu</div>
       )}
     </PageContainer>
   );
