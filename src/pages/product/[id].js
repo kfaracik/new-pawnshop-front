@@ -100,7 +100,7 @@ const ModalContent = styled.div`
 
 const Chip = styled.div`
   display: inline-block;
-  background: #f5f5f5;
+  background: linear-gradient(45deg, #e0e0e0, #f5f5f5);
   color: #333;
   font-size: 1rem;
   font-weight: bold;
