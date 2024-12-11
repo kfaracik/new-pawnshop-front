@@ -5,7 +5,7 @@ import Button from "components/Button";
 import Table from "components/Table";
 import Input from "components/Input";
 import { CartContext } from "components/CartContext";
-import { fetchProductById, useProduct } from "services/api/useProductApi";
+import { useProducts } from "services/api/useProductApi";
 import PageContainer from "components/PageContainer";
 
 const ColumnsWrapper = styled.div`
@@ -145,9 +145,7 @@ const FullWidthButton = styled(Button)`
 `;
 
 const CartPage = () => {
-  const { cartProducts, addProduct, removeProduct } =
-    useContext(CartContext);
-  const [products, setProducts] = useState([]);
+  const { cartProducts, addProduct, removeProduct } = useContext(CartContext);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
@@ -156,23 +154,14 @@ const CartPage = () => {
   const [country, setCountry] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      const productData = await Promise.all(
-        cartProducts.map(async ({ productId }) => {
-          const product = await fetchProductById(productId);
-          return product;
-        })
-      );
-      setProducts(productData);
-    };
+  const productIds = cartProducts.map(({ productId }) => productId);
+  const { data: products = [], isLoading, error } = useProducts(productIds);
 
-    if (cartProducts.length > 0) {
-      fetchProducts();
-    } else {
-      setProducts([]);
-    }
-  }, [cartProducts]);
+  const calculateTotal = () =>
+    cartProducts.reduce((total, { productId, quantity }) => {
+      const product = products.find((p) => p._id === productId);
+      return total + (product ? product.price * quantity : 0);
+    }, 0);
 
   const handlePayment = async () => {
     if (!name || !email || !city || !postalCode || !streetAddress || !country) {
@@ -184,16 +173,12 @@ const CartPage = () => {
     // TODO: Order logic here
   };
 
-  const calculateTotal = () =>
-    cartProducts.reduce((total, { productId, quantity }) => {
-      const product = products.find((p) => p._id === productId);
-      return total + (product ? product.price * quantity : 0);
-    }, 0);
-
   const onCloseConfirmOrderPress = () => {
     setIsSuccess(false);
     // TODO: update state eg. clearCart();
   };
+
+  if (error) return <div>Error loading products</div>;
 
   if (isSuccess) {
     return (
@@ -212,7 +197,7 @@ const CartPage = () => {
   }
 
   return (
-    <PageContainer>
+    <PageContainer loading={isLoading}>
       <ColumnsWrapper>
         <Box>
           <Title>Twój Koszyk</Title>
