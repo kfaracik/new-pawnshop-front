@@ -11,7 +11,6 @@ const Bg = styled.div`
   border-radius: 8px;
   color: #fff;
   padding: 20px;
-  width: 100%;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
 `;
 
