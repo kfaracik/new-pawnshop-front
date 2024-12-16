@@ -1,5 +1,4 @@
 import React from "react";
-import Image from "next/image";
 import Center from "components/Center";
 import styled from "styled-components";
 import ButtonLink from "components/ButtonLink";
