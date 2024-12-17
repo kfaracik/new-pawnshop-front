@@ -7,7 +7,7 @@ import { FaDollarSign } from "react-icons/fa";
 const Bg = styled.div`
   margin: 20px 0;
   background: linear-gradient(135deg, #ff7e5f, #feb47b);
-  border-radius: 12px;
+  border-radius: 5px;
   color: #fff;
   padding: 40px 20px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
@@ -126,7 +126,7 @@ export default function Slogan() {
                   color: "#000",
                   fontWeight: "bold",
                   padding: "12px 24px",
-                  borderRadius: "8px",
+                  borderRadius: "5px",
                   transition: "all 0.3s ease",
                 }}
                 onMouseEnter={(e) =>
