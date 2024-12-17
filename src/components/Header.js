@@ -6,6 +6,7 @@ import Center from "components/Center";
 import { FaOpencart } from "react-icons/fa";
 import BarsIcon from "assets/icons/Bars";
 import { CartContext } from "./CartContext";
+import Button from "./Button";
 
 const StyledHeader = styled.header`
   background-color: #111;
@@ -111,6 +112,8 @@ const NavLink = styled(Link)`
 `;
 
 const SearchButton = styled.button`
+  background-color: #ffd700;
+  margin: 3px;
   height: 40px;
   border: none;
   border-radius: 5px;
