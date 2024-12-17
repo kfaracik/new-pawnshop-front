@@ -10,7 +10,7 @@ import { CartContext } from "./CartContext";
 const StyledHeader = styled.header`
   background-color: #111;
   color: #fff;
-  padding: 20px 0;
+  padding: 10px 30px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
@@ -20,12 +20,6 @@ const StyledHeader = styled.header`
 const Wrapper = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 0 20px;
-  width: 100%;
-  box-sizing: border-box;
   transition: padding-right 0.3s ease;
   @media screen and (max-width: 768px) {
     padding-right: 40px;
@@ -39,7 +33,7 @@ const LogoLink = styled(Link)`
   font-weight: bold;
   letter-spacing: 1px;
   text-transform: uppercase;
-  margin-right: 40px;
+  margin-right: 10px;
   @media screen and (max-width: 768px) {
     font-size: 1.5rem;
     margin-right: 20px;
@@ -114,6 +108,12 @@ const NavLink = styled(Link)`
     font-size: 1.2rem;
     padding: 15px;
   }
+`;
+
+const SearchButton = styled.button`
+  height: 40px;
+  border: none;
+  border-radius: 5px;
 `;
 
 const NavButton = styled.button`
@@ -193,6 +193,7 @@ export default function Header() {
                 value={searchQuery}
                 onChange={handleSearchChange}
               />
+              <SearchButton>SZUKAJ</SearchButton>
             </form>
           </SearchInputWrapper>
           <StyledNav mobileNavActive={mobileNavActive}>
