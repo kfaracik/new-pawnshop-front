@@ -1,8 +1,8 @@
 import React from "react";
-import NewProducts from "components/NewProducts";
 import PageContainer from "components/PageContainer";
 import { useNewProducts } from "services/api/newProductsApi";
 import Slogan from "components/Slogan";
+import HorizontalProductList from "components/HorizontalProductList";
 
 export default function HomePage() {
   const { data: newProducts, isLoading: isLoadingNew } = useNewProducts();
@@ -16,17 +16,17 @@ export default function HomePage() {
       loading={isLoadingNew || isLoadingPopular || isLoadingSuggested}
     >
       <Slogan />
-      <NewProducts
+      <HorizontalProductList
         title="Nowości"
         products={newProducts}
         loading={isLoadingNew}
       />
-      <NewProducts
+      <HorizontalProductList
         title="Popularne"
         products={popularProducts}
         loading={isLoadingPopular}
       />
-      <NewProducts
+      <HorizontalProductList
         title="Sugerowane"
         products={suggestedProducts}
         loading={isLoadingSuggested}
