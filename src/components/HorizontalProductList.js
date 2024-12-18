@@ -21,6 +21,7 @@ const Container = styled.div`
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
 `;
 
 const TitleContainer = styled.div`
@@ -50,6 +51,10 @@ const ProductCard = styled.div`
     transform: translateY(-5px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   }
+`;
+
+const SkeletonContainer = styled.div`
+  display: flex;
 `;
 
 const ProductImage = styled.img`
@@ -122,11 +127,25 @@ const HorizontalProductList = ({
     api.scrollNext();
   };
 
+  if (!products || products.length === 0) {
+    return (
+      <Container>
+        <TitleContainer>
+          <Title>{title}</Title>
+          <p>Nie mamy aktualnie dostępnych produktów.</p>
+        </TitleContainer>
+      </Container>
+    );
+  }
+
   return (
     <Container>
-      {loading ? (
-        <>
-          {Array.from({ length: 8 }).map((_, index) => (
+      {loading || true ? (
+        <SkeletonContainer>
+          <TitleContainer>
+            <Title>{title}</Title>
+          </TitleContainer>
+          {Array.from({ length: 6 }).map((_, index) => (
             <StyledSkeleton
               key={index}
               variant="rectangular"
@@ -134,7 +153,7 @@ const HorizontalProductList = ({
               height={350}
             />
           ))}
-        </>
+        </SkeletonContainer>
       ) : (
         <ScrollMenu
           wrapperClassName="hide-scrollbar"
