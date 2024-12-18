@@ -3,7 +3,11 @@ import styled from "styled-components";
 import { ScrollMenu, VisibilityContext } from "react-horizontal-scrolling-menu";
 import "react-horizontal-scrolling-menu/dist/styles.css";
 import { IconButton, Typography } from "@mui/material";
-import { RiArrowRightSLine, RiAuctionFill } from "react-icons/ri";
+import {
+  RiArrowRightSLine,
+  RiArrowLeftSLine,
+  RiAuctionFill,
+} from "react-icons/ri";
 import Skeleton from "@mui/material/Skeleton";
 import { keyframes } from "@emotion/react";
 import colors from "styles/colors";
@@ -22,11 +26,16 @@ const Container = styled.div`
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
+  position: relative;
+  display: flex;
 `;
 
 const TitleContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
   padding: 20px;
   min-width: 180px;
+  align-items: center;
 `;
 
 const Title = styled.span`
@@ -127,6 +136,10 @@ const HorizontalProductList = ({
     api.scrollNext();
   };
 
+  const handleScrollPrev = (api) => {
+    api.scrollPrev();
+  };
+
   if (!products || products.length === 0) {
     return (
       <Container>
@@ -140,11 +153,11 @@ const HorizontalProductList = ({
 
   return (
     <Container>
-      {loading || true ? (
+      <TitleContainer>
+        <Title>{title}</Title>
+      </TitleContainer>
+      {loading ? (
         <SkeletonContainer>
-          <TitleContainer>
-            <Title>{title}</Title>
-          </TitleContainer>
           {Array.from({ length: 6 }).map((_, index) => (
             <StyledSkeleton
               key={index}
@@ -157,6 +170,15 @@ const HorizontalProductList = ({
       ) : (
         <ScrollMenu
           wrapperClassName="hide-scrollbar"
+          LeftArrow={() => (
+            <VisibilityContext.Consumer>
+              {(api) => (
+                <ArrowButton onClick={() => handleScrollPrev(api)}>
+                  <RiArrowLeftSLine size={24} />
+                </ArrowButton>
+              )}
+            </VisibilityContext.Consumer>
+          )}
           RightArrow={() => (
             <VisibilityContext.Consumer>
               {(api) => (
@@ -167,9 +189,6 @@ const HorizontalProductList = ({
             </VisibilityContext.Consumer>
           )}
         >
-          <TitleContainer>
-            <Title>{title}</Title>
-          </TitleContainer>
           {products.map((product) => {
             const url = product.isAuction
               ? product.auctionLink
