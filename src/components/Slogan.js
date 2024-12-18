@@ -1,5 +1,4 @@
 import React from "react";
-import Center from "components/Center";
 import styled, { keyframes } from "styled-components";
 import ButtonLink from "components/ButtonLink";
 import { FaDollarSign } from "react-icons/fa";
@@ -108,47 +107,45 @@ const IconWrapper = styled.div`
 export default function Slogan() {
   return (
     <Bg>
-      <Center>
-        <ColumnsWrapper>
-          <Column>
-            <Title>Gotówka od ręki, zakupy na każdą kieszeń!</Title>
-            <Desc>
-              Wpadnij do naszego lombardu! Uzyskaj szybką gotówkę bez zbędnych
-              formalności lub skorzystaj z wyjątkowych okazji cenowych na
-              produkty, które pokochasz!
-            </Desc>
-            <ButtonWrapper>
-              <ButtonLink
-                href={"/products"}
-                outline={0}
-                style={{
-                  background: "#4caf50",
-                  color: "#fff",
-                  fontWeight: "bold",
-                  padding: "12px 24px",
-                  borderRadius: "8px",
-                  transition: "all 0.3s ease",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#66bb6a")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "#4caf50")
-                }
-              >
-                Zobacz najlepsze oferty!
-              </ButtonLink>
-            </ButtonWrapper>
-          </Column>
-          <Column>
-            <IconWrapper>
-              <FaDollarSign />
-              <FaDollarSign />
-              <FaDollarSign />
-            </IconWrapper>
-          </Column>
-        </ColumnsWrapper>
-      </Center>
+      <ColumnsWrapper>
+        <Column>
+          <Title>Gotówka od ręki, zakupy na każdą kieszeń!</Title>
+          <Desc>
+            Wpadnij do naszego lombardu! Uzyskaj szybką gotówkę bez zbędnych
+            formalności lub skorzystaj z wyjątkowych okazji cenowych na
+            produkty, które pokochasz!
+          </Desc>
+          <ButtonWrapper>
+            <ButtonLink
+              href={"/products"}
+              outline={0}
+              style={{
+                background: "#4caf50",
+                color: "#fff",
+                fontWeight: "bold",
+                padding: "12px 24px",
+                borderRadius: "8px",
+                transition: "all 0.3s ease",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "#66bb6a")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "#4caf50")
+              }
+            >
+              Zobacz najlepsze oferty!
+            </ButtonLink>
+          </ButtonWrapper>
+        </Column>
+        <Column>
+          <IconWrapper>
+            <FaDollarSign />
+            <FaDollarSign />
+            <FaDollarSign />
+          </IconWrapper>
+        </Column>
+      </ColumnsWrapper>
     </Bg>
   );
 }
