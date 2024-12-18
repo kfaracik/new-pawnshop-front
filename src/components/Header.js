@@ -2,11 +2,17 @@ import React, { useState, useContext } from "react";
 import Link from "next/link";
 import styled from "styled-components";
 import { useRouter } from "next/router";
-import Center from "components/Center";
-import { FaOpencart } from "react-icons/fa";
+import {
+  FaOpencart,
+  FaTv,
+  FaTshirt,
+  FaHome,
+  FaFootballBall,
+} from "react-icons/fa";
+import { IoIosArrowDown } from "react-icons/io";
 import BarsIcon from "assets/icons/Bars";
 import { CartContext } from "./CartContext";
-import Button from "./Button";
+import colors from "styles/colors";
 
 const StyledHeader = styled.header`
   background-color: #111;
@@ -21,12 +27,15 @@ const StyledHeader = styled.header`
 const Wrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: center;
   transition: padding-right 0.3s ease;
   @media screen and (max-width: 768px) {
     padding-right: 40px;
+    flex-wrap: wrap;
   }
 `;
 
+// @ts-ignore
 const LogoLink = styled(Link)`
   color: #fff;
   text-decoration: none;
@@ -41,32 +50,33 @@ const LogoLink = styled(Link)`
   }
 `;
 
-const SearchInputWrapper = styled.div`
+const SearchWrapper = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  position: relative;
+  gap: 10px;
   width: 100%;
-  max-width: 400px;
+  max-width: 600px;
   margin-right: 40px;
   @media screen and (max-width: 768px) {
+    max-width: 100%;
     margin-right: 20px;
+    flex-wrap: wrap;
   }
 `;
 
 const SearchInput = styled.input`
-  min-width: 200px;
+  flex: 1;
   padding: 12px 15px;
-  background-color: #333;
+  background-color: #222;
   border: 1px solid #444;
-  border-radius: 5px;
+  border-radius: 8px 0 0 8px;
   color: #fff;
   font-size: 1rem;
   outline: none;
   transition: border-color 0.3s ease, background-color 0.3s ease;
   &:focus {
-    background-color: #222;
-    border-color: #e74c3c;
+    background-color: #333;
+    border-color: ${colors.primary};
   }
   ::placeholder {
     color: #bbb;
@@ -76,12 +86,83 @@ const SearchInput = styled.input`
   }
 `;
 
+const SearchButton = styled.button`
+  background-color: ${colors.primary};
+  color: ${colors.grayLight};
+  border: none;
+  border-radius: 0 8px 8px 0;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  &:hover {
+    background-color: #c0392b;
+    transform: scale(1.05);
+  }
+  @media screen and (max-width: 768px) {
+    font-size: 0.9rem;
+  }
+`;
+
+const DropdownWrapper = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+`;
+
+const DropdownButton = styled.button`
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 10px 15px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: #222;
+  }
+`;
+
+const DropdownMenu = styled.ul`
+  position: absolute;
+  top: 50px;
+  left: 0;
+  background-color: #111;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 10px 0;
+  list-style: none;
+  z-index: 1000;
+  display: ${(props) => (props.isOpen ? "block" : "none")};
+`;
+
+const DropdownItem = styled.li`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  color: #bbb;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: #222;
+    color: #fff;
+  }
+`;
+
 const StyledNav = styled.nav`
   display: flex;
   gap: 20px;
   align-items: center;
   @media screen and (max-width: 768px) {
-    display: ${(props) => (props.mobileNavActive ? "block" : "none")};
+    display: ${(props) =>
+      // @ts-ignore
+      props.mobileNavActive ? "block" : "none"};
     position: fixed;
     top: 0;
     right: 0;
@@ -94,29 +175,23 @@ const StyledNav = styled.nav`
   }
 `;
 
+// @ts-ignore
 const NavLink = styled(Link)`
   color: #bbb;
   text-decoration: none;
   font-size: 1rem;
   padding: 10px;
   text-transform: uppercase;
-  border-bottom: ${(props) => (props.active ? "2px solid #e74c3c" : "none")};
+  border-bottom: ${(props) =>
+    props.active ? `2px solid ${colors.primary}` : "none"};
   transition: color 0.3s ease, border-color 0.3s ease;
   &:hover {
-    color: #e74c3c;
+    color: ${colors.primary};
   }
   @media screen and (max-width: 768px) {
     font-size: 1.2rem;
     padding: 15px;
   }
-`;
-
-const SearchButton = styled.button`
-  background-color: #ffd700;
-  margin: 3px;
-  height: 40px;
-  border: none;
-  border-radius: 5px;
 `;
 
 const NavButton = styled.button`
@@ -168,6 +243,8 @@ export default function Header() {
   const router = useRouter();
   const [mobileNavActive, setMobileNavActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  // @ts-ignore
   const { getCartItemCount } = useContext(CartContext);
 
   const cartItemCount = getCartItemCount();
@@ -183,47 +260,65 @@ export default function Header() {
 
   return (
     <StyledHeader>
-      <Center>
-        <Wrapper>
-          <LogoLink href="/">
-            Nowy <br /> Lombard
-          </LogoLink>
-          <SearchInputWrapper>
-            <form onSubmit={handleSearchSubmit}>
-              <SearchInput
-                type="text"
-                placeholder="Wyszukaj produkty..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-              />
-              <SearchButton>SZUKAJ</SearchButton>
-            </form>
-          </SearchInputWrapper>
-          <StyledNav mobileNavActive={mobileNavActive}>
-            <NavLink href="/" active={router.pathname === "/"}>
-              Home
-            </NavLink>
-            <NavLink href="/products" active={router.pathname === "/products"}>
-              Produkty
-            </NavLink>
-            <NavLink href="/contact" active={router.pathname === "/contact"}>
-              Kontakt
-            </NavLink>
-            <NavLink href="/account" active={router.pathname === "/account"}>
-              Konto
-            </NavLink>
-            <NavLink href="/cart" active={router.pathname === "/cart"}>
-              <CartIconWrapper>
-                <CartIcon />
-                {cartItemCount > 0 && <Badge>{cartItemCount}</Badge>}
-              </CartIconWrapper>
-            </NavLink>
-          </StyledNav>
-          <NavButton onClick={() => setMobileNavActive((prev) => !prev)}>
-            <BarsIcon />
-          </NavButton>
-        </Wrapper>
-      </Center>
+      <Wrapper>
+        <LogoLink href="/">
+          Nowy <br /> Lombard
+        </LogoLink>
+        <SearchWrapper>
+          <form
+            onSubmit={handleSearchSubmit}
+            style={{ display: "flex", flex: 1 }}
+          >
+            <SearchInput
+              type="text"
+              placeholder="Wyszukaj produkty..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
+            <SearchButton>SZUKAJ</SearchButton>
+          </form>
+          <DropdownWrapper>
+            <DropdownButton onClick={() => setDropdownOpen(!dropdownOpen)}>
+              Kategorie <IoIosArrowDown />
+            </DropdownButton>
+            <DropdownMenu isOpen={dropdownOpen}>
+              <DropdownItem>
+                <FaTv /> Elektronika
+              </DropdownItem>
+              <DropdownItem>
+                <FaTshirt /> Moda
+              </DropdownItem>
+              <DropdownItem>
+                <FaHome /> Dom i Ogród
+              </DropdownItem>
+              <DropdownItem>
+                <FaFootballBall /> Sport
+              </DropdownItem>
+            </DropdownMenu>
+          </DropdownWrapper>
+        </SearchWrapper>
+        <CartIconWrapper>
+          <CartIcon />
+          {cartItemCount > 0 && <Badge>{cartItemCount}</Badge>}
+        </CartIconWrapper>
+        <StyledNav
+          // @ts-ignore
+          mobileNavActive={mobileNavActive}
+        >
+          <NavLink href="/" active={router.pathname === "/"}>
+            Home
+          </NavLink>
+          <NavLink href="/products" active={router.pathname === "/products"}>
+            Produkty
+          </NavLink>
+          <NavLink href="/contact" active={router.pathname === "/contact"}>
+            Kontakt
+          </NavLink>
+          <NavLink href="/account" active={router.pathname === "/account"}>
+            Konto
+          </NavLink>
+        </StyledNav>
+      </Wrapper>
     </StyledHeader>
   );
 }

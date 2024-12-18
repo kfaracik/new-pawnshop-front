@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Center from "components/Center";
 import PageContainer from "components/PageContainer";
 import styled from "styled-components";
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from "react-icons/fa";
@@ -135,84 +134,82 @@ export default function ContactPage() {
 
   return (
     <PageContainer>
-      <Center>
-        <Title>Skontaktuj się z nami</Title>
-        <LocationHeader>
-          <LocationButton
-            onClick={() => handleCityChange("czestochowa")}
-            active={selectedCity === "czestochowa"}
-          >
-            Częstochowa Al. NPM 1
-          </LocationButton>
-          <LocationButton
-            onClick={() => handleCityChange("czestochowa2")}
-            active={selectedCity === "czestochowa2"}
-          >
-            Częstochowa
-          </LocationButton>
-          <LocationButton
-            onClick={() => handleCityChange("katowice")}
-            active={selectedCity === "katowice"}
-          >
-            Katowice
-          </LocationButton>
-        </LocationHeader>
-        <ContactWrapper>
-          <InfoSection>
-            <ContactInfo>
-              <ContactIcon>
-                <FaPhone />
-              </ContactIcon>
-              <span>+48 515 671 666</span>
-            </ContactInfo>
-            <ContactInfo>
-              <ContactIcon>
-                <FaEnvelope />
-              </ContactIcon>
-              <span>kontakt@lombard.pl</span>
-            </ContactInfo>
-            <ContactInfo>
-              <ContactIcon>
-                <FaMapMarkerAlt />
-              </ContactIcon>
-              <span>
-                {selectedCity === "czestochowa"
-                  ? "Al. Najświętszej Maryi Panny 1, 42-200 Częstochowa"
-                  : selectedCity === "czestochowa2"
-                  ? "Al. Najświętszej Maryi Panny 2, 42-200 Częstochowa"
-                  : "ul. Mariacka 3, 40-053 Katowice"}
-              </span>
-            </ContactInfo>
-            <ContactInfo>
-              <ContactIcon>
-                <FaClock />
-              </ContactIcon>
-              <span>Godziny otwarcia: Pon-Pt 9:00-18:30, Sob 9:00-15:00</span>
-            </ContactInfo>
-          </InfoSection>
-          <FormMapWrapper>
-            <Form>
-              <Input type="text" placeholder="Imię i nazwisko" required />
-              <Input type="email" placeholder="Adres e-mail" required />
-              <Input type="text" placeholder="Temat wiadomości" />
-              <Textarea placeholder="Twoja wiadomość" rows="5" required />
-              <Button onSubmit={handleMessageSend} type="submit">
-                Wyślij wiadomość
-              </Button>
-            </Form>
-            <MapContainer>
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.1246155!3d50.8125063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4710b54aa8fc5dbd%3A0x7ebed8eb0200a035!2sNowy%20Lombard%20NMP%206!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl&markers=50.8125063,19.1246155,13&markers=50.860371,19.029123,13&markers=50.260938,19.003697,13"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-              />
-            </MapContainer>
-          </FormMapWrapper>
-        </ContactWrapper>
-      </Center>
+      <Title>Skontaktuj się z nami</Title>
+      <LocationHeader>
+        <LocationButton
+          onClick={() => handleCityChange("czestochowa")}
+          active={selectedCity === "czestochowa"}
+        >
+          Częstochowa Al. NPM 1
+        </LocationButton>
+        <LocationButton
+          onClick={() => handleCityChange("czestochowa2")}
+          active={selectedCity === "czestochowa2"}
+        >
+          Częstochowa
+        </LocationButton>
+        <LocationButton
+          onClick={() => handleCityChange("katowice")}
+          active={selectedCity === "katowice"}
+        >
+          Katowice
+        </LocationButton>
+      </LocationHeader>
+      <ContactWrapper>
+        <InfoSection>
+          <ContactInfo>
+            <ContactIcon>
+              <FaPhone />
+            </ContactIcon>
+            <span>+48 515 671 666</span>
+          </ContactInfo>
+          <ContactInfo>
+            <ContactIcon>
+              <FaEnvelope />
+            </ContactIcon>
+            <span>kontakt@lombard.pl</span>
+          </ContactInfo>
+          <ContactInfo>
+            <ContactIcon>
+              <FaMapMarkerAlt />
+            </ContactIcon>
+            <span>
+              {selectedCity === "czestochowa"
+                ? "Al. Najświętszej Maryi Panny 1, 42-200 Częstochowa"
+                : selectedCity === "czestochowa2"
+                ? "Al. Najświętszej Maryi Panny 2, 42-200 Częstochowa"
+                : "ul. Mariacka 3, 40-053 Katowice"}
+            </span>
+          </ContactInfo>
+          <ContactInfo>
+            <ContactIcon>
+              <FaClock />
+            </ContactIcon>
+            <span>Godziny otwarcia: Pon-Pt 9:00-18:30, Sob 9:00-15:00</span>
+          </ContactInfo>
+        </InfoSection>
+        <FormMapWrapper>
+          <Form>
+            <Input type="text" placeholder="Imię i nazwisko" required />
+            <Input type="email" placeholder="Adres e-mail" required />
+            <Input type="text" placeholder="Temat wiadomości" />
+            <Textarea placeholder="Twoja wiadomość" rows="5" required />
+            <Button onSubmit={handleMessageSend} type="submit">
+              Wyślij wiadomość
+            </Button>
+          </Form>
+          <MapContainer>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.1246155!3d50.8125063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4710b54aa8fc5dbd%3A0x7ebed8eb0200a035!2sNowy%20Lombard%20NMP%206!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl&markers=50.8125063,19.1246155,13&markers=50.860371,19.029123,13&markers=50.260938,19.003697,13"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+            />
+          </MapContainer>
+        </FormMapWrapper>
+      </ContactWrapper>
     </PageContainer>
   );
 }

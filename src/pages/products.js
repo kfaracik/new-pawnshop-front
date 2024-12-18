@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import Center from "components/Center";
 import Title from "components/Title";
 import PageContainer from "components/PageContainer";
 import ProductList from "components/ProductList";
@@ -33,16 +32,14 @@ export default function ProductsPage() {
 
   return (
     <PageContainer loading={isLoading}>
-      <Center>
-        <Title>Wszystkie produkty</Title>
-        <ProductList
-          products={data?.products || []}
-          loading={isLoading}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-          selectedPage={page}
-        />
-      </Center>
+      <Title>Wszystkie produkty</Title>
+      <ProductList
+        products={data?.products || []}
+        loading={isLoading}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        selectedPage={page}
+      />
     </PageContainer>
   );
 }

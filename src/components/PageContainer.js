@@ -1,7 +1,6 @@
 import React from "react";
 import Header from "components/Header";
 import styled from "styled-components";
-import Center from "components/Center";
 import Footer from "components/Footer";
 import PageLoader from "./PageLoader";
 
@@ -20,9 +19,7 @@ export default function PageContainer({ children, loading = false }) {
   return (
     <Container>
       <Header />
-      <MainContent>
-        {loading ? <PageLoader /> : <Center>{children}</Center>}
-      </MainContent>
+      <MainContent>{loading ? <PageLoader /> : <>{children}</>}</MainContent>
       <Footer />
     </Container>
   );

@@ -1,16 +1,15 @@
 import React from "react";
-import Center from "components/Center";
 import styled, { keyframes } from "styled-components";
 import ButtonLink from "components/ButtonLink";
 import { FaDollarSign } from "react-icons/fa";
 
 const Bg = styled.div`
   margin: 20px 0;
-  background: linear-gradient(135deg, #ff7e5f, #feb47b);
-  border-radius: 5px;
+  background: linear-gradient(135deg, #6a82fb, #56ccf2);
+  border-radius: 8px;
   color: #fff;
   padding: 40px 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   overflow: hidden;
 
   @media screen and (min-width: 768px) {
@@ -39,7 +38,7 @@ const Title = styled.h1`
 `;
 
 const Desc = styled.p`
-  color: #fff;
+  color: #f1f1f1; /* Łagodniejsza biel */
   font-size: 1rem;
   margin-top: 20px;
   line-height: 1.6;
@@ -92,63 +91,61 @@ const IconAnimation = keyframes`
 `;
 
 const IconWrapper = styled.div`
-  font-size: 4rem;
-  color: #ffd700;
+  font-size: 3.5rem;
+  color: #4caf50;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   animation: ${IconAnimation} 1.5s infinite;
 
   @media screen and (min-width: 768px) {
-    font-size: 5rem;
+    font-size: 4.5rem;
   }
 `;
 
 export default function Slogan() {
   return (
     <Bg>
-      <Center>
-        <ColumnsWrapper>
-          <Column>
-            <Title>Pożyczki i zakupy w jednym!</Title>
-            <Desc>
-              Potrzebujesz gotówki? Zajrzyj do naszego lombardu i zyskaj szybki
-              dostęp do gotówki lub skorzystaj z wyjątkowych ofert na produkty.
-              Zakupy nigdy nie były prostsze!
-            </Desc>
-            <ButtonWrapper>
-              <ButtonLink
-                href={"/products"}
-                outline={0}
-                style={{
-                  background: "#ffd700",
-                  color: "#000",
-                  fontWeight: "bold",
-                  padding: "12px 24px",
-                  borderRadius: "5px",
-                  transition: "all 0.3s ease",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#f4c10f")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "#ffd700")
-                }
-              >
-                Sprawdź ofertę
-              </ButtonLink>
-            </ButtonWrapper>
-          </Column>
-          <Column>
-            <IconWrapper>
-              <FaDollarSign />
-              <FaDollarSign />
-              <FaDollarSign />
-            </IconWrapper>
-          </Column>
-        </ColumnsWrapper>
-      </Center>
+      <ColumnsWrapper>
+        <Column>
+          <Title>Gotówka od ręki, zakupy na każdą kieszeń!</Title>
+          <Desc>
+            Wpadnij do naszego lombardu! Uzyskaj szybką gotówkę bez zbędnych
+            formalności lub skorzystaj z wyjątkowych okazji cenowych na
+            produkty, które pokochasz!
+          </Desc>
+          <ButtonWrapper>
+            <ButtonLink
+              href={"/products"}
+              outline={0}
+              style={{
+                background: "#4caf50",
+                color: "#fff",
+                fontWeight: "bold",
+                padding: "12px 24px",
+                borderRadius: "8px",
+                transition: "all 0.3s ease",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "#66bb6a")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "#4caf50")
+              }
+            >
+              Zobacz najlepsze oferty!
+            </ButtonLink>
+          </ButtonWrapper>
+        </Column>
+        <Column>
+          <IconWrapper>
+            <FaDollarSign />
+            <FaDollarSign />
+            <FaDollarSign />
+          </IconWrapper>
+        </Column>
+      </ColumnsWrapper>
     </Bg>
   );
 }

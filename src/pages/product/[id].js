@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import styled, { keyframes } from "styled-components";
 import Modal from "react-modal";
 import PageContainer from "components/PageContainer";
-import Center from "components/Center";
 import Title from "components/Title";
 import WhiteBox from "components/WhiteBox";
 import Button from "components/Button";
@@ -298,7 +297,7 @@ const ProductPage = () => {
           )}
         </>
       ) : (
-        <Center>Ładowanie danych produktu...</Center>
+        <>Ładowanie danych produktu...</>
       )}
     </PageContainer>
   );
