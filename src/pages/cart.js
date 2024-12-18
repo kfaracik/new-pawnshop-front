@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
-import Center from "components/Center";
 import Button from "components/Button";
 import Table from "components/Table";
 import Input from "components/Input";
@@ -183,15 +182,13 @@ const CartPage = () => {
   if (isSuccess) {
     return (
       <PageContainer>
-        <Center>
-          <Box>
-            <Title>Dziękujemy za Twoje zamówienie!</Title>
-            <p>Powiadomimy Cię, gdy Twoje zamówienie będzie w drodze.</p>
-            <Button onPress={onCloseConfirmOrderPress} primary>
-              Zamknij
-            </Button>
-          </Box>
-        </Center>
+        <Box>
+          <Title>Dziękujemy za Twoje zamówienie!</Title>
+          <p>Powiadomimy Cię, gdy Twoje zamówienie będzie w drodze.</p>
+          <Button onPress={onCloseConfirmOrderPress} primary>
+            Zamknij
+          </Button>
+        </Box>
       </PageContainer>
     );
   }
