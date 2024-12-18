@@ -2,7 +2,6 @@ import React, { useState, useContext } from "react";
 import Link from "next/link";
 import styled from "styled-components";
 import { useRouter } from "next/router";
-import Center from "components/Center";
 import { FaOpencart } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
 import BarsIcon from "assets/icons/Bars";
@@ -251,64 +250,62 @@ export default function Header() {
 
   return (
     <StyledHeader>
-      <Center>
-        <Wrapper>
-          <LogoLink href="/">
-            Nowy <br /> Lombard
-          </LogoLink>
-          <SearchInputWrapper>
-            <form onSubmit={handleSearchSubmit} style={{ display: "flex" }}>
-              <SearchInput
-                type="text"
-                placeholder="Wyszukaj produkty..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-              />
-              <SearchButton>SZUKAJ</SearchButton>
-            </form>
-          </SearchInputWrapper>
-          <DropdownWrapper>
-            <DropdownButton onClick={() => setDropdownOpen(!dropdownOpen)}>
-              Kategorie <IoIosArrowDown />
-            </DropdownButton>
-            <DropdownMenu
-              // @ts-ignore
-              isOpen={dropdownOpen}
-            >
-              <DropdownItem>Elektronika</DropdownItem>
-              <DropdownItem>Moda</DropdownItem>
-              <DropdownItem>Dom i Ogród</DropdownItem>
-              <DropdownItem>Sport</DropdownItem>
-            </DropdownMenu>
-          </DropdownWrapper>
-          <StyledNav
+      <Wrapper>
+        <LogoLink href="/">
+          Nowy <br /> Lombard
+        </LogoLink>
+        <SearchInputWrapper>
+          <form onSubmit={handleSearchSubmit} style={{ display: "flex" }}>
+            <SearchInput
+              type="text"
+              placeholder="Wyszukaj produkty..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
+            <SearchButton>SZUKAJ</SearchButton>
+          </form>
+        </SearchInputWrapper>
+        <DropdownWrapper>
+          <DropdownButton onClick={() => setDropdownOpen(!dropdownOpen)}>
+            Kategorie <IoIosArrowDown />
+          </DropdownButton>
+          <DropdownMenu
             // @ts-ignore
-            mobileNavActive={mobileNavActive}
+            isOpen={dropdownOpen}
           >
-            <NavLink href="/" active={router.pathname === "/"}>
-              Home
-            </NavLink>
-            <NavLink href="/products" active={router.pathname === "/products"}>
-              Produkty
-            </NavLink>
-            <NavLink href="/contact" active={router.pathname === "/contact"}>
-              Kontakt
-            </NavLink>
-            <NavLink href="/account" active={router.pathname === "/account"}>
-              Konto
-            </NavLink>
-            <NavLink href="/cart" active={router.pathname === "/cart"}>
-              <CartIconWrapper>
-                <CartIcon />
-                {cartItemCount > 0 && <Badge>{cartItemCount}</Badge>}
-              </CartIconWrapper>
-            </NavLink>
-          </StyledNav>
-          <NavButton onClick={() => setMobileNavActive((prev) => !prev)}>
-            <BarsIcon />
-          </NavButton>
-        </Wrapper>
-      </Center>
+            <DropdownItem>Elektronika</DropdownItem>
+            <DropdownItem>Moda</DropdownItem>
+            <DropdownItem>Dom i Ogród</DropdownItem>
+            <DropdownItem>Sport</DropdownItem>
+          </DropdownMenu>
+        </DropdownWrapper>
+        <StyledNav
+          // @ts-ignore
+          mobileNavActive={mobileNavActive}
+        >
+          <NavLink href="/" active={router.pathname === "/"}>
+            Home
+          </NavLink>
+          <NavLink href="/products" active={router.pathname === "/products"}>
+            Produkty
+          </NavLink>
+          <NavLink href="/contact" active={router.pathname === "/contact"}>
+            Kontakt
+          </NavLink>
+          <NavLink href="/account" active={router.pathname === "/account"}>
+            Konto
+          </NavLink>
+          <NavLink href="/cart" active={router.pathname === "/cart"}>
+            <CartIconWrapper>
+              <CartIcon />
+              {cartItemCount > 0 && <Badge>{cartItemCount}</Badge>}
+            </CartIconWrapper>
+          </NavLink>
+        </StyledNav>
+        <NavButton onClick={() => setMobileNavActive((prev) => !prev)}>
+          <BarsIcon />
+        </NavButton>
+      </Wrapper>
     </StyledHeader>
   );
 }
