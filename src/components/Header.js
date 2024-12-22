@@ -6,7 +6,11 @@ import Menu from "./Menu";
 export default function Header() {
   return (
     <header
-      style={{ backgroundColor: "#111", color: "#fff", padding: "10px 30px" }}
+      style={{
+        backgroundColor: "#111",
+        padding: "10px 40px",
+        boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
+      }}
     >
       <div
         style={{
