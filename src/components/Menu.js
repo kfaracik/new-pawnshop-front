@@ -112,12 +112,12 @@ export default function Menu() {
           Konto
         </NavLink>
       </StyledNav>
-      <a href="/cart">
+      <Link href="/cart">
         <CartIconWrapper>
           <CartIcon />
           {cartItemCount > 0 && <Badge>{cartItemCount}</Badge>}
         </CartIconWrapper>
-      </a>
+      </Link>
       <MobileMenuButton onClick={toggleMobileNav}>
         <FaBars />
       </MobileMenuButton>
