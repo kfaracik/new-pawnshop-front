@@ -5,6 +5,7 @@ import { RiAuctionFill } from "react-icons/ri";
 import Pagination from "@mui/material/Pagination";
 import Skeleton from "@mui/material/Skeleton";
 import { keyframes } from "@emotion/react";
+import Link from "next/link";
 
 const fadeIn = keyframes`
   0% { opacity: 0; transform: scale(1); }
@@ -89,7 +90,7 @@ const ProductList = ({
                 ? product.auctionLink
                 : `/product/${product._id}`;
               return (
-                <a
+                <Link
                   href={url}
                   key={product._id}
                   style={{ textDecoration: "none" }}
@@ -176,7 +177,7 @@ const ProductList = ({
                       }}
                     />
                   </ImageListItem>
-                </a>
+                </Link>
               );
             })}
       </ImageList>
