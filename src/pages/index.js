@@ -7,9 +7,9 @@ import HorizontalProductList from "components/HorizontalProductList";
 export default function HomePage() {
   const { data: newProducts, isLoading: isLoadingNew } = useNewProducts();
   const { data: popularProducts, isLoading: isLoadingPopular } =
-    useNewProducts();
+    useNewProducts(); // todo: usePopularProducts();
   const { data: suggestedProducts, isLoading: isLoadingSuggested } =
-    useNewProducts();
+    useNewProducts(); // todo: useSuggestedProducts();
 
   return (
     <PageContainer
