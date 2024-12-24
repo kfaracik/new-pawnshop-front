@@ -68,18 +68,20 @@ const ContactIcon = styled.div`
 `;
 
 const FormMapWrapper = styled.div`
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 40px;
-  grid-template-columns: 1fr 1fr; /* Map and form side by side */
   width: 100%;
-  max-width: 800px;
 `;
 
 const MapContainer = styled.div`
-  height: 350px;
+  height: 300px;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  min-width: 400px;
 `;
 
 const Form = styled.form`
@@ -213,17 +215,17 @@ export default function ContactPage() {
             <span>Godziny otwarcia: Pon-Pt 9:00-18:30, Sob 9:00-15:00</span>
           </ContactInfo>
         </InfoSection>
+        <MapContainer>
+          <iframe
+            src={mapSrc}
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+          />
+        </MapContainer>
         <FormMapWrapper>
-          <MapContainer>
-            <iframe
-              src={mapSrc}
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-            />
-          </MapContainer>
           <Form onSubmit={handleMessageSend}>
             <Input type="text" placeholder="Imię i nazwisko" required />
             <Input type="email" placeholder="Adres e-mail" required />
