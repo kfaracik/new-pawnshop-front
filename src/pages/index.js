@@ -11,6 +11,31 @@ export default function HomePage() {
   const { data: suggestedProducts, isLoading: isLoadingSuggested } =
     useNewProducts(); // todo: useSuggestedProducts();
 
+  // TODO: tmp function
+  const shuffleByField = (array, field, ascending = true) => {
+    if (!Array.isArray(array)) {
+      return [];
+    }
+
+    return [...array].sort((a, b) => {
+      const valueA = a[field];
+      const valueB = b[field];
+
+      if (ascending) {
+        return valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+      } else {
+        return valueB > valueA ? 1 : valueB < valueA ? -1 : 0;
+      }
+    });
+  };
+
+  const shuffledPopularProducts = popularProducts
+    ? shuffleByField(popularProducts, "title")
+    : [];
+  const shuffledSuggestedProducts = suggestedProducts
+    ? shuffleByField(suggestedProducts, "price")
+    : [];
+
   return (
     <PageContainer
       loading={isLoadingNew || isLoadingPopular || isLoadingSuggested}
@@ -23,12 +48,12 @@ export default function HomePage() {
       />
       <HorizontalProductList
         title="Popularne"
-        products={popularProducts}
+        products={shuffledPopularProducts}
         loading={isLoadingPopular}
       />
       <HorizontalProductList
         title="Sugerowane"
-        products={suggestedProducts}
+        products={shuffledSuggestedProducts}
         loading={isLoadingSuggested}
       />
     </PageContainer>
