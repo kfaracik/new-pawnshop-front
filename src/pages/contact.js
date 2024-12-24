@@ -70,7 +70,7 @@ const ContactIcon = styled.div`
 const FormMapWrapper = styled.div`
   display: grid;
   gap: 40px;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr; /* Map and form side by side */
   width: 100%;
   max-width: 800px;
 `;
@@ -214,13 +214,6 @@ export default function ContactPage() {
           </ContactInfo>
         </InfoSection>
         <FormMapWrapper>
-          <Form onSubmit={handleMessageSend}>
-            <Input type="text" placeholder="Imię i nazwisko" required />
-            <Input type="email" placeholder="Adres e-mail" required />
-            <Input type="text" placeholder="Temat wiadomości" />
-            <Textarea placeholder="Twoja wiadomość" rows="5" required />
-            <Button type="submit">Wyślij wiadomość</Button>
-          </Form>
           <MapContainer>
             <iframe
               src={mapSrc}
@@ -231,6 +224,13 @@ export default function ContactPage() {
               loading="lazy"
             />
           </MapContainer>
+          <Form onSubmit={handleMessageSend}>
+            <Input type="text" placeholder="Imię i nazwisko" required />
+            <Input type="email" placeholder="Adres e-mail" required />
+            <Input type="text" placeholder="Temat wiadomości" />
+            <Textarea placeholder="Twoja wiadomość" rows="5" required />
+            <Button type="submit">Wyślij wiadomość</Button>
+          </Form>
         </FormMapWrapper>
       </ContactWrapper>
     </PageContainer>
