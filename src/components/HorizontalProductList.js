@@ -11,6 +11,7 @@ import {
 import Skeleton from "@mui/material/Skeleton";
 import { keyframes } from "@emotion/react";
 import colors from "styles/colors";
+import Link from "next/link";
 
 const fadeIn = keyframes`
   0% { opacity: 0; transform: scale(0.95); }
@@ -194,7 +195,7 @@ const HorizontalProductList = ({
               ? product.auctionLink
               : `/product/${product._id}`;
             return (
-              <a href={url} key={product._id}>
+              <Link href={url} key={product._id}>
                 <ProductCard>
                   <ProductImage
                     src={
@@ -236,7 +237,7 @@ const HorizontalProductList = ({
                     )}
                   </StyledImageListItemBar>
                 </ProductCard>
-              </a>
+              </Link>
             );
           })}
         </ScrollMenu>

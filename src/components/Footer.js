@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { FaFacebook, FaStore, FaInstagram } from "react-icons/fa";
+import Link from "next/link";
 
 const FooterContainer = styled.footer`
   background-color: #111;
@@ -110,27 +111,27 @@ export default function Footer() {
         <Section>
           <h4>Śledź nas</h4>
           <SocialIcons>
-            <a
+            <Link
               href="https://facebook.com"
               target="_blank"
               rel="noopener noreferrer"
             >
               <FaFacebook />
-            </a>
-            <a
+            </Link>
+            <Link
               href="https://allegro.pl"
               target="_blank"
               rel="noopener noreferrer"
             >
               <FaStore />
-            </a>
-            <a
+            </Link>
+            <Link
               href="https://instagram.com"
               target="_blank"
               rel="noopener noreferrer"
             >
               <FaInstagram />
-            </a>
+            </Link>
           </SocialIcons>
         </Section>
       </FooterGrid>
