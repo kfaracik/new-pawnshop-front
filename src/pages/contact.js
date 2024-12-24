@@ -4,33 +4,30 @@ import styled from "styled-components";
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from "react-icons/fa";
 
 const Title = styled.h2`
-  font-size: 2.5rem;
+  font-size: 2rem;
   text-align: center;
-  margin-bottom: 20px;
   color: #333;
+  margin-bottom: 20px;
 `;
 
 const LocationHeader = styled.div`
   display: flex;
   justify-content: center;
-  gap: 20px;
-  background-color: #333333;
-  padding: 10px 20px;
-  border-radius: 8px;
-  width: fit-content;
-  margin: 0 auto;
+  gap: 30px;
+  margin-bottom: 30px;
 `;
 
 const LocationButton = styled.button`
   background: none;
   border: none;
-  color: #fff;
+  color: #333;
   font-size: 1.2rem;
+  font-weight: 500;
   cursor: pointer;
-  padding: 5px 15px;
   text-transform: capitalize;
+  transition: color 0.3s ease;
   &:hover {
-    opacity: 0.6;
+    color: #e74c3c;
   }
   ${(props) =>
     props.active &&
@@ -52,32 +49,30 @@ const InfoSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 15px;
   text-align: center;
+  max-width: 600px;
 `;
 
 const ContactInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 15px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #555;
 `;
 
 const ContactIcon = styled.div`
   font-size: 1.5rem;
-  color: #333333;
+  color: #333;
 `;
 
 const FormMapWrapper = styled.div`
   display: grid;
   gap: 40px;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   width: 100%;
   max-width: 800px;
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
 `;
 
 const MapContainer = styled.div`
@@ -91,20 +86,24 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 15px;
+  max-width: 400px;
+  width: 100%;
 `;
 
 const Input = styled.input`
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 1rem;
+  color: #333;
 `;
 
 const Textarea = styled.textarea`
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 1rem;
+  color: #333;
   resize: vertical;
 `;
 
@@ -112,12 +111,13 @@ const Button = styled.button`
   padding: 12px;
   font-size: 1rem;
   color: white;
-  background-color: #333333;
+  background-color: #333;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
   &:hover {
-    background-color: #444444;
+    background-color: #444;
   }
 `;
 
@@ -128,9 +128,40 @@ export default function ContactPage() {
     setSelectedCity(city);
   };
 
-  const handleMessageSend = () => {
-    // TODO: add logic here
+  const handleMessageSend = (e) => {
+    e.preventDefault();
+    // TODO: add logic here to handle message submission
   };
+
+  const getLocationData = (city) => {
+    switch (city) {
+      case "czestochowa":
+        return {
+          address: "Al. Najświętszej Maryi Panny 1, 42-200 Częstochowa",
+          mapSrc:
+            "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.1246155!3d50.8125063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4710b54aa8fc5dbd%3A0x7ebed8eb0200a035!2sNowy%20Lombard%20NMP%206!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl",
+        };
+      case "czestochowa-rakow":
+        return {
+          address: "ul. Brzozowa 16, 42-216 Częstochowa - Raków",
+          mapSrc:
+            "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.1246155!3d50.7817892!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4710b54aa8fc5dbd%3A0x7ebed8eb0200a035!2sNowy%20Lombard%20RAK%C3%93W!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl",
+        };
+      case "katowice":
+        return {
+          address: "ul. Warszawska 13, 40-009 Katowice",
+          mapSrc:
+            "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.0246155!3d50.258614!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4716cf2c02be991b%3A0x72d74599feffda2!2sNowy%20Lombard%20Katowice!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl",
+        };
+      default:
+        return {
+          address: "",
+          mapSrc: "",
+        };
+    }
+  };
+
+  const { address, mapSrc } = getLocationData(selectedCity);
 
   return (
     <PageContainer>
@@ -140,13 +171,13 @@ export default function ContactPage() {
           onClick={() => handleCityChange("czestochowa")}
           active={selectedCity === "czestochowa"}
         >
-          Częstochowa Al. NPM 1
+          Częstochowa NPM
         </LocationButton>
         <LocationButton
-          onClick={() => handleCityChange("czestochowa2")}
-          active={selectedCity === "czestochowa2"}
+          onClick={() => handleCityChange("czestochowa-rakow")}
+          active={selectedCity === "czestochowa-rakow"}
         >
-          Częstochowa
+          Częstochowa Raków
         </LocationButton>
         <LocationButton
           onClick={() => handleCityChange("katowice")}
@@ -173,13 +204,7 @@ export default function ContactPage() {
             <ContactIcon>
               <FaMapMarkerAlt />
             </ContactIcon>
-            <span>
-              {selectedCity === "czestochowa"
-                ? "Al. Najświętszej Maryi Panny 1, 42-200 Częstochowa"
-                : selectedCity === "czestochowa2"
-                ? "Al. Najświętszej Maryi Panny 2, 42-200 Częstochowa"
-                : "ul. Mariacka 3, 40-053 Katowice"}
-            </span>
+            <span>{address}</span>
           </ContactInfo>
           <ContactInfo>
             <ContactIcon>
@@ -189,18 +214,16 @@ export default function ContactPage() {
           </ContactInfo>
         </InfoSection>
         <FormMapWrapper>
-          <Form>
+          <Form onSubmit={handleMessageSend}>
             <Input type="text" placeholder="Imię i nazwisko" required />
             <Input type="email" placeholder="Adres e-mail" required />
             <Input type="text" placeholder="Temat wiadomości" />
             <Textarea placeholder="Twoja wiadomość" rows="5" required />
-            <Button onSubmit={handleMessageSend} type="submit">
-              Wyślij wiadomość
-            </Button>
+            <Button type="submit">Wyślij wiadomość</Button>
           </Form>
           <MapContainer>
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.1246155!3d50.8125063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4710b54aa8fc5dbd%3A0x7ebed8eb0200a035!2sNowy%20Lombard%20NMP%206!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl&markers=50.8125063,19.1246155,13&markers=50.860371,19.029123,13&markers=50.260938,19.003697,13"
+              src={mapSrc}
               width="100%"
               height="100%"
               style={{ border: 0 }}
