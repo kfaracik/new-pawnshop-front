@@ -12,12 +12,10 @@ const ProductList = ({
   selectedPage,
   searchQuery = "",
 }) => {
-  // Media queries to handle responsiveness
   const isSmallScreen = useMediaQuery("(max-width:600px)");
   const isMediumScreen = useMediaQuery("(max-width:900px)");
   const isLargeScreen = useMediaQuery("(max-width:1200px)");
 
-  // Dynamically calculate the number of columns
   const calculateColumns = () => {
     if (isSmallScreen) return 1;
     if (isMediumScreen) return 2;
@@ -27,23 +25,29 @@ const ProductList = ({
 
   const [columns, setColumns] = useState(calculateColumns);
 
-  // Update columns on screen resize
   useEffect(() => {
     setColumns(calculateColumns);
   }, [isSmallScreen, isMediumScreen, isLargeScreen]);
 
   return (
-    <div style={{ margin: "0 auto", padding: "16px" }}>
+    <div
+      style={{
+        margin: "0 auto",
+        padding: "16px",
+        maxWidth: "100%",
+        overflow: "hidden",
+      }}
+    >
       <ImageList
         cols={columns}
-        gap={16}
+        gap={isSmallScreen ? 8 : 16}
         sx={{
           width: "100%",
-          maxWidth: "100vw",
+          maxWidth: "100%",
           boxSizing: "border-box",
           padding: { xs: "8px", sm: "16px", md: "24px" },
           display: "grid",
-          gridTemplateColumns: `repeat(${columns}, 1fr)`,
+          gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
           alignItems: "stretch",
         }}
       >
