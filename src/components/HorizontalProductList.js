@@ -77,8 +77,10 @@ const HorizontalProductList = ({
       <Container>
         <TitleContainer>
           <Title>{title}</Title>
-          <p>Nie mamy aktualnie dostępnych produktów.</p>
         </TitleContainer>
+        <div style={{ padding: 20 }}>
+          <p>Nie mamy aktualnie dostępnych produktów.</p>
+        </div>
       </Container>
     );
   }
