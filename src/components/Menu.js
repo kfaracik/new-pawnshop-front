@@ -3,29 +3,8 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import styled from "styled-components";
 import { FaOpencart, FaBars } from "react-icons/fa";
-import { CartContext } from "./CartContext";
+import { CartContext } from "../context/CartContext";
 import colors from "styles/colors";
-
-const StyledNav = styled.nav`
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  @media screen and (max-width: 768px) {
-    display: ${(props) => (props.mobileNavActive ? "block" : "none")};
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background-color: #111;
-    padding: 60px 20px;
-    z-index: 999;
-    overflow-y: auto;
-    transition: transform 0.3s ease;
-    transform: ${(props) =>
-      props.mobileNavActive ? "translateX(0)" : "translateX(100%)"};
-  }
-`;
 
 const NavLink = styled(Link)`
   color: #bbb;
@@ -77,8 +56,31 @@ const Badge = styled.div`
   font-weight: bold;
 `;
 
+const StyledNav = styled.nav`
+  display: flex;
+  gap: 20px;
+  align-items: center;
+
+  @media screen and (max-width: 768px) {
+    display: ${(props) => (props.mobileNavActive ? "block" : "none")};
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: #111;
+    padding: 60px 20px;
+    z-index: 999;
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+    transform: ${(props) =>
+      props.mobileNavActive ? "translateX(0)" : "translateX(100%)"};
+  }
+`;
+
 const MobileMenuButton = styled.div`
   display: none;
+
   @media screen and (max-width: 768px) {
     display: block;
     font-size: 30px;

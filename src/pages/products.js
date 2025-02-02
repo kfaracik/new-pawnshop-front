@@ -31,7 +31,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <PageContainer loading={isLoading}>
+    <PageContainer>
       <Title>Wszystkie produkty</Title>
       <ProductList
         products={data?.products || []}

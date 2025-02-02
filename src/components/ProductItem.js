@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import styled from "styled-components";
 import Link from "next/link";
 import { keyframes } from "@emotion/react";
 import { IconButton, Typography } from "@mui/material";
 import colors from "styles/colors";
 import { RiAuctionFill } from "react-icons/ri";
+import { FaCartPlus } from "react-icons/fa";
+import { CartContext } from "context/CartContext";
 
 const fadeIn = keyframes`
   0% { opacity: 0; transform: scale(0.95); }
@@ -50,7 +52,20 @@ const StyledImageListItemBar = styled.div`
   align-items: flex-start;
 `;
 
+const TitleContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+`;
+
+const CartButton = styled(IconButton)`
+  color: #fff;
+  margin-left: auto;
+`;
+
 export const ProductItem = ({ product, searchQuery }) => {
+  const { addProduct } = useContext(CartContext);
   const url = product.isAuction
     ? product.auctionLink
     : `/product/${product._id}`;
@@ -87,21 +102,32 @@ export const ProductItem = ({ product, searchQuery }) => {
           loading="lazy"
         />
         <StyledImageListItemBar>
-          <Typography
-            variant="body1"
-            style={{
-              fontWeight: "bold",
-              color: "#fff",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {highlightQuery(truncateTitle(product.title, 40), searchQuery)}
-          </Typography>
+          <TitleContainer>
+            <Typography
+              variant="body1"
+              style={{
+                color: "#fff",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                maxWidth: "180px",
+              }}
+            >
+              {highlightQuery(truncateTitle(product.title, 40), searchQuery)}
+            </Typography>
+            <CartButton
+              onClick={(e) => {
+                e.preventDefault();
+                addProduct(product._id);
+              }}
+            >
+              <FaCartPlus color="white" style={{ paddingRight: 10 }} />
+            </CartButton>
+          </TitleContainer>
           <Typography
             variant="h6"
             style={{
+              fontWeight: "normal",
               color: colors.secondary,
               fontSize: "1.2rem",
             }}

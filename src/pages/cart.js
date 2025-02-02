@@ -1,9 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import Button from "components/Button";
 import Table from "components/Table";
 import Input from "components/Input";
-import { CartContext } from "components/CartContext";
+import { CartContext } from "context/CartContext";
 import { useProducts } from "services/api/useProductApi";
 import PageContainer from "components/PageContainer";
 

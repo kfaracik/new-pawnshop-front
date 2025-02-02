@@ -29,7 +29,7 @@ export default function SearchPage() {
   };
 
   return (
-    <PageContainer loading={isLoading}>
+    <PageContainer>
       {searchQuery && (
         <h2>
           Wyniki wyszukiwania dla: <strong>{searchQuery}</strong>

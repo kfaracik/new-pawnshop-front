@@ -14,9 +14,7 @@ export default function HomePage() {
     useSuggestedProducts();
 
   return (
-    <PageContainer
-      loading={isLoadingNew || isLoadingPopular || isLoadingSuggested}
-    >
+    <PageContainer>
       <Slogan />
       <HorizontalProductList
         title="Nowości"

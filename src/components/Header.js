@@ -3,12 +3,12 @@ import Logo from "./Logo";
 import SearchWithCategory from "./SearchWithCategory";
 import Menu from "./Menu";
 
-export default function Header() {
+const Header = () => {
   return (
     <header
       style={{
         backgroundColor: "#111",
-        padding: "10px 40px",
+        padding: "10px 20px",
         boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
       }}
     >
@@ -17,6 +17,8 @@ export default function Header() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: "10px",
         }}
       >
         <Logo />
@@ -25,4 +27,6 @@ export default function Header() {
       </div>
     </header>
   );
-}
+};
+
+export default Header;
