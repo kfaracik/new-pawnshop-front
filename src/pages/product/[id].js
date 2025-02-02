@@ -8,7 +8,7 @@ import WhiteBox from "components/WhiteBox";
 import Button from "components/Button";
 import CartIcon from "assets/icons/CartIcon";
 import { useProduct } from "services/api/useProductApi";
-import { CartContext } from "components/CartContext";
+import { CartContext } from "context/CartContext";
 
 const ColWrapper = styled.div`
   display: grid;

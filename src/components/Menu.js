@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import styled from "styled-components";
 import { FaOpencart, FaBars } from "react-icons/fa";
-import { CartContext } from "./CartContext";
+import { CartContext } from "../context/CartContext";
 import colors from "styles/colors";
 
 const NavLink = styled(Link)`

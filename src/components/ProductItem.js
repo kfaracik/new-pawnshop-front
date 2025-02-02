@@ -6,7 +6,7 @@ import { IconButton, Typography } from "@mui/material";
 import colors from "styles/colors";
 import { RiAuctionFill } from "react-icons/ri";
 import { FaCartPlus } from "react-icons/fa";
-import { CartContext } from "components/CartContext";
+import { CartContext } from "context/CartContext";
 
 const fadeIn = keyframes`
   0% { opacity: 0; transform: scale(0.95); }
