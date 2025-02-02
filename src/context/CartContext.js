@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useState } from "react";
 
 export const CartContext = createContext({});
 
+// TODO: move from components dir
 export const CartContextProvider = ({ children }) => {
   const ls = typeof window !== "undefined" ? window.localStorage : null;
   const [cartProducts, setCartProducts] = useState([]);
