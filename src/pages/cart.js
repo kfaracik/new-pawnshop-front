@@ -235,21 +235,27 @@ const CartPage = () => {
   const { data: products = [], isLoading, error } = useProducts(productIds);
 
   const resolveAvailableQuantity = (product) => {
-    const candidates = [
-      product?.availableQuantity,
-      product?.stock,
-      product?.quantity,
-      product?.properties?.quantity,
-    ];
+    const fromQuantity = Number(product?.quantity);
+    if (Number.isFinite(fromQuantity)) {
+      return Math.max(0, fromQuantity);
+    }
 
-    const numericCandidates = candidates
-      .map((value) => Number(value))
-      .filter((value) => Number.isFinite(value));
-    const positiveValue = numericCandidates.find((value) => value > 0);
+    const fromAvailableQuantity = Number(product?.availableQuantity);
+    if (Number.isFinite(fromAvailableQuantity)) {
+      return Math.max(0, fromAvailableQuantity);
+    }
 
-    if (positiveValue !== undefined) return positiveValue;
-    if (numericCandidates.length > 0) return 0;
-    return Infinity;
+    const fromProperty = Number(product?.properties?.quantity);
+    if (Number.isFinite(fromProperty)) {
+      return Math.max(0, fromProperty);
+    }
+
+    const fromStock = Number(product?.stock);
+    if (Number.isFinite(fromStock)) {
+      return Math.max(0, fromStock);
+    }
+
+    return 0;
   };
 
   const cartItems = useMemo(

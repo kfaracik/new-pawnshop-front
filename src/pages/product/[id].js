@@ -4,6 +4,7 @@ import styled, { keyframes } from "styled-components";
 import Modal from "react-modal";
 import Link from "next/link";
 import { Chip } from "@mui/material";
+import { MdChevronLeft, MdChevronRight, MdClose } from "react-icons/md";
 import PageContainer from "components/PageContainer";
 import Title from "components/Title";
 import Button from "components/Button";
@@ -18,6 +19,7 @@ import {
 } from "services/api/auctionApi";
 import { CartContext } from "context/CartContext";
 import colors from "styles/colors";
+import { getAuthToken } from "utils/authToken";
 
 const ColWrapper = styled.div`
   display: grid;
@@ -118,13 +120,17 @@ const FullscreenImageContainer = styled.div`
   align-items: center;
   width: 100%;
   height: 100%;
+  max-width: min(1200px, 96vw);
+  max-height: 92dvh;
+  padding: 16px;
 `;
 
 const FullscreenImage = styled.img`
-  max-width: 90%;
-  max-height: 90%;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
   animation: ${keyframes`
     from {
       opacity: 0;
@@ -137,40 +143,66 @@ const FullscreenImage = styled.img`
   `} 0.3s ease forwards;
 `;
 
-const CloseButton = styled.button`
+const IconControlButton = styled.button`
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(20, 20, 20, 0.52);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
   cursor: pointer;
-`;
-
-const NavigationButton = styled.button`
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.5);
-  border: none;
-  color: white;
-  font-size: 2rem;
-  padding: 10px;
-  cursor: pointer;
-  border-radius: 50%;
-  z-index: 2;
+  z-index: 3;
+  transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(20, 20, 20, 0.72);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.04);
   }
 
-  &.prev {
-    left: 10px;
+  &:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.72);
+    outline-offset: 2px;
   }
 
-  &.next {
-    right: 10px;
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  svg {
+    font-size: 2rem;
+  }
+
+  @media (max-width: 600px) {
+    width: 42px;
+    height: 42px;
+
+    svg {
+      font-size: 1.8rem;
+    }
+  }
+`;
+
+const CloseButton = styled(IconControlButton)`
+  top: 22px;
+  right: 22px;
+`;
+
+const NavigationButton = styled(IconControlButton)`
+  top: 50%;
+  transform: translateY(-50%);
+
+  ${(props) => (props.side === "left" ? "left: 18px;" : "right: 18px;")}
+
+  @media (max-width: 600px) {
+    ${(props) => (props.side === "left" ? "left: 10px;" : "right: 10px;")}
   }
 `;
 
@@ -266,6 +298,24 @@ const BidHint = styled.p`
   margin: 0;
   font-size: 0.82rem;
   color: ${(props) => (props.error ? colors.error : colors.textSecondary)};
+`;
+
+const AuthRequiredNotice = styled.div`
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px solid #e8dec0;
+  border-radius: 10px;
+  background: #fff7df;
+  color: ${colors.textSecondary};
+  font-size: 0.86rem;
+  line-height: 1.4;
+
+  a {
+    color: ${colors.primaryDark};
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
 `;
 
 const BidHistory = styled.ul`
@@ -396,21 +446,29 @@ const ProductPage = () => {
   const [liveAuction, setLiveAuction] = useState(null);
   const [liveBids, setLiveBids] = useState([]);
   const { addProduct, cartProducts } = useContext(CartContext);
+  const isLoggedIn = Boolean(getAuthToken());
   const maxProductQuantity = useMemo(() => {
-    const candidates = [
-      product?.availableQuantity,
-      product?.quantity,
-      product?.stock,
-      product?.properties?.quantity,
-    ];
-    const numericCandidates = candidates
-      .map((value) => Number(value))
-      .filter((value) => Number.isFinite(value));
+    const fromQuantity = Number(product?.quantity);
+    if (Number.isFinite(fromQuantity)) {
+      return Math.max(0, fromQuantity);
+    }
 
-    const positiveValue = numericCandidates.find((value) => value > 0);
-    if (positiveValue !== undefined) return positiveValue;
-    if (numericCandidates.length > 0) return 0;
-    return Infinity;
+    const fromAvailableQuantity = Number(product?.availableQuantity);
+    if (Number.isFinite(fromAvailableQuantity)) {
+      return Math.max(0, fromAvailableQuantity);
+    }
+
+    const fromProperty = Number(product?.properties?.quantity);
+    if (Number.isFinite(fromProperty)) {
+      return Math.max(0, fromProperty);
+    }
+
+    const fromStock = Number(product?.stock);
+    if (Number.isFinite(fromStock)) {
+      return Math.max(0, fromStock);
+    }
+
+    return 0;
   }, [product]);
   const currentInCart = useMemo(
     () =>
@@ -514,10 +572,17 @@ const ProductPage = () => {
     if (!targetTs) return "";
 
     const seconds = Math.max(0, Math.floor((targetTs - now) / 1000));
-    const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
-    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
-    const s = String(seconds % 60).padStart(2, "0");
-    return `${h}:${m}:${s}`;
+    const days = Math.floor(seconds / 86400);
+    const hours = String(Math.floor((seconds % 86400) / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+    const secs = String(seconds % 60).padStart(2, "0");
+
+    if (days > 0) {
+      const dayLabel = days === 1 ? "dzień" : "dni";
+      return `${days} ${dayLabel} ${hours}:${minutes}:${secs}`;
+    }
+
+    return `${hours}:${minutes}:${secs}`;
   }, [auction, auctionStatus, now]);
 
   const handleAddToCart = () => {
@@ -555,6 +620,13 @@ const ProductPage = () => {
   const handlePlaceBid = async (e) => {
     e.preventDefault();
     if (!auction?.id) return;
+    if (!isLoggedIn) {
+      setBidStatus({
+        error: "Aby wziąć udział w licytacji, musisz się zalogować.",
+        info: "",
+      });
+      return;
+    }
 
     const amount = Number(bidAmount.replace(",", "."));
     const minAllowed = Number(auction.currentPrice) + Number(auction.minIncrement);
@@ -575,8 +647,16 @@ const ProductPage = () => {
       setBidStatus({ error: "", info: "Oferta została złożona." });
       await refetchAuction();
     } catch (error) {
+      const isAuthError =
+        error?.response?.status === 401 ||
+        String(error?.response?.data?.message || "")
+          .toLowerCase()
+          .includes("no token provided");
+
       setBidStatus({
-        error: error.response?.data?.message || "Nie udało się złożyć oferty.",
+        error: isAuthError
+          ? "Aby wziąć udział w licytacji, musisz się zalogować."
+          : error.response?.data?.message || "Nie udało się złożyć oferty.",
         info: "",
       });
     } finally {
@@ -661,7 +741,7 @@ const ProductPage = () => {
                     <span>Przebicie min.</span>
                     <strong>{auction.minIncrement.toFixed(2)} zł</strong>
                   </AuctionRow>
-                  {auctionStatus === "active" && auction.id && (
+                  {auctionStatus === "active" && auction.id && isLoggedIn && (
                     <>
                       <BidForm onSubmit={handlePlaceBid}>
                         <BidInput
@@ -680,6 +760,12 @@ const ProductPage = () => {
                       {bidStatus.error && <BidHint error>{bidStatus.error}</BidHint>}
                       {bidStatus.info && <BidHint>{bidStatus.info}</BidHint>}
                     </>
+                  )}
+                  {auctionStatus === "active" && auction.id && !isLoggedIn && (
+                    <AuthRequiredNotice>
+                      W licytacji mogą brać udział wyłącznie zalogowani użytkownicy.{" "}
+                      <Link href="/account">Zaloguj się</Link>, aby złożyć ofertę.
+                    </AuthRequiredNotice>
                   )}
                   {!!auction.bids?.length && (
                     <>
@@ -777,17 +863,33 @@ const ProductPage = () => {
               }}
             >
               <FullscreenImageContainer>
-                <NavigationButton className="prev" onClick={showPrevImage}>
-                  ‹
+                <NavigationButton
+                  side="left"
+                  type="button"
+                  onClick={showPrevImage}
+                  aria-label="Poprzednie zdjęcie"
+                >
+                  <MdChevronLeft />
                 </NavigationButton>
                 <FullscreenImage
                   src={product.images[selectedImageIndex]}
                   alt={`${product.title} - ${selectedImageIndex + 1}`}
                 />
-                <NavigationButton className="next" onClick={showNextImage}>
-                  ›
+                <NavigationButton
+                  side="right"
+                  type="button"
+                  onClick={showNextImage}
+                  aria-label="Następne zdjęcie"
+                >
+                  <MdChevronRight />
                 </NavigationButton>
-                <CloseButton onClick={closeImageModal}>×</CloseButton>
+                <CloseButton
+                  type="button"
+                  onClick={closeImageModal}
+                  aria-label="Zamknij podgląd zdjęcia"
+                >
+                  <MdClose />
+                </CloseButton>
               </FullscreenImageContainer>
             </Modal>
           )}

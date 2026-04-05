@@ -136,24 +136,40 @@ const PriceText = styled(Typography)`
   }
 `;
 
+const AuctionTimer = styled(Typography)`
+  && {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #ffe79a;
+    letter-spacing: 0.2px;
+  }
+`;
+
 export const ProductItem = ({ product, searchQuery }) => {
   const { addProduct, cartProducts } = useContext(CartContext);
   const url = `/product/${product._id}`;
   const resolveAvailableQuantity = () => {
-    const candidates = [
-      product?.availableQuantity,
-      product?.quantity,
-      product?.stock,
-      product?.properties?.quantity,
-    ];
-    const numericCandidates = candidates
-      .map((value) => Number(value))
-      .filter((value) => Number.isFinite(value));
+    const fromQuantity = Number(product?.quantity);
+    if (Number.isFinite(fromQuantity)) {
+      return Math.max(0, fromQuantity);
+    }
 
-    const positiveValue = numericCandidates.find((value) => value > 0);
-    if (positiveValue !== undefined) return positiveValue;
-    if (numericCandidates.length > 0) return 0;
-    return Infinity;
+    const fromAvailableQuantity = Number(product?.availableQuantity);
+    if (Number.isFinite(fromAvailableQuantity)) {
+      return Math.max(0, fromAvailableQuantity);
+    }
+
+    const fromProperty = Number(product?.properties?.quantity);
+    if (Number.isFinite(fromProperty)) {
+      return Math.max(0, fromProperty);
+    }
+
+    const fromStock = Number(product?.stock);
+    if (Number.isFinite(fromStock)) {
+      return Math.max(0, fromStock);
+    }
+
+    return 0;
   };
 
   const maxQuantity = resolveAvailableQuantity();
@@ -218,6 +234,11 @@ export const ProductItem = ({ product, searchQuery }) => {
           <PriceText variant="h6">
             {product.price.toFixed(2)} zł
           </PriceText>
+          {product.isAuction && product.auctionTimerLabel && (
+            <AuctionTimer variant="body2">
+              Koniec za: {product.auctionTimerLabel}
+            </AuctionTimer>
+          )}
         </StyledImageListItemBar>
       </CardContainer>
     </Link>

@@ -8,6 +8,8 @@ import AuthForm from "components/AuthForm";
 import { FaRegSadTear, FaRegUserCircle } from "react-icons/fa";
 import { clearAuthToken } from "utils/authToken";
 import colors from "styles/colors";
+import { useMyOrders } from "services/api/orderApi";
+import { useMyAuctionParticipations } from "services/api/auctionApi";
 
 const AccountWrapper = styled.section`
   margin: 24px auto 40px;
@@ -95,14 +97,58 @@ const EmptyState = styled.div`
   }
 `;
 
+const OrdersSection = styled.section`
+  margin-top: 16px;
+  border: 1px solid #efefef;
+  border-radius: 12px;
+  overflow: hidden;
+`;
+
+const OrdersHeader = styled.div`
+  background: #fafafa;
+  border-bottom: 1px solid #efefef;
+  padding: 10px 12px;
+  font-weight: 700;
+  color: ${colors.textPrimary};
+`;
+
+const OrdersBody = styled.div`
+  padding: 10px 12px;
+  display: grid;
+  gap: 10px;
+`;
+
+const OrderItem = styled.div`
+  border: 1px solid #efefef;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fff;
+`;
+
+const OrderMeta = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: ${colors.textSecondary};
+
+  strong {
+    color: ${colors.textPrimary};
+  }
+`;
+
 const AccountPage = () => {
   const { data, error, isLoading } = useUserData();
+  const { data: myOrders = [] } = useMyOrders();
+  const { data: myAuctionParticipations = [] } = useMyAuctionParticipations(!!data);
   const router = useRouter();
   const queryClient = useQueryClient();
 
   const handleLogout = useCallback(() => {
     clearAuthToken();
     queryClient.removeQueries({ queryKey: ["userData"] });
+    queryClient.removeQueries({ queryKey: ["myOrders"] });
     router.replace("/account");
   }, [queryClient, router]);
 
@@ -137,10 +183,70 @@ const AccountPage = () => {
               <strong>{data.email}</strong>
             </UserMeta>
           </UserRow>
-          <EmptyState>
-            <FaRegSadTear size={36} color={colors.grayDark} />
-            <p>Brak historii zamówień.</p>
-          </EmptyState>
+
+          <OrdersSection>
+            <OrdersHeader>Historia zamówień</OrdersHeader>
+            <OrdersBody>
+              {myOrders.length === 0 ? (
+                <EmptyState>
+                  <FaRegSadTear size={36} color={colors.grayDark} />
+                  <p>Brak historii zamówień.</p>
+                </EmptyState>
+              ) : (
+                myOrders.map((order) => (
+                  <OrderItem key={order._id}>
+                    <OrderMeta>
+                      <span>
+                        <strong>Data:</strong> {new Date(order.createdAt).toLocaleString()}
+                      </span>
+                      <span>
+                        <strong>Status:</strong> {order.orderStatus || "pending_payment"}
+                      </span>
+                      <span>
+                        <strong>Płatność:</strong> {order.paymentStatus || "unpaid"}
+                      </span>
+                      <span>
+                        <strong>Suma:</strong> {Number(order.totalAmount || 0).toFixed(2)} PLN
+                      </span>
+                    </OrderMeta>
+                  </OrderItem>
+                ))
+              )}
+            </OrdersBody>
+          </OrdersSection>
+
+          <OrdersSection>
+            <OrdersHeader>Moje licytacje</OrdersHeader>
+            <OrdersBody>
+              {myAuctionParticipations.length === 0 ? (
+                <EmptyState>
+                  <FaRegSadTear size={36} color={colors.grayDark} />
+                  <p>Nie brałeś jeszcze udziału w żadnej licytacji.</p>
+                </EmptyState>
+              ) : (
+                myAuctionParticipations.map((auction) => (
+                  <OrderItem key={auction._id}>
+                    <OrderMeta>
+                      <span>
+                        <strong>Produkt:</strong> {auction.productId?.title || "-"}
+                      </span>
+                      <span>
+                        <strong>Status:</strong> {auction.status || "-"}
+                      </span>
+                      <span>
+                        <strong>Twoja najwyższa oferta:</strong>{" "}
+                        {Number(auction.myHighestBid || 0).toFixed(2)} PLN
+                      </span>
+                      <span>
+                        <strong>Aktualna cena:</strong>{" "}
+                        {Number(auction.currentPrice || 0).toFixed(2)} PLN
+                      </span>
+                    </OrderMeta>
+                  </OrderItem>
+                ))
+              )}
+            </OrdersBody>
+          </OrdersSection>
         </ProfileCard>
       </AccountWrapper>
     </PageContainer>

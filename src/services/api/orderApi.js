@@ -1,4 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "lib/axiosInstance";
+import { getAuthToken } from "utils/authToken";
 
 export const createOrder = async ({
   name,
@@ -20,4 +22,20 @@ export const createOrder = async ({
   });
 
   return response.data;
+};
+
+const fetchMyOrders = async () => {
+  const response = await axiosInstance.get("/v1/orders/my");
+  return Array.isArray(response.data) ? response.data : [];
+};
+
+export const useMyOrders = () => {
+  const token = getAuthToken();
+
+  return useQuery({
+    queryKey: ["myOrders"],
+    queryFn: fetchMyOrders,
+    enabled: !!token,
+    staleTime: 60 * 1000,
+  });
 };

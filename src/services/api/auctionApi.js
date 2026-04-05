@@ -56,6 +56,19 @@ export const useAuctionBids = (auctionId, enabled = true) =>
     staleTime: 2000,
   });
 
+export const useMyAuctionParticipations = (enabled = true) =>
+  useQuery({
+    enabled,
+    queryKey: ["my-auction-participations"],
+    queryFn: async () => {
+      const response = await axiosInstance.get("/v1/auctions/my/participations");
+      if (Array.isArray(response.data)) return response.data;
+      if (Array.isArray(response.data?.items)) return response.data.items;
+      return [];
+    },
+    staleTime: 60 * 1000,
+  });
+
 export const placeAuctionBid = async ({ auctionId, amount }) => {
   const response = await axiosInstance.post(`/v1/auctions/${auctionId}/bids`, {
     amount,
