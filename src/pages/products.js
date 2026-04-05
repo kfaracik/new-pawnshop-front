@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Title from "components/Title";
 import PageContainer from "components/PageContainer";
@@ -9,19 +9,29 @@ const PRODUCTS_PER_PAGE = 8;
 
 export default function ProductsPage() {
   const router = useRouter();
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(Number(router.query.page) || 1);
+  const selectedCategory = router.query.category || "";
 
   const { data, isLoading, isError, error } = useProducts(
     page,
-    PRODUCTS_PER_PAGE
+    PRODUCTS_PER_PAGE,
+    selectedCategory
   );
 
   const totalPages = Math.ceil((data?.total || 0) / PRODUCTS_PER_PAGE);
 
+  useEffect(() => {
+    setPage(Number(router.query.page) || 1);
+  }, [router.query.page, selectedCategory]);
+
   const handlePageChange = (newPage) => {
     if (newPage !== page) {
       setPage(newPage);
-      router.push(`/products?page=${newPage}`, undefined, { shallow: true });
+      const params = new URLSearchParams({ page: String(newPage) });
+      if (selectedCategory) {
+        params.set("category", String(selectedCategory));
+      }
+      router.push(`/products?${params.toString()}`, undefined, { shallow: true });
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };

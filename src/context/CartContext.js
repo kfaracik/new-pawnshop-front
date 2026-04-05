@@ -6,10 +6,15 @@ export const CartContext = createContext({});
 export const CartContextProvider = ({ children }) => {
   const ls = typeof window !== "undefined" ? window.localStorage : null;
   const [cartProducts, setCartProducts] = useState([]);
+  const normalizeId = (id) => String(id);
 
   useEffect(() => {
+    if (!ls) return;
+
     if (cartProducts?.length > 0) {
       ls?.setItem("cart", JSON.stringify(cartProducts));
+    } else {
+      ls?.removeItem("cart");
     }
   }, [cartProducts, ls]);
 
@@ -27,38 +32,51 @@ export const CartContextProvider = ({ children }) => {
     }
   }, [ls]);
 
-  const addProduct = (productId) => {
+  const addProduct = (productId, maxQuantity = Infinity) => {
     setCartProducts((prev) => {
+      const normalizedId = normalizeId(productId);
       const productIndex = prev.findIndex(
-        (item) => item.productId === productId
+        (item) => normalizeId(item.productId) === normalizedId
       );
 
       if (productIndex !== -1) {
-        const updatedCart = [...prev];
-        updatedCart[productIndex].quantity += 1;
-        return updatedCart;
+        const currentQty = Number(prev[productIndex].quantity || 0);
+        if (currentQty >= maxQuantity) {
+          return prev;
+        }
+
+        return prev.map((item, index) =>
+          index === productIndex
+            ? { ...item, quantity: Number(item.quantity || 0) + 1 }
+            : item
+        );
       } else {
-        return [...prev, { productId, quantity: 1 }];
+        if (maxQuantity <= 0) {
+          return prev;
+        }
+        return [...prev, { productId: normalizedId, quantity: 1 }];
       }
     });
   };
 
   const removeProduct = (productId) => {
     setCartProducts((prev) => {
+      const normalizedId = normalizeId(productId);
       const productIndex = prev.findIndex(
-        (item) => item.productId === productId
+        (item) => normalizeId(item.productId) === normalizedId
       );
 
       if (productIndex !== -1) {
-        const updatedCart = [...prev];
-        const product = updatedCart[productIndex];
+        const product = prev[productIndex];
+        const currentQty = Number(product.quantity || 0);
 
-        if (product.quantity > 1) {
-          product.quantity -= 1;
-        } else {
-          updatedCart.splice(productIndex, 1);
+        if (currentQty > 1) {
+          return prev.map((item, index) =>
+            index === productIndex ? { ...item, quantity: currentQty - 1 } : item
+          );
         }
-        return updatedCart;
+
+        return prev.filter((_, index) => index !== productIndex);
       }
       return prev;
     });

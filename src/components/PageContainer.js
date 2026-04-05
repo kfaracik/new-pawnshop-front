@@ -4,6 +4,7 @@ import styled from "styled-components";
 import Footer from "components/Footer";
 import PageLoader from "./PageLoader";
 import { motion } from "framer-motion";
+import { LayoutInner } from "styles/layout";
 
 const Container = styled.div`
   min-height: 100vh;
@@ -12,8 +13,13 @@ const Container = styled.div`
 `;
 
 const AnimatedMainContent = styled(motion.main)`
-  margin: 10px 40px;
+  margin: 10px auto;
+  width: 100%;
   min-height: 91vh;
+`;
+
+const MainContentInner = styled(LayoutInner)`
+  min-height: inherit;
 `;
 
 export default function PageContainer({ children, loading = false }) {
@@ -26,7 +32,9 @@ export default function PageContainer({ children, loading = false }) {
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
       >
-        {loading ? <PageLoader /> : <>{children}</>}
+        <MainContentInner>
+          {loading ? <PageLoader /> : <>{children}</>}
+        </MainContentInner>
       </AnimatedMainContent>
       <Footer />
     </Container>

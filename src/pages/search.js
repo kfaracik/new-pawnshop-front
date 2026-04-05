@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import PageContainer from "components/PageContainer";
 import ProductList from "components/ProductList";
@@ -7,14 +7,16 @@ import { useSearchProducts } from "services/api/searchProductApi";
 const PRODUCTS_PER_PAGE = 8;
 
 export default function SearchPage() {
-  const [page, setPage] = useState(1);
   const router = useRouter();
+  const [page, setPage] = useState(Number(router.query.page) || 1);
   const searchQuery = router.query.query || "";
+  const selectedCategory = router.query.category || "";
 
   const { data, isLoading } = useSearchProducts(
     searchQuery,
     page,
-    PRODUCTS_PER_PAGE
+    PRODUCTS_PER_PAGE,
+    selectedCategory
   );
 
   const totalPages = Math.ceil(
@@ -23,10 +25,21 @@ export default function SearchPage() {
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    router.push(`/search?page=${newPage}&query=${searchQuery}`, undefined, {
+    const params = new URLSearchParams({
+      page: String(newPage),
+      query: String(searchQuery),
+    });
+    if (selectedCategory) {
+      params.set("category", String(selectedCategory));
+    }
+    router.push(`/search?${params.toString()}`, undefined, {
       shallow: true,
     });
   };
+
+  useEffect(() => {
+    setPage(Number(router.query.page) || 1);
+  }, [router.query.page, selectedCategory, searchQuery]);
 
   return (
     <PageContainer>

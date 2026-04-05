@@ -1,146 +1,219 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import styled from "styled-components";
-import Button from "components/Button";
-import Table from "components/Table";
+import PageContainer from "components/PageContainer";
 import Input from "components/Input";
 import { CartContext } from "context/CartContext";
 import { useProducts } from "services/api/useProductApi";
-import PageContainer from "components/PageContainer";
+import colors from "styles/colors";
 
-const ColumnsWrapper = styled.div`
+const Layout = styled.section`
+  margin: 20px 0 40px;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 40px;
-  margin-top: 40px;
-  transition: all 0.3s ease;
-  @media screen and (min-width: 768px) {
-    grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+
+  @media (min-width: 980px) {
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+    align-items: start;
   }
 `;
 
-const Box = styled.div`
-  background: #ffffff;
+const Card = styled.div`
+  background: ${colors.backgroundPaper};
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  padding: 16px;
+`;
+
+const Title = styled.h1`
+  margin: 0;
+  font-size: clamp(1.3rem, 2vw, 1.7rem);
+  color: ${colors.textPrimary};
+`;
+
+const EmptyState = styled.div`
+  padding: 22px 8px 6px;
+  color: ${colors.textSecondary};
+  text-align: center;
+`;
+
+const ItemsList = styled.div`
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+`;
+
+const ItemCard = styled.div`
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 12px;
+  border: 1px solid #efefef;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  padding: 40px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  height: fit-content;
+  padding: 10px;
+  background: #fff;
+`;
 
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+const ProductImage = styled.img`
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 9px;
+  border: 1px solid #f0f0f0;
+`;
+
+const ProductName = styled.h3`
+  margin: 0;
+  font-size: 0.96rem;
+  color: ${colors.textPrimary};
+  line-height: 1.3;
+`;
+
+const ProductMeta = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+`;
+
+const QuantityControl = styled.div`
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+
+  span {
+    min-width: 36px;
+    text-align: center;
+    font-weight: 600;
+    color: ${colors.textPrimary};
   }
 `;
 
-const Title = styled.h2`
-  font-size: 26px;
-  font-weight: 600;
-  margin-bottom: 25px;
-  color: #333;
-  text-align: center;
-`;
-
-const EmptyCartMessage = styled.p`
-  font-size: 18px;
-  color: #888;
-  text-align: center;
-`;
-
-const ProductRow = styled.tr`
-  border-bottom: 1px solid #eee;
-  &:last-child {
-    border-bottom: none;
-  }
+const QtyButton = styled.button`
+  border: 0;
+  width: 34px;
+  height: 34px;
+  background: #f7f7f7;
+  cursor: pointer;
+  font-size: 1rem;
+  color: ${colors.textPrimary};
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: #f7f7f7;
+    background: #ebebeb;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background: #f4f4f4;
   }
 `;
 
-const ProductImage = styled.div`
-  width: 80px;
-  height: 80px;
-  border-radius: 10px;
-  overflow: hidden;
-  margin: 0 auto;
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+const ItemPrice = styled.strong`
+  color: ${colors.primaryDark};
+  font-size: 1rem;
 `;
 
-const QuantityWrapper = styled.div`
+const StockHint = styled.span`
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: ${colors.textSecondary};
+`;
+
+const TotalRow = styled.div`
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #ededed;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  transition: transform 0.3s ease;
+  font-weight: 700;
+  color: ${colors.textPrimary};
+`;
 
-  button {
-    padding: 10px;
-    border-radius: 8px;
-    background-color: #f4f4f4;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-
-    &:hover {
-      background-color: #ddd;
-    }
-
-    &:active {
-      background-color: #ccc;
-    }
+const SummaryCard = styled(Card)`
+  @media (min-width: 980px) {
+    position: sticky;
+    top: 14px;
   }
 `;
 
-const TotalPrice = styled.div`
-  text-align: right;
-  font-size: 22px;
-  font-weight: bold;
-  color: #444;
-  margin-top: 30px;
-  transition: color 0.3s ease;
+const SectionTitle = styled.h2`
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  color: ${colors.textPrimary};
+`;
 
-  &:hover {
-    color: #222;
+const Form = styled.form`
+  display: grid;
+  gap: 10px;
+`;
+
+const TwoCols = styled.div`
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 560px) {
+    grid-template-columns: 1fr 1fr;
   }
 `;
 
-const OrderForm = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  transition: all 0.3s ease;
-`;
-
-const InputGroup = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-`;
-
-const FullWidthButton = styled(Button)`
+const PrimaryButton = styled.button`
+  margin-top: 6px;
   width: 100%;
-  padding: 15px;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
-  background: #ee7668;
-  text-align: center;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: none;
+  border-radius: 10px;
+  background: ${colors.primary};
+  color: ${colors.primaryContrastText};
+  font-size: 0.98rem;
+  font-weight: 700;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: #e74c3c;
+    background: ${colors.primaryLight};
+  }
+`;
+
+const Feedback = styled.p`
+  margin: 4px 0 0;
+  font-size: 0.88rem;
+  color: ${colors.error};
+`;
+
+const SuccessState = styled(Card)`
+  max-width: 640px;
+  margin: 24px auto 0;
+  text-align: center;
+
+  h2 {
+    margin: 0 0 10px;
+    color: ${colors.textPrimary};
   }
 
-  &:active {
-    background-color: #ccc;
+  p {
+    margin: 0;
+    color: ${colors.textSecondary};
   }
+`;
+
+const CloseButton = styled.button`
+  margin-top: 16px;
+  border: 1px solid #e1d8b5;
+  background: #fff;
+  color: ${colors.primaryDark};
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
 `;
 
 const CartPage = () => {
@@ -152,124 +225,164 @@ const CartPage = () => {
   const [streetAddress, setStreetAddress] = useState("");
   const [country, setCountry] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [formError, setFormError] = useState("");
 
-  const productIds = cartProducts.map(({ productId }) => productId);
+  const productIds = useMemo(
+    () => cartProducts.map(({ productId }) => productId),
+    [cartProducts]
+  );
   const { data: products = [], isLoading, error } = useProducts(productIds);
 
-  const calculateTotal = () =>
-    cartProducts.reduce((total, { productId, quantity }) => {
-      const product = products.find((p) => p._id === productId);
-      return total + (product ? product.price * quantity : 0);
-    }, 0);
+  const resolveAvailableQuantity = (product) => {
+    const candidates = [
+      product?.availableQuantity,
+      product?.stock,
+      product?.quantity,
+      product?.properties?.quantity,
+    ];
 
-  const handlePayment = async () => {
+    const firstNumeric = candidates.find((value) =>
+      Number.isFinite(Number(value))
+    );
+
+    if (firstNumeric === undefined) return Infinity;
+    return Math.max(0, Number(firstNumeric));
+  };
+
+  const cartItems = useMemo(
+    () =>
+      products
+        .map((product) => {
+          const productInCart = cartProducts.find(
+            (item) => String(item.productId) === String(product._id)
+          );
+          if (!productInCart) return null;
+
+          const cartQuantity = Number(productInCart.quantity || 0);
+          const availableQuantity = resolveAvailableQuantity(product);
+
+          return {
+            ...product,
+            cartQuantity,
+            availableQuantity,
+            total: product.price * cartQuantity,
+          };
+        })
+        .filter(Boolean),
+    [products, cartProducts]
+  );
+
+  const cartTotal = useMemo(
+    () => cartItems.reduce((sum, item) => sum + item.total, 0),
+    [cartItems]
+  );
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setFormError("");
+
     if (!name || !email || !city || !postalCode || !streetAddress || !country) {
-      alert("Proszę wypełnić wszystkie pola.");
+      setFormError("Uzupełnij wszystkie pola zamówienia.");
       return;
     }
-    // TODO: Payment logic here
+
     setIsSuccess(true);
-    // TODO: Order logic here
   };
 
-  const onCloseConfirmOrderPress = () => {
-    setIsSuccess(false);
-    // TODO: update state eg. clearCart();
-  };
+  const onCloseConfirmOrderPress = () => setIsSuccess(false);
 
   if (error) return <div>Error loading products</div>;
 
   if (isSuccess) {
     return (
       <PageContainer>
-        <Box>
-          <Title>Dziękujemy za Twoje zamówienie!</Title>
-          <p>Powiadomimy Cię, gdy Twoje zamówienie będzie w drodze.</p>
-          <Button onPress={onCloseConfirmOrderPress} primary>
+        <SuccessState>
+          <h2>Dziękujemy za zamówienie</h2>
+          <p>Potwierdzenie wyślemy na podany adres e-mail.</p>
+          <CloseButton type="button" onClick={onCloseConfirmOrderPress}>
             Zamknij
-          </Button>
-        </Box>
+          </CloseButton>
+        </SuccessState>
       </PageContainer>
     );
   }
 
   return (
     <PageContainer loading={isLoading}>
-      <ColumnsWrapper>
-        <Box>
-          <Title>Twój Koszyk</Title>
-          {!cartProducts.length ? (
-            <EmptyCartMessage>Twój koszyk jest pusty.</EmptyCartMessage>
+      <Layout>
+        <Card>
+          <Title>Koszyk</Title>
+          {!cartItems.length ? (
+            <EmptyState>Twój koszyk jest pusty.</EmptyState>
           ) : (
-            <Table>
-              <thead>
-                <tr>
-                  <th style={{ textAlign: "center" }}>Produkt</th>
-                  <th style={{ textAlign: "center" }}>Ilość</th>
-                  <th style={{ textAlign: "center" }}>Cena</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => {
-                  const productInCart = cartProducts.find(
-                    (item) => item.productId === product._id
-                  );
-                  return (
-                    <ProductRow key={product._id} style={{ padding: "5px" }}>
-                      <td style={{ textAlign: "center" }}>
-                        <ProductImage>
-                          <img
-                            src={
-                              product.images[0] ||
-                              "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
-                            }
-                            alt={product.title}
-                          />
-                        </ProductImage>
-                        {product.title}
-                      </td>
-                      <td style={{ textAlign: "center" }}>
-                        <QuantityWrapper>
-                          <Button onClick={() => removeProduct(product._id)}>
+            <>
+              <ItemsList>
+                {cartItems.map((item) => (
+                  <ItemCard key={item._id}>
+                    <ProductImage
+                      src={
+                        item.images?.[0] ||
+                        "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
+                      }
+                      alt={item.title}
+                    />
+                    <div>
+                      <ProductName>{item.title}</ProductName>
+                      <ProductMeta>
+                        <QuantityControl>
+                          <QtyButton
+                            type="button"
+                            aria-label={`Zmniejsz ilość produktu ${item.title}`}
+                            onClick={() => removeProduct(item._id)}
+                          >
                             -
-                          </Button>
-                          <span>{productInCart?.quantity}</span>
-                          <Button onClick={() => addProduct(product._id)}>
+                          </QtyButton>
+                          <span>{item.cartQuantity}</span>
+                          <QtyButton
+                            type="button"
+                            aria-label={`Zwiększ ilość produktu ${item.title}`}
+                            onClick={() =>
+                              addProduct(item._id, item.availableQuantity)
+                            }
+                            disabled={item.cartQuantity >= item.availableQuantity}
+                          >
                             +
-                          </Button>
-                        </QuantityWrapper>
-                      </td>
-                      <td style={{ textAlign: "center" }}>
-                        {(product.price * productInCart?.quantity).toFixed(2)}{" "}
-                        zł
-                      </td>
-                    </ProductRow>
-                  );
-                })}
-              </tbody>
-            </Table>
+                          </QtyButton>
+                        </QuantityControl>
+                        <ItemPrice>{item.total.toFixed(2)} zł</ItemPrice>
+                      </ProductMeta>
+                      {Number.isFinite(item.availableQuantity) && (
+                        <StockHint>Dostępne: {item.availableQuantity} szt.</StockHint>
+                      )}
+                    </div>
+                  </ItemCard>
+                ))}
+              </ItemsList>
+              <TotalRow>
+                <span>Razem</span>
+                <span>{cartTotal.toFixed(2)} zł</span>
+              </TotalRow>
+            </>
           )}
-          {cartProducts.length > 0 && (
-            <TotalPrice>Razem: {calculateTotal().toFixed(2)} zł</TotalPrice>
-          )}
-        </Box>
-        {!!cartProducts.length && (
-          <Box>
-            <Title>Szczegóły zamówienia</Title>
-            <OrderForm>
+        </Card>
+
+        {!!cartItems.length && (
+          <SummaryCard>
+            <SectionTitle>Dane zamówienia</SectionTitle>
+            <Form onSubmit={handleSubmit}>
               <Input
                 type="text"
-                placeholder="Imię"
+                placeholder="Imię i nazwisko"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
               <Input
                 type="email"
-                placeholder="Email"
+                placeholder="Adres e-mail"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <InputGroup>
+              <TwoCols>
                 <Input
                   type="text"
                   placeholder="Miasto"
@@ -282,7 +395,7 @@ const CartPage = () => {
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
                 />
-              </InputGroup>
+              </TwoCols>
               <Input
                 type="text"
                 placeholder="Adres ulicy"
@@ -295,13 +408,12 @@ const CartPage = () => {
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
               />
-              <FullWidthButton onClick={handlePayment}>
-                Przejdź do płatności
-              </FullWidthButton>
-            </OrderForm>
-          </Box>
+              {formError && <Feedback>{formError}</Feedback>}
+              <PrimaryButton type="submit">Przejdź do płatności</PrimaryButton>
+            </Form>
+          </SummaryCard>
         )}
-      </ColumnsWrapper>
+      </Layout>
     </PageContainer>
   );
 };

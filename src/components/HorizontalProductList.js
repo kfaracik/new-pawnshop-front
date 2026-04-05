@@ -1,61 +1,67 @@
 import React from "react";
 import styled from "styled-components";
-import { ScrollMenu, VisibilityContext } from "react-horizontal-scrolling-menu";
-import "react-horizontal-scrolling-menu/dist/styles.css";
-import { IconButton } from "@mui/material";
-import { RiArrowRightSLine, RiArrowLeftSLine } from "react-icons/ri";
 import Skeleton from "@mui/material/Skeleton";
 import colors from "styles/colors";
 import { ProductItem } from "./ProductItem";
 
 const Container = styled.div`
-  background: linear-gradient(135deg, #f5f5f5, #dcdcdc);
-  border-radius: 8px;
+  background: linear-gradient(180deg, #f7f7f7, #efefef);
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
   margin-bottom: 2rem;
-  position: relative;
-  display: flex;
 `;
 
 const TitleContainer = styled.div`
   display: flex;
-  justify-content: space-between;
-  padding: 20px;
-  min-width: 180px;
+  padding: 14px 16px 6px;
   align-items: center;
 `;
 
 const Title = styled.span`
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: ${colors.textSecondary};
+  font-size: clamp(1.15rem, 2.2vw, 1.35rem);
+  font-weight: 700;
+  color: ${colors.textPrimary};
 `;
 
-const SkeletonContainer = styled.div`
+const HorizontalTrack = styled.div`
   display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 10px 16px 16px;
+
+  &::-webkit-scrollbar {
+    height: 7px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c7c7c7;
+    border-radius: 999px;
+  }
+
+  @media screen and (max-width: 600px) {
+    gap: 10px;
+    padding: 8px 12px 12px;
+  }
+`;
+
+const ItemSlot = styled.div`
+  flex: 0 0 clamp(220px, 30vw, 280px);
+  scroll-snap-align: start;
+
+  @media screen and (max-width: 900px) {
+    flex-basis: clamp(200px, 45vw, 260px);
+  }
+
+  @media screen and (max-width: 600px) {
+    flex-basis: clamp(180px, 82vw, 320px);
+  }
 `;
 
 const StyledSkeleton = styled(Skeleton)`
-  border-radius: 8px;
-  margin-right: 16px;
-`;
-
-const ArrowButton = styled(IconButton)`
-  background: ${colors.secondary};
-  color: #333;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  &:hover {
-    background: #ffcc00;
-  }
+  border-radius: 12px;
 `;
 
 const HorizontalProductList = ({
@@ -64,21 +70,13 @@ const HorizontalProductList = ({
   loading,
   searchQuery = "",
 }) => {
-  const handleScrollNext = (api) => {
-    api.scrollNext();
-  };
-
-  const handleScrollPrev = (api) => {
-    api.scrollPrev();
-  };
-
   if (!products || products.length === 0) {
     return (
       <Container>
         <TitleContainer>
           <Title>{title}</Title>
         </TitleContainer>
-        <div style={{ padding: 20 }}>
+        <div style={{ padding: "6px 16px 16px" }}>
           <p>Nie mamy aktualnie dostępnych produktów.</p>
         </div>
       </Container>
@@ -91,46 +89,21 @@ const HorizontalProductList = ({
         <Title>{title}</Title>
       </TitleContainer>
       {loading ? (
-        <SkeletonContainer>
+        <HorizontalTrack>
           {Array.from({ length: 6 }).map((_, index) => (
-            <StyledSkeleton
-              key={index}
-              variant="rectangular"
-              width={250}
-              height={350}
-            />
+            <ItemSlot key={index}>
+              <StyledSkeleton variant="rectangular" width="100%" height={330} />
+            </ItemSlot>
           ))}
-        </SkeletonContainer>
+        </HorizontalTrack>
       ) : (
-        <ScrollMenu
-          wrapperClassName="hide-scrollbar"
-          LeftArrow={() => (
-            <VisibilityContext.Consumer>
-              {(api) => (
-                <ArrowButton onClick={() => handleScrollPrev(api)}>
-                  <RiArrowLeftSLine size={24} />
-                </ArrowButton>
-              )}
-            </VisibilityContext.Consumer>
-          )}
-          RightArrow={() => (
-            <VisibilityContext.Consumer>
-              {(api) => (
-                <ArrowButton onClick={() => handleScrollNext(api)}>
-                  <RiArrowRightSLine size={24} />
-                </ArrowButton>
-              )}
-            </VisibilityContext.Consumer>
-          )}
-        >
+        <HorizontalTrack>
           {products.map((product) => (
-            <ProductItem
-              key={product._id}
-              product={product}
-              searchQuery={searchQuery}
-            />
+            <ItemSlot key={product._id}>
+              <ProductItem product={product} searchQuery={searchQuery} />
+            </ItemSlot>
           ))}
-        </ScrollMenu>
+        </HorizontalTrack>
       )}
     </Container>
   );

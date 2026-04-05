@@ -1,240 +1,260 @@
-import React, { useState } from "react";
-import PageContainer from "components/PageContainer";
+import React, { useMemo, useState } from "react";
 import styled from "styled-components";
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from "react-icons/fa";
+import PageContainer from "components/PageContainer";
+import colors from "styles/colors";
 
-const Title = styled.h2`
-  font-size: 2rem;
+const LOCATIONS = {
+  czestochowa: {
+    label: "Częstochowa NPM",
+    address: "Al. Najświętszej Maryi Panny 1, 42-200 Częstochowa",
+    mapSrc:
+      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.1246155!3d50.8125063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4710b54aa8fc5dbd%3A0x7ebed8eb0200a035!2sNowy%20Lombard%20NMP%206!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl",
+  },
+  rakow: {
+    label: "Częstochowa Raków",
+    address: "ul. Brzozowa 16, 42-216 Częstochowa - Raków",
+    mapSrc:
+      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.1246155!3d50.7817892!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4710b54aa8fc5dbd%3A0x7ebed8eb0200a035!2sNowy%20Lombard%20RAK%C3%93W!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl",
+  },
+  katowice: {
+    label: "Katowice",
+    address: "ul. Warszawska 13, 40-009 Katowice",
+    mapSrc:
+      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.0246155!3d50.258614!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4716cf2c02be991b%3A0x72d74599feffda2!2sNowy%20Lombard%20Katowice!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl",
+  },
+};
+
+const PageSection = styled.section`
+  margin: 24px 0 40px;
+`;
+
+const Header = styled.header`
   text-align: center;
-  color: #333;
   margin-bottom: 20px;
 `;
 
-const LocationHeader = styled.div`
+const Title = styled.h1`
+  margin: 0;
+  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+  color: ${colors.textPrimary};
+  line-height: 1.2;
+`;
+
+const Tabs = styled.div`
   display: flex;
+  gap: 10px;
   justify-content: center;
-  gap: 30px;
-  margin-bottom: 30px;
+  flex-wrap: wrap;
+  margin: 18px 0 10px;
 `;
 
-const LocationButton = styled.button`
-  background: none;
-  border: none;
-  color: #333;
-  font-size: 1.2rem;
-  font-weight: 500;
+const TabButton = styled.button`
+  border: 1px solid
+    ${(props) => (props.active ? colors.primaryDark : "rgba(0, 0, 0, 0.12)")};
+  color: ${(props) => (props.active ? colors.primaryDark : colors.textPrimary)};
+  background: ${(props) =>
+    props.active ? "rgba(201,162,39,0.12)" : colors.backgroundPaper};
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  text-transform: capitalize;
-  transition: color 0.3s ease;
+  transition: all 0.2s ease;
+
   &:hover {
-    color: #e74c3c;
+    border-color: ${colors.primary};
   }
-  ${(props) =>
-    props.active &&
-    `
-    font-weight: bold;
-    color: #e74c3c;
-  `}
 `;
 
-const ContactWrapper = styled.div`
+const ContentGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+
+  @media (min-width: 900px) {
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    gap: 20px;
+  }
+`;
+
+const Card = styled.div`
+  background: ${colors.backgroundPaper};
+  border: 1px solid #e9e9e9;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+`;
+
+const CardHeader = styled.div`
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  padding: 40px 0;
-  gap: 40px;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
 `;
 
-const InfoSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  text-align: center;
-  max-width: 600px;
+const CardTitle = styled.h2`
+  margin: 0;
+  font-size: 1.02rem;
+  color: ${colors.textPrimary};
 `;
 
-const ContactInfo = styled.div`
-  display: flex;
+const BranchPill = styled.span`
+  display: inline-flex;
   align-items: center;
-  gap: 15px;
-  font-size: 1rem;
-  color: #555;
+  border: 1px solid #e3d6a7;
+  background: rgba(201, 162, 39, 0.1);
+  color: ${colors.primaryDark};
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
 `;
 
-const ContactIcon = styled.div`
-  font-size: 1.5rem;
-  color: #333;
+const InfoList = styled.div`
+  display: grid;
+  gap: 8px;
 `;
 
-const FormMapWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 40px;
+const InfoRow = styled.div`
+  display: grid;
+  grid-template-columns: 24px 95px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  color: ${colors.textPrimary};
+  line-height: 1.35;
+  padding: 8px 0;
+  border-bottom: 1px solid #f4f4f4;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 24px minmax(0, 1fr);
+  }
+`;
+
+const IconWrap = styled.span`
+  width: 22px;
+  margin-top: 2px;
+  color: ${colors.primaryDark};
+  display: inline-flex;
+  justify-content: center;
+`;
+
+const InfoLabel = styled.span`
+  font-size: 0.83rem;
+  color: ${colors.textSecondary};
+  font-weight: 600;
+
+  @media (max-width: 600px) {
+    display: none;
+  }
+`;
+
+const InfoValue = styled.span`
+  font-size: 0.93rem;
+  color: ${colors.textPrimary};
+`;
+
+const MapCard = styled(Card)`
+  padding: 10px;
+`;
+
+const MapFrame = styled.iframe`
   width: 100%;
-`;
+  height: 320px;
+  border: 0;
+  border-radius: 10px;
 
-const MapContainer = styled.div`
-  height: 300px;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 800px;
-  min-width: 400px;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  max-width: 400px;
-  width: 100%;
-`;
-
-const Input = styled.input`
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 1rem;
-  color: #333;
-`;
-
-const Textarea = styled.textarea`
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 1rem;
-  color: #333;
-  resize: vertical;
-`;
-
-const Button = styled.button`
-  padding: 12px;
-  font-size: 1rem;
-  color: white;
-  background-color: #333;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  &:hover {
-    background-color: #444;
+  @media (min-width: 900px) {
+    height: 100%;
+    min-height: 360px;
   }
 `;
 
 export default function ContactPage() {
-  const [selectedCity, setSelectedCity] = useState("czestochowa");
-
-  const handleCityChange = (city) => {
-    setSelectedCity(city);
-  };
-
-  const handleMessageSend = (e) => {
-    e.preventDefault();
-    // TODO: add logic here to handle message submission
-  };
-
-  const getLocationData = (city) => {
-    switch (city) {
-      case "czestochowa":
-        return {
-          address: "Al. Najświętszej Maryi Panny 1, 42-200 Częstochowa",
-          mapSrc:
-            "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.1246155!3d50.8125063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4710b54aa8fc5dbd%3A0x7ebed8eb0200a035!2sNowy%20Lombard%20NMP%206!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl",
-        };
-      case "czestochowa-rakow":
-        return {
-          address: "ul. Brzozowa 16, 42-216 Częstochowa - Raków",
-          mapSrc:
-            "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.1246155!3d50.7817892!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4710b54aa8fc5dbd%3A0x7ebed8eb0200a035!2sNowy%20Lombard%20RAK%C3%93W!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl",
-        };
-      case "katowice":
-        return {
-          address: "ul. Warszawska 13, 40-009 Katowice",
-          mapSrc:
-            "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.0246155!3d50.258614!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4716cf2c02be991b%3A0x72d74599feffda2!2sNowy%20Lombard%20Katowice!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl",
-        };
-      default:
-        return {
-          address: "",
-          mapSrc: "",
-        };
-    }
-  };
-
-  const { address, mapSrc } = getLocationData(selectedCity);
+  const [selectedKey, setSelectedKey] = useState("czestochowa");
+  const selected = useMemo(() => LOCATIONS[selectedKey], [selectedKey]);
 
   return (
     <PageContainer>
-      <Title>Skontaktuj się z nami</Title>
-      <LocationHeader>
-        <LocationButton
-          onClick={() => handleCityChange("czestochowa")}
-          active={selectedCity === "czestochowa"}
-        >
-          Częstochowa NPM
-        </LocationButton>
-        <LocationButton
-          onClick={() => handleCityChange("czestochowa-rakow")}
-          active={selectedCity === "czestochowa-rakow"}
-        >
-          Częstochowa Raków
-        </LocationButton>
-        <LocationButton
-          onClick={() => handleCityChange("katowice")}
-          active={selectedCity === "katowice"}
-        >
-          Katowice
-        </LocationButton>
-      </LocationHeader>
-      <ContactWrapper>
-        <InfoSection>
-          <ContactInfo>
-            <ContactIcon>
-              <FaPhone />
-            </ContactIcon>
-            <span>+48 515 671 666</span>
-          </ContactInfo>
-          <ContactInfo>
-            <ContactIcon>
-              <FaEnvelope />
-            </ContactIcon>
-            <span>kontakt@lombard.pl</span>
-          </ContactInfo>
-          <ContactInfo>
-            <ContactIcon>
-              <FaMapMarkerAlt />
-            </ContactIcon>
-            <span>{address}</span>
-          </ContactInfo>
-          <ContactInfo>
-            <ContactIcon>
-              <FaClock />
-            </ContactIcon>
-            <span>Godziny otwarcia: Pon-Pt 9:00-18:30, Sob 9:00-15:00</span>
-          </ContactInfo>
-        </InfoSection>
-        <MapContainer>
-          <iframe
-            src={mapSrc}
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-          />
-        </MapContainer>
-        <FormMapWrapper>
-          <Form onSubmit={handleMessageSend}>
-            <Input type="text" placeholder="Imię i nazwisko" required />
-            <Input type="email" placeholder="Adres e-mail" required />
-            <Input type="text" placeholder="Temat wiadomości" />
-            <Textarea placeholder="Twoja wiadomość" rows="5" required />
-            <Button type="submit">Wyślij wiadomość</Button>
-          </Form>
-        </FormMapWrapper>
-      </ContactWrapper>
+      <PageSection>
+        <Header>
+          <Title>Skontaktuj się z nami</Title>
+          <Tabs>
+            {Object.entries(LOCATIONS).map(([key, item]) => (
+              <TabButton
+                key={key}
+                type="button"
+                active={selectedKey === key}
+                onClick={() => setSelectedKey(key)}
+              >
+                {item.label}
+              </TabButton>
+            ))}
+          </Tabs>
+        </Header>
+
+        <ContentGrid>
+          <Card>
+            <CardHeader>
+              <CardTitle>Dane kontaktowe</CardTitle>
+              <BranchPill>{selected.label}</BranchPill>
+            </CardHeader>
+            <InfoList>
+              <InfoRow>
+                <IconWrap>
+                  <FaPhone />
+                </IconWrap>
+                <InfoLabel>Telefon</InfoLabel>
+                <InfoValue>+48 515 671 666</InfoValue>
+              </InfoRow>
+              <InfoRow>
+                <IconWrap>
+                  <FaEnvelope />
+                </IconWrap>
+                <InfoLabel>E-mail</InfoLabel>
+                <InfoValue>kontakt@lombard.pl</InfoValue>
+              </InfoRow>
+              <InfoRow>
+                <IconWrap>
+                  <FaMapMarkerAlt />
+                </IconWrap>
+                <InfoLabel>Adres</InfoLabel>
+                <InfoValue>{selected.address}</InfoValue>
+              </InfoRow>
+              <InfoRow>
+                <IconWrap>
+                  <FaClock />
+                </IconWrap>
+                <InfoLabel>Godziny</InfoLabel>
+                <InfoValue>Pon-Pt 9:00-18:30, Sob 9:00-15:00</InfoValue>
+              </InfoRow>
+            </InfoList>
+          </Card>
+
+          <MapCard>
+            <MapFrame
+              src={selected.mapSrc}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
+              title={`Mapa lokalizacji: ${selected.label}`}
+            />
+          </MapCard>
+        </ContentGrid>
+      </PageSection>
     </PageContainer>
   );
 }

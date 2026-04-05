@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { MutatingDots } from "react-loader-spinner";
+import colors from "styles/colors";
 
 const LoaderWrapper = styled.div`
   display: flex;
@@ -16,8 +17,8 @@ const PageLoader = () => {
         visible={true}
         height="100"
         width="100"
-        color="#e74c3c"
-        secondaryColor="#111"
+        color={colors.primary}
+        secondaryColor={colors.secondaryDark}
         radius="12.5"
         ariaLabel="mutating-dots-loading"
       />
