@@ -217,6 +217,24 @@ const CloseButton = styled.button`
   cursor: pointer;
 `;
 
+const SkeletonItem = styled.div`
+  height: 92px;
+  border-radius: 12px;
+  border: 1px solid #efefef;
+  background: linear-gradient(90deg, #f3f3f3 25%, #ececec 37%, #f3f3f3 63%);
+  background-size: 400% 100%;
+  animation: skeletonShimmer 1.2s ease-in-out infinite;
+
+  @keyframes skeletonShimmer {
+    0% {
+      background-position: 100% 0;
+    }
+    100% {
+      background-position: 0 0;
+    }
+  }
+`;
+
 const CartPage = () => {
   const { cartProducts, setCartProducts, addProduct, removeProduct, clearCart } =
     useContext(CartContext);
@@ -233,7 +251,8 @@ const CartPage = () => {
     () => cartProducts.map(({ productId }) => productId),
     [cartProducts]
   );
-  const { data: products = [], isLoading, error } = useProducts(productIds);
+  const { data: products = [], isLoading, isFetching, error } = useProducts(productIds);
+  const isCartLoading = productIds.length > 0 && (isLoading || isFetching);
 
   const resolveAvailableQuantity = (product) => {
     const fromQuantity = Number(product?.quantity);
@@ -365,11 +384,17 @@ const CartPage = () => {
   }
 
   return (
-    <PageContainer loading={isLoading}>
+    <PageContainer loading={false}>
       <Layout>
         <Card>
           <Title>Koszyk</Title>
-          {!cartItems.length ? (
+          {isCartLoading ? (
+            <ItemsList>
+              {Array.from({ length: Math.min(productIds.length || 3, 4) }).map((_, index) => (
+                <SkeletonItem key={`cart-skeleton-${index}`} />
+              ))}
+            </ItemsList>
+          ) : !cartItems.length ? (
             <EmptyState>Twój koszyk jest pusty.</EmptyState>
           ) : (
             <>
