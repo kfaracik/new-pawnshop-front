@@ -16,6 +16,8 @@ const SearchWrapper = styled.div`
     max-width: 100%;
     margin: 0;
     flex-wrap: wrap;
+    padding: 0 12px;
+    box-sizing: border-box;
   }
 `;
 
@@ -64,6 +66,10 @@ const DropdownWrapper = styled.div`
   position: relative;
   display: flex;
   align-items: center;
+
+  @media screen and (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const DropdownButton = styled.button`
@@ -114,7 +120,7 @@ export default function SearchWithCategory() {
   const [searchQuery, setSearchQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
-  const { data: categoriesData } = useCategories();
+  const { data: categoriesData, isLoading: isCategoriesLoading } = useCategories();
 
   const categories = useMemo(() => {
     if (Array.isArray(categoriesData)) return categoriesData;
@@ -161,7 +167,9 @@ export default function SearchWithCategory() {
           Kategorie <IoIosArrowDown />
         </DropdownButton>
         <DropdownMenu isOpen={dropdownOpen}>
-          {categories.length > 0 ? (
+          {isCategoriesLoading ? (
+            <DropdownItem as="div">Ładowanie kategorii...</DropdownItem>
+          ) : categories.length > 0 ? (
             categories.map((category) => (
               <DropdownItem
                 key={category._id}

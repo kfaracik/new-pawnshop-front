@@ -318,6 +318,21 @@ const AuthRequiredNotice = styled.div`
   }
 `;
 
+const ReservationNotice = styled.div`
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px solid #f0d7c7;
+  border-radius: 10px;
+  background: #fff5ef;
+  color: ${colors.textSecondary};
+  font-size: 0.86rem;
+  line-height: 1.4;
+
+  strong {
+    color: ${colors.textPrimary};
+  }
+`;
+
 const BidHistory = styled.ul`
   margin: 2px 0 0;
   padding: 0;
@@ -468,6 +483,10 @@ const ProductPage = () => {
       return Math.max(0, fromStock);
     }
 
+    if (product?.availabilityStatus === "available") {
+      return Infinity;
+    }
+
     return 0;
   }, [product]);
   const currentInCart = useMemo(
@@ -478,6 +497,20 @@ const ProductPage = () => {
       }, 0),
     [cartProducts, id]
   );
+  const reservationCountdown = useMemo(() => {
+    if (!product?.reservationExpiresAt) return "";
+    const remaining = Math.max(
+      0,
+      Math.floor((new Date(product.reservationExpiresAt).getTime() - now) / 1000)
+    );
+    const days = Math.floor(remaining / 86400);
+    const hours = String(Math.floor((remaining % 86400) / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((remaining % 3600) / 60)).padStart(2, "0");
+    const seconds = String(remaining % 60).padStart(2, "0");
+    return days > 0
+      ? `${days} dni ${hours}:${minutes}:${seconds}`
+      : `${hours}:${minutes}:${seconds}`;
+  }, [product, now]);
 
   const auction = useMemo(() => {
     if (!product?.isAuction) return null;
@@ -541,10 +574,10 @@ const ProductPage = () => {
   }, [auctionId, refetchAuction, refetchBids]);
 
   useEffect(() => {
-    if (!auction) return undefined;
+    if (!auction && !product?.reservationExpiresAt) return undefined;
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
-  }, [auction]);
+  }, [auction, product?.reservationExpiresAt]);
 
   const auctionStatus = useMemo(() => {
     if (!auction) return "none";
@@ -797,18 +830,35 @@ const ProductPage = () => {
                 </AuctionLink>
               )}
               {!product.isAuction && (
-                <Button
-                  primary
-                  onClick={handleAddToCart}
-                  disabled={currentInCart >= maxProductQuantity}
-                  style={{
-                    fontSize: "1.05rem",
-                    padding: "13px 22px",
-                    alignSelf: "flex-start",
-                  }}
-                >
-                  <CartIcon /> Dodaj do koszyka
-                </Button>
+                <>
+                  <Button
+                    primary
+                    onClick={handleAddToCart}
+                    disabled={
+                      currentInCart >= maxProductQuantity ||
+                      product?.availabilityStatus === "reserved" ||
+                      product?.availabilityStatus === "unavailable"
+                    }
+                    style={{
+                      fontSize: "1.05rem",
+                      padding: "13px 22px",
+                      alignSelf: "flex-start",
+                    }}
+                  >
+                    <CartIcon /> Dodaj do koszyka
+                  </Button>
+                  {product?.availabilityStatus === "reserved" && (
+                    <ReservationNotice>
+                      <strong>Status:</strong> zarezerwowane
+                      {reservationCountdown ? ` (${reservationCountdown})` : ""}.
+                    </ReservationNotice>
+                  )}
+                  {product?.availabilityStatus === "unavailable" && (
+                    <ReservationNotice>
+                      <strong>Status:</strong> niedostępne.
+                    </ReservationNotice>
+                  )}
+                </>
               )}
             </InfoCard>
           </ColWrapper>

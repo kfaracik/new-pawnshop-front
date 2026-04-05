@@ -145,6 +145,15 @@ const AuctionTimer = styled(Typography)`
   }
 `;
 
+const AvailabilityNote = styled(Typography)`
+  && {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #ffd7d7;
+    letter-spacing: 0.2px;
+  }
+`;
+
 export const ProductItem = ({ product, searchQuery }) => {
   const { addProduct, cartProducts } = useContext(CartContext);
   const url = `/product/${product._id}`;
@@ -169,6 +178,10 @@ export const ProductItem = ({ product, searchQuery }) => {
       return Math.max(0, fromStock);
     }
 
+    if (product?.availabilityStatus === "available") {
+      return Infinity;
+    }
+
     return 0;
   };
 
@@ -178,6 +191,19 @@ export const ProductItem = ({ product, searchQuery }) => {
     return acc + Number(item.quantity || 0);
   }, 0);
   const isOutOfStock = currentInCart >= maxQuantity;
+  const availabilityStatus = product?.availabilityStatus || "available";
+  const reservationLabel = (() => {
+    if (!product?.reservationExpiresAt) return "";
+    const remaining = Math.max(
+      0,
+      Math.floor((new Date(product.reservationExpiresAt).getTime() - Date.now()) / 1000)
+    );
+    const h = String(Math.floor((remaining % 86400) / 3600)).padStart(2, "0");
+    const m = String(Math.floor((remaining % 3600) / 60)).padStart(2, "0");
+    const s = String(remaining % 60).padStart(2, "0");
+    const d = Math.floor(remaining / 86400);
+    return d > 0 ? `${d} dni ${h}:${m}:${s}` : `${h}:${m}:${s}`;
+  })();
 
   const highlightQuery = (text, query) => {
     if (!query) return text;
@@ -222,7 +248,7 @@ export const ProductItem = ({ product, searchQuery }) => {
             </ProductTitle>
             <CartButton
               aria-label="Dodaj do koszyka"
-              disabled={isOutOfStock}
+              disabled={isOutOfStock || availabilityStatus !== "available"}
               onClick={(e) => {
                 e.preventDefault();
                 addProduct(product._id, maxQuantity);
@@ -238,6 +264,14 @@ export const ProductItem = ({ product, searchQuery }) => {
             <AuctionTimer variant="body2">
               Koniec za: {product.auctionTimerLabel}
             </AuctionTimer>
+          )}
+          {availabilityStatus === "reserved" && (
+            <AvailabilityNote variant="body2">
+              Zarezerwowane{reservationLabel ? ` (${reservationLabel})` : ""}
+            </AvailabilityNote>
+          )}
+          {availabilityStatus === "unavailable" && (
+            <AvailabilityNote variant="body2">Niedostępne</AvailabilityNote>
           )}
         </StyledImageListItemBar>
       </CardContainer>

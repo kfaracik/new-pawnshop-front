@@ -218,7 +218,8 @@ const CloseButton = styled.button`
 `;
 
 const CartPage = () => {
-  const { cartProducts, addProduct, removeProduct, clearCart } = useContext(CartContext);
+  const { cartProducts, setCartProducts, addProduct, removeProduct, clearCart } =
+    useContext(CartContext);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
@@ -253,6 +254,10 @@ const CartPage = () => {
     const fromStock = Number(product?.stock);
     if (Number.isFinite(fromStock)) {
       return Math.max(0, fromStock);
+    }
+
+    if (product?.availabilityStatus === "available") {
+      return Infinity;
     }
 
     return 0;
@@ -314,6 +319,24 @@ const CartPage = () => {
       clearCart();
       setIsSuccess(true);
     } catch (err) {
+      const unavailableProductIds = Array.isArray(
+        err?.response?.data?.unavailableProductIds
+      )
+        ? err.response.data.unavailableProductIds.map((id) => String(id))
+        : [];
+
+      if (err?.response?.status === 409 && unavailableProductIds.length > 0) {
+        setCartProducts((prev) =>
+          prev.filter(
+            (item) => !unavailableProductIds.includes(String(item.productId))
+          )
+        );
+        setFormError(
+          "Niektóre produkty są już niedostępne lub zarezerwowane. Zostały automatycznie usunięte z koszyka."
+        );
+        return;
+      }
+
       setFormError(
         err?.response?.data?.message ||
           err?.response?.data?.error ||

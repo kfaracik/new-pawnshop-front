@@ -138,6 +138,31 @@ const OrderMeta = styled.div`
   }
 `;
 
+const ORDER_STATUS_LABELS = {
+  pending_payment: "Oczekuje na płatność",
+  paid: "Opłacone",
+  completed: "Zrealizowane",
+  canceled: "Anulowane",
+  failed: "Nieudane",
+};
+
+const PAYMENT_STATUS_LABELS = {
+  unpaid: "Nieopłacone",
+  pending: "W trakcie",
+  paid: "Opłacone",
+  failed: "Nieudane",
+  canceled: "Anulowane",
+  refunded: "Zwrócone",
+};
+
+const OrderProducts = styled.div`
+  margin-top: 8px;
+  font-size: 0.88rem;
+  color: ${colors.textSecondary};
+  display: grid;
+  gap: 4px;
+`;
+
 const AccountPage = () => {
   const { data, error, isLoading } = useUserData();
   const { data: myOrders = [] } = useMyOrders();
@@ -200,15 +225,28 @@ const AccountPage = () => {
                         <strong>Data:</strong> {new Date(order.createdAt).toLocaleString()}
                       </span>
                       <span>
-                        <strong>Status:</strong> {order.orderStatus || "pending_payment"}
+                        <strong>Status:</strong>{" "}
+                        {ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus || "-"}
                       </span>
                       <span>
-                        <strong>Płatność:</strong> {order.paymentStatus || "unpaid"}
+                        <strong>Płatność:</strong>{" "}
+                        {PAYMENT_STATUS_LABELS[order.paymentStatus] || order.paymentStatus || "-"}
                       </span>
                       <span>
                         <strong>Suma:</strong> {Number(order.totalAmount || 0).toFixed(2)} PLN
                       </span>
                     </OrderMeta>
+                    <OrderProducts>
+                      {(order.products || []).length > 0 ? (
+                        (order.products || []).map((product, index) => (
+                          <span key={`${order._id}-product-${index}`}>
+                            {product.name} x{product.quantity}
+                          </span>
+                        ))
+                      ) : (
+                        <span>Brak pozycji produktów.</span>
+                      )}
+                    </OrderProducts>
                   </OrderItem>
                 ))
               )}

@@ -6,6 +6,7 @@ import { FaBars, FaTimes } from "react-icons/fa";
 import { FiShoppingCart } from "react-icons/fi";
 import { CartContext } from "../context/CartContext";
 import colors from "styles/colors";
+import { useCategories } from "services/api/categoryApi";
 
 const NavLink = styled(Link)`
   color: #d0d0d0;
@@ -143,10 +144,49 @@ const HeaderActions = styled.div`
   gap: 10px;
 `;
 
+const MobileCategorySection = styled.div`
+  display: none;
+
+  @media screen and (max-width: 768px) {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    border-top: 1px solid #2b2b2b;
+    padding-top: 10px;
+  }
+`;
+
+const MobileCategoryTitle = styled.p`
+  margin: 0 0 8px;
+  padding: 0 15px;
+  color: #a7a7a7;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+`;
+
+const MobileCategoryLink = styled(Link)`
+  display: block;
+  color: #d0d0d0;
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 10px 15px;
+
+  &:hover {
+    color: ${colors.grayLight};
+  }
+`;
+
 export default function Menu() {
   const router = useRouter();
   const [mobileNavActive, setMobileNavActive] = useState(false);
   const { getCartItemCount } = useContext(CartContext);
+  const { data: categoriesData } = useCategories();
+  const categories = Array.isArray(categoriesData)
+    ? categoriesData
+    : Array.isArray(categoriesData?.categories)
+      ? categoriesData.categories
+      : [];
 
   const cartItemCount = getCartItemCount();
 
@@ -198,6 +238,18 @@ export default function Menu() {
           >
             Konto
           </NavLink>
+          <MobileCategorySection>
+            <MobileCategoryTitle>Kategorie</MobileCategoryTitle>
+            {categories.map((category) => (
+              <MobileCategoryLink
+                key={category._id}
+                href={`/products?category=${encodeURIComponent(category._id)}&page=1`}
+                onClick={closeMobileNav}
+              >
+                {category.name}
+              </MobileCategoryLink>
+            ))}
+          </MobileCategorySection>
         </StyledNav>
         <Link href="/cart">
           <CartIconWrapper>
