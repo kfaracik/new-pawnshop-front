@@ -21,8 +21,16 @@ const SearchWrapper = styled.div`
   }
 `;
 
+const SearchForm = styled.form`
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+`;
+
 const SearchInput = styled.input`
   flex: 1;
+  min-width: 0;
   padding: 12px 15px;
   background-color: #1a1a1a;
   border: 1px solid #2f2f2f;
@@ -40,6 +48,7 @@ const SearchInput = styled.input`
   }
   @media screen and (max-width: 768px) {
     font-size: 1rem;
+    width: 100%;
   }
 `;
 
@@ -150,10 +159,7 @@ export default function SearchWithCategory() {
 
   return (
     <SearchWrapper>
-      <form
-        onSubmit={handleSearchSubmit}
-        style={{ display: "flex", flex: 1 }}
-      >
+      <SearchForm onSubmit={handleSearchSubmit}>
         <SearchInput
           type="text"
           placeholder="Wyszukaj produkty..."
@@ -161,7 +167,7 @@ export default function SearchWithCategory() {
           onChange={handleSearchChange}
         />
         <SearchButton>SZUKAJ</SearchButton>
-      </form>
+      </SearchForm>
       <DropdownWrapper>
         <DropdownButton onClick={() => setDropdownOpen(!dropdownOpen)}>
           Kategorie <IoIosArrowDown />
