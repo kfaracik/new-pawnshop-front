@@ -1,4 +1,5 @@
 import React, { useContext, useMemo, useState } from "react";
+import { createOrder } from "services/api/orderApi";
 import styled from "styled-components";
 import PageContainer from "components/PageContainer";
 import Input from "components/Input";
@@ -217,7 +218,7 @@ const CloseButton = styled.button`
 `;
 
 const CartPage = () => {
-  const { cartProducts, addProduct, removeProduct } = useContext(CartContext);
+  const { cartProducts, addProduct, removeProduct, clearCart } = useContext(CartContext);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
@@ -241,12 +242,14 @@ const CartPage = () => {
       product?.properties?.quantity,
     ];
 
-    const firstNumeric = candidates.find((value) =>
-      Number.isFinite(Number(value))
-    );
+    const numericCandidates = candidates
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+    const positiveValue = numericCandidates.find((value) => value > 0);
 
-    if (firstNumeric === undefined) return Infinity;
-    return Math.max(0, Number(firstNumeric));
+    if (positiveValue !== undefined) return positiveValue;
+    if (numericCandidates.length > 0) return 0;
+    return Infinity;
   };
 
   const cartItems = useMemo(
@@ -277,7 +280,7 @@ const CartPage = () => {
     [cartItems]
   );
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError("");
 
@@ -286,7 +289,32 @@ const CartPage = () => {
       return;
     }
 
-    setIsSuccess(true);
+    try {
+      const productsPayload = cartItems.map((item) => ({
+        productId: item._id,
+        quantity: item.cartQuantity,
+      }));
+
+      await createOrder({
+        name,
+        email,
+        city,
+        postalCode,
+        streetAddress,
+        country,
+        products: productsPayload,
+      });
+
+      clearCart();
+      setIsSuccess(true);
+    } catch (err) {
+      setFormError(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          err?.message ||
+          "Nie udało się utworzyć zamówienia."
+      );
+    }
   };
 
   const onCloseConfirmOrderPress = () => setIsSuccess(false);

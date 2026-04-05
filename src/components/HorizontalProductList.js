@@ -70,18 +70,7 @@ const HorizontalProductList = ({
   loading,
   searchQuery = "",
 }) => {
-  if (!products || products.length === 0) {
-    return (
-      <Container>
-        <TitleContainer>
-          <Title>{title}</Title>
-        </TitleContainer>
-        <div style={{ padding: "6px 16px 16px" }}>
-          <p>Nie mamy aktualnie dostępnych produktów.</p>
-        </div>
-      </Container>
-    );
-  }
+  const normalizedProducts = Array.isArray(products) ? products : [];
 
   return (
     <Container>
@@ -96,9 +85,13 @@ const HorizontalProductList = ({
             </ItemSlot>
           ))}
         </HorizontalTrack>
+      ) : normalizedProducts.length === 0 ? (
+        <div style={{ padding: "6px 16px 16px" }}>
+          <p>Nie mamy aktualnie dostępnych produktów.</p>
+        </div>
       ) : (
         <HorizontalTrack>
-          {products.map((product) => (
+          {normalizedProducts.map((product) => (
             <ItemSlot key={product._id}>
               <ProductItem product={product} searchQuery={searchQuery} />
             </ItemSlot>

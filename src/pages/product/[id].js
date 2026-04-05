@@ -284,6 +284,19 @@ const BidHistoryItem = styled.li`
   gap: 8px;
 `;
 
+const LegalNotice = styled.div`
+  margin-top: 6px;
+  border-top: 1px solid #ece6d2;
+  padding-top: 10px;
+  color: ${colors.textSecondary};
+  font-size: 0.82rem;
+  line-height: 1.45;
+
+  strong {
+    color: ${colors.textPrimary};
+  }
+`;
+
 const slideIn = keyframes`
   from {
     transform: translateY(20px);
@@ -356,16 +369,20 @@ const ProductPage = () => {
   const { query, push } = useRouter();
   const { id } = query;
   const { data: product, isLoading } = useProduct(id);
-  const { data: auctionsData = [] } = useAuctions({
+  const { data: auctionsData } = useAuctions({
     productId: id,
     enabled: !!id,
   });
-  const auctionId = auctionsData?.[0]?._id || auctionsData?.[0]?.id || null;
+  const auctionsList = useMemo(
+    () => (Array.isArray(auctionsData) ? auctionsData : []),
+    [auctionsData]
+  );
+  const auctionId = auctionsList?.[0]?._id || auctionsList?.[0]?.id || null;
   const { data: auctionDetail, refetch: refetchAuction } = useAuction(
     auctionId,
     !!auctionId
   );
-  const { data: auctionBids = [], refetch: refetchBids } = useAuctionBids(
+  const { data: auctionBids, refetch: refetchBids } = useAuctionBids(
     auctionId,
     !!auctionId
   );
@@ -378,11 +395,35 @@ const ProductPage = () => {
   const [isBidding, setIsBidding] = useState(false);
   const [liveAuction, setLiveAuction] = useState(null);
   const [liveBids, setLiveBids] = useState([]);
-  const { addProduct } = useContext(CartContext);
+  const { addProduct, cartProducts } = useContext(CartContext);
+  const maxProductQuantity = useMemo(() => {
+    const candidates = [
+      product?.availableQuantity,
+      product?.quantity,
+      product?.stock,
+      product?.properties?.quantity,
+    ];
+    const numericCandidates = candidates
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+
+    const positiveValue = numericCandidates.find((value) => value > 0);
+    if (positiveValue !== undefined) return positiveValue;
+    if (numericCandidates.length > 0) return 0;
+    return Infinity;
+  }, [product]);
+  const currentInCart = useMemo(
+    () =>
+      (cartProducts || []).reduce((acc, item) => {
+        if (String(item.productId) !== String(id)) return acc;
+        return acc + Number(item.quantity || 0);
+      }, 0),
+    [cartProducts, id]
+  );
 
   const auction = useMemo(() => {
     if (!product?.isAuction) return null;
-    const base = liveAuction || auctionDetail || auctionsData?.[0] || {};
+    const base = liveAuction || auctionDetail || auctionsList?.[0] || {};
     return {
       id: base._id || base.id || product.auctionId || null,
       startAt: base.startAt || product.auctionStartAt || null,
@@ -399,14 +440,16 @@ const ProductPage = () => {
           ? auctionBids
           : [],
     };
-  }, [auctionDetail, auctionBids, auctionsData, liveAuction, liveBids, product]);
+  }, [auctionDetail, auctionBids, auctionsList, liveAuction, liveBids, product]);
 
   useEffect(() => {
-    setLiveAuction(auctionDetail || auctionsData?.[0] || null);
-  }, [auctionDetail, auctionsData]);
+    setLiveAuction(auctionDetail || auctionsList?.[0] || null);
+  }, [auctionDetail, auctionsList]);
 
   useEffect(() => {
-    setLiveBids(Array.isArray(auctionBids) ? auctionBids : []);
+    if (Array.isArray(auctionBids)) {
+      setLiveBids(auctionBids);
+    }
   }, [auctionBids]);
 
   useEffect(() => {
@@ -478,8 +521,9 @@ const ProductPage = () => {
   }, [auction, auctionStatus, now]);
 
   const handleAddToCart = () => {
+    if (currentInCart >= maxProductQuantity) return;
     setIsModalOpen(true);
-    addProduct(id);
+    addProduct(id, maxProductQuantity);
   };
 
   const closeModal = () => setIsModalOpen(false);
@@ -652,6 +696,9 @@ const ProductPage = () => {
                       </BidHistory>
                     </>
                   )}
+                  <LegalNotice>
+                    <strong>Opis prawny licytacji:</strong> sprzedaż przedmiotu zabezpieczenia lombardowego odbywa się zgodnie z ustawą z dnia 14 kwietnia 2023 r. o konsumenckiej pożyczce lombardowej (tekst jedn. Dz.U. 2024 poz. 1111), w tym art. 25-27, art. 34 oraz art. 47. Co do zasady sprzedaż prowadzona jest w formie aukcji elektronicznej kierowanej do nieograniczonego kręgu podmiotów (z wyjątkiem ustawowego progu 500 zł). Nadwyżka uzyskana ze sprzedaży ponad kwotę do spłaty podlega zwrotowi konsumentowi na zasadach ustawowych.
+                  </LegalNotice>
                 </AuctionPanel>
               )}
               {product.auctionLink && (
@@ -667,6 +714,7 @@ const ProductPage = () => {
                 <Button
                   primary
                   onClick={handleAddToCart}
+                  disabled={currentInCart >= maxProductQuantity}
                   style={{
                     fontSize: "1.05rem",
                     padding: "13px 22px",

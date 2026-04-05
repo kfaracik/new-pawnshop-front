@@ -137,8 +137,31 @@ const PriceText = styled(Typography)`
 `;
 
 export const ProductItem = ({ product, searchQuery }) => {
-  const { addProduct } = useContext(CartContext);
+  const { addProduct, cartProducts } = useContext(CartContext);
   const url = `/product/${product._id}`;
+  const resolveAvailableQuantity = () => {
+    const candidates = [
+      product?.availableQuantity,
+      product?.quantity,
+      product?.stock,
+      product?.properties?.quantity,
+    ];
+    const numericCandidates = candidates
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+
+    const positiveValue = numericCandidates.find((value) => value > 0);
+    if (positiveValue !== undefined) return positiveValue;
+    if (numericCandidates.length > 0) return 0;
+    return Infinity;
+  };
+
+  const maxQuantity = resolveAvailableQuantity();
+  const currentInCart = (cartProducts || []).reduce((acc, item) => {
+    if (String(item.productId) !== String(product._id)) return acc;
+    return acc + Number(item.quantity || 0);
+  }, 0);
+  const isOutOfStock = currentInCart >= maxQuantity;
 
   const highlightQuery = (text, query) => {
     if (!query) return text;
@@ -183,9 +206,10 @@ export const ProductItem = ({ product, searchQuery }) => {
             </ProductTitle>
             <CartButton
               aria-label="Dodaj do koszyka"
+              disabled={isOutOfStock}
               onClick={(e) => {
                 e.preventDefault();
-                addProduct(product._id);
+                addProduct(product._id, maxQuantity);
               }}
             >
               <FiShoppingCart size={18} />
