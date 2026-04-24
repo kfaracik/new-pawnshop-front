@@ -8,6 +8,9 @@ import { CartContext } from "../context/CartContext";
 import colors from "styles/colors";
 import { useCategories } from "services/api/categoryApi";
 
+const FACEBOOK_AUCTIONS_URL =
+  process.env.NEXT_PUBLIC_FACEBOOK_AUCTIONS_URL || "https://www.facebook.com/";
+
 const NavLink = styled(Link)`
   color: #d0d0d0;
   text-decoration: none;
@@ -21,6 +24,27 @@ const NavLink = styled(Link)`
   &:hover {
     color: ${colors.grayLight};
   }
+  @media screen and (max-width: 768px) {
+    font-size: 1.2rem;
+    padding: 15px;
+  }
+`;
+
+const ExternalNavLink = styled.a`
+  color: #d0d0d0;
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding: 8px 10px;
+  text-transform: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    color: ${colors.grayLight};
+    border-bottom-color: ${colors.primary};
+  }
+
   @media screen and (max-width: 768px) {
     font-size: 1.2rem;
     padding: 15px;
@@ -231,6 +255,14 @@ export default function Menu() {
           >
             Kontakt
           </NavLink>
+          <ExternalNavLink
+            href={FACEBOOK_AUCTIONS_URL}
+            target="_blank"
+            rel="noreferrer"
+            onClick={closeMobileNav}
+          >
+            Licytacje FB
+          </ExternalNavLink>
           <NavLink
             href="/account"
             $active={router.pathname === "/account"}
