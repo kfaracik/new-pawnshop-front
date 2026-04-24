@@ -1,6 +1,7 @@
 import React, { useContext, useMemo, useState } from "react";
 import { createOrder } from "services/api/orderApi";
 import styled from "styled-components";
+import { useQueryClient } from "@tanstack/react-query";
 import PageContainer from "components/PageContainer";
 import Input from "components/Input";
 import { CartContext } from "context/CartContext";
@@ -246,6 +247,8 @@ const CartPage = () => {
   const [country, setCountry] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [formError, setFormError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
   const productIds = useMemo(
     () => cartProducts.map(({ productId }) => productId),
@@ -310,6 +313,14 @@ const CartPage = () => {
     [cartItems]
   );
 
+  const missingCartProductIds = useMemo(() => {
+    const loadedIds = new Set(products.map((product) => String(product._id)));
+
+    return cartProducts
+      .map((item) => String(item.productId))
+      .filter((productId) => !loadedIds.has(productId));
+  }, [products, cartProducts]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError("");
@@ -319,7 +330,36 @@ const CartPage = () => {
       return;
     }
 
+    if (!cartItems.length) {
+      setFormError("Koszyk jest pusty.");
+      return;
+    }
+
+    if (missingCartProductIds.length > 0) {
+      setCartProducts((prev) =>
+        prev.filter(
+          (item) => !missingCartProductIds.includes(String(item.productId))
+        )
+      );
+      setFormError(
+        "Część produktów nie jest już dostępna. Zostały usunięte z koszyka."
+      );
+      return;
+    }
+
+    const unavailableItems = cartItems.filter(
+      (item) => item.availableQuantity < item.cartQuantity
+    );
+
+    if (unavailableItems.length > 0) {
+      setFormError(
+        "Co najmniej jeden produkt ma już zbyt małą dostępność. Popraw koszyk i spróbuj ponownie."
+      );
+      return;
+    }
+
     try {
+      setIsSubmitting(true);
       const productsPayload = cartItems.map((item) => ({
         productId: item._id,
         quantity: item.cartQuantity,
@@ -336,6 +376,7 @@ const CartPage = () => {
       });
 
       clearCart();
+      queryClient.invalidateQueries({ queryKey: ["myOrders"] });
       setIsSuccess(true);
     } catch (err) {
       const unavailableProductIds = Array.isArray(
@@ -362,6 +403,8 @@ const CartPage = () => {
           err?.message ||
           "Nie udało się utworzyć zamówienia."
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -491,7 +534,9 @@ const CartPage = () => {
                 onChange={(e) => setCountry(e.target.value)}
               />
               {formError && <Feedback>{formError}</Feedback>}
-              <PrimaryButton type="submit">Przejdź do płatności</PrimaryButton>
+              <PrimaryButton type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Tworzenie zamówienia..." : "Przejdź do płatności"}
+              </PrimaryButton>
             </Form>
           </SummaryCard>
         )}
