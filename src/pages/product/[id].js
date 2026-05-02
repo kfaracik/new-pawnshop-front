@@ -4,11 +4,15 @@ import styled, { keyframes } from "styled-components";
 import Modal from "react-modal";
 import Link from "next/link";
 import { Chip } from "@mui/material";
-import { MdChevronLeft, MdChevronRight, MdClose } from "react-icons/md";
 import PageContainer from "components/PageContainer";
+import SeoHead from "components/SeoHead";
 import Title from "components/Title";
-import Button from "components/Button";
+import Button, { buttonBaseStyle, buttonSecondaryStyle } from "components/Button";
 import CartIcon from "assets/icons/CartIcon";
+import ProductAuctionPanel from "features/product/components/AuctionPanel";
+import ProductGallery from "features/product/components/ProductGallery";
+import { sanitizeHtml } from "features/product/lib/sanitizeHtml";
+import { getProductSeoData } from "features/product/lib/seo";
 import { useProduct } from "services/api/useProductApi";
 import {
   getAuctionStreamUrl,
@@ -39,6 +43,10 @@ const GalleryCard = styled.section`
   border-radius: 14px;
   padding: 14px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  @media screen and (max-width: 600px) {
+    padding: 10px;
+  }
 `;
 
 const InfoCard = styled.section`
@@ -69,6 +77,10 @@ const MainImage = styled.img`
   object-fit: cover;
   border-radius: 10px;
   border: 1px solid #efefef;
+
+  @media screen and (max-width: 600px) {
+    aspect-ratio: 1 / 1;
+  }
 `;
 
 const ThumbGrid = styled.div`
@@ -87,7 +99,7 @@ const ThumbButton = styled.button`
   cursor: pointer;
   line-height: 0;
 
-  img {
+  .thumb-image {
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
@@ -107,6 +119,16 @@ const Price = styled.span`
   color: ${colors.primaryDark};
   font-weight: 700;
   letter-spacing: 0.3px;
+`;
+
+const ActionGroup = styled.div`
+  display: grid;
+  gap: 10px;
+  width: 100%;
+
+  @media screen and (min-width: 601px) {
+    justify-items: start;
+  }
 `;
 
 const ImagesWrapper = styled.div`
@@ -281,13 +303,10 @@ const BidInput = styled.input`
 `;
 
 const BidButton = styled.button`
-  border: 1px solid ${colors.primaryDark};
+  ${buttonBaseStyle}
   background: ${colors.primary};
+  border-color: ${colors.primaryDark};
   color: ${colors.primaryContrastText};
-  border-radius: 8px;
-  font-weight: 700;
-  padding: 10px 14px;
-  cursor: pointer;
 
   @media (max-width: 600px) {
     width: 100%;
@@ -327,6 +346,20 @@ const ReservationNotice = styled.div`
   color: ${colors.textSecondary};
   font-size: 0.86rem;
   line-height: 1.4;
+
+  strong {
+    color: ${colors.textPrimary};
+  }
+`;
+
+const AvailabilityDetails = styled.div`
+  padding: 12px;
+  border: 1px solid #ece6d2;
+  border-radius: 12px;
+  background: #fffdf7;
+  color: ${colors.textSecondary};
+  font-size: 0.9rem;
+  line-height: 1.5;
 
   strong {
     color: ${colors.textPrimary};
@@ -391,20 +424,15 @@ const ModalContent = styled.div`
   }
 
   button {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 1rem;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+    ${buttonBaseStyle}
+    ${buttonSecondaryStyle}
     margin: 10px;
+  }
 
-    &:hover {
-      background-color: #e64a19;
-    }
+  button:first-of-type {
+    background: ${colors.primary};
+    border-color: ${colors.primaryDark};
+    color: ${colors.primaryContrastText};
   }
 
   @media (max-width: 600px) {
@@ -430,10 +458,14 @@ const StyledTitle = styled(Title)`
   line-height: 1.2;
 `;
 
-const ProductPage = () => {
+const ProductPage = ({ initialProduct = null }) => {
   const { query, push } = useRouter();
   const { id } = query;
-  const { data: product, isLoading } = useProduct(id);
+  const { data: product, isLoading } = useProduct(id, initialProduct);
+  const safeDescription = useMemo(
+    () => sanitizeHtml(product?.description),
+    [product?.description]
+  );
   const { data: auctionsData } = useAuctions({
     productId: id,
     enabled: !!id,
@@ -462,6 +494,12 @@ const ProductPage = () => {
   const [liveBids, setLiveBids] = useState([]);
   const { addProduct, cartProducts } = useContext(CartContext);
   const isLoggedIn = Boolean(getAuthToken());
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      Modal.setAppElement("#__next");
+    }
+  }, []);
   const maxProductQuantity = useMemo(() => {
     const fromQuantity = Number(product?.quantity);
     if (Number.isFinite(fromQuantity)) {
@@ -697,32 +735,48 @@ const ProductPage = () => {
     }
   };
 
+  const { seoTitle, seoDescription, canonicalPath, productSchema } =
+    getProductSeoData(product, id);
+  const productAvailabilityLabel =
+    product?.availabilityMode === "online_only"
+      ? "Produkt dostępny wyłącznie online."
+      : Array.isArray(product?.availableLocations) && product.availableLocations.length > 0
+        ? `Produkt dostępny w punktach: ${product.availableLocations.join(", ")}.`
+        : "Dostępność punktowa potwierdzana indywidualnie przez obsługę.";
+
   return (
     <PageContainer loading={isLoading}>
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        path={canonicalPath}
+        image={product?.images?.[0]}
+        schema={productSchema}
+      />
       {!!product ? (
         <>
           <ColWrapper>
             <ImagesWrapper>
-              <GalleryCard>
-                <MainImage
-                  src={product.images[selectedImageIndex]}
-                  alt={`${product.title} - ${selectedImageIndex + 1}`}
-                  onClick={() => handleImageClick(selectedImageIndex)}
-                />
-                <ThumbGrid>
-                  {product.images.map((image, index) => (
-                    <ThumbButton
-                      key={index}
-                      type="button"
-                      active={selectedImageIndex === index}
-                      onClick={() => setSelectedImageIndex(index)}
-                      aria-label={`Pokaż zdjęcie ${index + 1}`}
-                    >
-                      <img src={image} alt={`${product.title} miniatura ${index + 1}`} />
-                    </ThumbButton>
-                  ))}
-                </ThumbGrid>
-              </GalleryCard>
+              <ProductGallery
+                product={product}
+                selectedImageIndex={selectedImageIndex}
+                setSelectedImageIndex={setSelectedImageIndex}
+                isImageModalOpen={isImageModalOpen}
+                handleImageClick={handleImageClick}
+                closeImageModal={closeImageModal}
+                showPrevImage={showPrevImage}
+                showNextImage={showNextImage}
+                galleryStyles={{
+                  GalleryCard,
+                  MainImage,
+                  ThumbGrid,
+                  ThumbButton,
+                  FullscreenImageContainer,
+                  FullscreenImage,
+                  NavigationButton,
+                  CloseButton,
+                }}
+              />
             </ImagesWrapper>
             <InfoCard>
               <MetaRow>
@@ -742,83 +796,35 @@ const ProductPage = () => {
               </MetaRow>
               <Price>{product.price.toFixed(2)} zł</Price>
               <Description
-                dangerouslySetInnerHTML={{ __html: product.description }}
+                dangerouslySetInnerHTML={{ __html: safeDescription }}
               />
+              <AvailabilityDetails>
+                <strong>Dostępność:</strong> {productAvailabilityLabel}
+              </AvailabilityDetails>
               {product.isAuction && auction && (
-                <AuctionPanel>
-                  <AuctionRow>
-                    <span>Status</span>
-                    <strong>
-                      {auctionStatus === "upcoming"
-                        ? "Nierozpoczęta"
-                        : auctionStatus === "active"
-                          ? "Aktywna"
-                          : "Zakończona"}
-                    </strong>
-                  </AuctionRow>
-                  {!!countdownLabel && (
-                    <AuctionRow>
-                      <span>
-                        {auctionStatus === "upcoming"
-                          ? "Start za"
-                          : "Koniec za"}
-                      </span>
-                      <strong>{countdownLabel}</strong>
-                    </AuctionRow>
-                  )}
-                  <AuctionRow>
-                    <span>Aktualna oferta</span>
-                    <strong>{auction.currentPrice.toFixed(2)} zł</strong>
-                  </AuctionRow>
-                  <AuctionRow>
-                    <span>Przebicie min.</span>
-                    <strong>{auction.minIncrement.toFixed(2)} zł</strong>
-                  </AuctionRow>
-                  {auctionStatus === "active" && auction.id && isLoggedIn && (
-                    <>
-                      <BidForm onSubmit={handlePlaceBid}>
-                        <BidInput
-                          type="number"
-                          inputMode="decimal"
-                          step="0.01"
-                          min={(auction.currentPrice + auction.minIncrement).toFixed(2)}
-                          placeholder="Twoja oferta (zł)"
-                          value={bidAmount}
-                          onChange={(e) => setBidAmount(e.target.value)}
-                        />
-                        <BidButton type="submit" disabled={isBidding}>
-                          {isBidding ? "Składanie..." : "Licytuj"}
-                        </BidButton>
-                      </BidForm>
-                      {bidStatus.error && <BidHint error>{bidStatus.error}</BidHint>}
-                      {bidStatus.info && <BidHint>{bidStatus.info}</BidHint>}
-                    </>
-                  )}
-                  {auctionStatus === "active" && auction.id && !isLoggedIn && (
-                    <AuthRequiredNotice>
-                      W licytacji mogą brać udział wyłącznie zalogowani użytkownicy.{" "}
-                      <Link href="/account">Zaloguj się</Link>, aby złożyć ofertę.
-                    </AuthRequiredNotice>
-                  )}
-                  {!!auction.bids?.length && (
-                    <>
-                      <AuctionRow>
-                        <span>Ostatnie oferty</span>
-                      </AuctionRow>
-                      <BidHistory>
-                        {auction.bids.slice(0, 5).map((bid, index) => (
-                          <BidHistoryItem key={bid._id || bid.id || index}>
-                            <span>{new Date(bid.createdAt || Date.now()).toLocaleTimeString()}</span>
-                            <strong>{Number(bid.amount || 0).toFixed(2)} zł</strong>
-                          </BidHistoryItem>
-                        ))}
-                      </BidHistory>
-                    </>
-                  )}
-                  <LegalNotice>
-                    <strong>Opis prawny licytacji:</strong> sprzedaż przedmiotu zabezpieczenia lombardowego odbywa się zgodnie z ustawą z dnia 14 kwietnia 2023 r. o konsumenckiej pożyczce lombardowej (tekst jedn. Dz.U. 2024 poz. 1111), w tym art. 25-27, art. 34 oraz art. 47. Co do zasady sprzedaż prowadzona jest w formie aukcji elektronicznej kierowanej do nieograniczonego kręgu podmiotów (z wyjątkiem ustawowego progu 500 zł). Nadwyżka uzyskana ze sprzedaży ponad kwotę do spłaty podlega zwrotowi konsumentowi na zasadach ustawowych.
-                  </LegalNotice>
-                </AuctionPanel>
+                <ProductAuctionPanel
+                  auction={auction}
+                  auctionStatus={auctionStatus}
+                  countdownLabel={countdownLabel}
+                  isLoggedIn={isLoggedIn}
+                  bidAmount={bidAmount}
+                  setBidAmount={setBidAmount}
+                  isBidding={isBidding}
+                  bidStatus={bidStatus}
+                  handlePlaceBid={handlePlaceBid}
+                  auctionStyles={{
+                    AuctionPanel,
+                    AuctionRow,
+                    BidForm,
+                    BidInput,
+                    BidButton,
+                    BidHint,
+                    AuthRequiredNotice,
+                    BidHistory,
+                    BidHistoryItem,
+                    LegalNotice,
+                  }}
+                />
               )}
               {product.auctionLink && (
                 <AuctionLink
@@ -830,7 +836,7 @@ const ProductPage = () => {
                 </AuctionLink>
               )}
               {!product.isAuction && (
-                <>
+                <ActionGroup>
                   <Button
                     primary
                     onClick={handleAddToCart}
@@ -842,7 +848,9 @@ const ProductPage = () => {
                     style={{
                       fontSize: "1.05rem",
                       padding: "13px 22px",
-                      alignSelf: "flex-start",
+                      alignSelf: "stretch",
+                      justifyContent: "center",
+                      width: "100%",
                     }}
                   >
                     <CartIcon /> Dodaj do koszyka
@@ -858,7 +866,7 @@ const ProductPage = () => {
                       <strong>Status:</strong> niedostępne.
                     </ReservationNotice>
                   )}
-                </>
+                </ActionGroup>
               )}
             </InfoCard>
           </ColWrapper>
@@ -890,59 +898,10 @@ const ProductPage = () => {
             <ModalContent>
               <h2>Dodano do koszyka!</h2>
               <p>{product.title} został pomyślnie dodany do Twojego koszyka.</p>
-              <button onClick={goToCart}>Przejdź do koszyka</button>
-              <button onClick={closeModal}>Kontynuuj zakupy</button>
+              <button type="button" onClick={goToCart}>Przejdź do koszyka</button>
+              <button type="button" onClick={closeModal}>Kontynuuj zakupy</button>
             </ModalContent>
           </Modal>
-          {isImageModalOpen && (
-            <Modal
-              isOpen={isImageModalOpen}
-              onRequestClose={closeImageModal}
-              contentLabel="Fullscreen Image Modal"
-              style={{
-                overlay: {
-                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                },
-                content: {
-                  backgroundColor: "transparent",
-                  border: "none",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                },
-              }}
-            >
-              <FullscreenImageContainer>
-                <NavigationButton
-                  side="left"
-                  type="button"
-                  onClick={showPrevImage}
-                  aria-label="Poprzednie zdjęcie"
-                >
-                  <MdChevronLeft />
-                </NavigationButton>
-                <FullscreenImage
-                  src={product.images[selectedImageIndex]}
-                  alt={`${product.title} - ${selectedImageIndex + 1}`}
-                />
-                <NavigationButton
-                  side="right"
-                  type="button"
-                  onClick={showNextImage}
-                  aria-label="Następne zdjęcie"
-                >
-                  <MdChevronRight />
-                </NavigationButton>
-                <CloseButton
-                  type="button"
-                  onClick={closeImageModal}
-                  aria-label="Zamknij podgląd zdjęcia"
-                >
-                  <MdClose />
-                </CloseButton>
-              </FullscreenImageContainer>
-            </Modal>
-          )}
         </>
       ) : (
         <>Ładowanie danych produktu...</>
@@ -952,3 +911,35 @@ const ProductPage = () => {
 };
 
 export default ProductPage;
+
+export async function getServerSideProps(context) {
+  const { id } = context.params || {};
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  if (!id || !apiBaseUrl) {
+    return { props: { initialProduct: null } };
+  }
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl.replace(/\/$/, "")}/products/${encodeURIComponent(id)}`
+    );
+
+    if (!response.ok) {
+      return { props: { initialProduct: null } };
+    }
+
+    const initialProduct = await response.json();
+    return {
+      props: {
+        initialProduct,
+      },
+    };
+  } catch (_error) {
+    return {
+      props: {
+        initialProduct: null,
+      },
+    };
+  }
+}

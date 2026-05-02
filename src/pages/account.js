@@ -2,7 +2,9 @@ import React, { useCallback, useEffect } from "react";
 import styled from "styled-components";
 import { useRouter } from "next/router";
 import { useQueryClient } from "@tanstack/react-query";
+import { buttonBaseStyle, buttonSecondaryStyle } from "components/Button";
 import PageContainer from "components/PageContainer";
+import SeoHead from "components/SeoHead";
 import { useUserData } from "services/api/useUserApi";
 import AuthForm from "components/AuthForm";
 import { FaRegSadTear, FaRegUserCircle } from "react-icons/fa";
@@ -38,20 +40,12 @@ const Header = styled.header`
   }
 
   button {
+    ${buttonBaseStyle}
+    ${buttonSecondaryStyle}
+    min-height: 40px;
     font-size: 0.92rem;
-    color: ${colors.primaryDark};
-    background: none;
-    border: 1px solid #dfd3aa;
-    border-radius: 999px;
-    padding: 8px 12px;
     font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: rgba(201, 162, 39, 0.1);
-      border-color: ${colors.primary};
-    }
+    border-radius: 999px;
   }
 `;
 
@@ -155,6 +149,17 @@ const PAYMENT_STATUS_LABELS = {
   refunded: "Zwrócone",
 };
 
+const DELIVERY_LABELS = {
+  courier_standard: "Kurier standard",
+  parcel_locker: "Paczkomat / automat odbioru",
+  store_pickup: "Odbiór osobisty",
+};
+
+const PAYMENT_METHOD_LABELS = {
+  bank_transfer: "Przelew tradycyjny",
+  stripe_card: "Stripe / karta / BLIK",
+};
+
 const OrderProducts = styled.div`
   margin-top: 8px;
   font-size: 0.88rem;
@@ -186,6 +191,12 @@ const AccountPage = () => {
   if (!data) {
     return (
       <PageContainer loading={isLoading}>
+        <SeoHead
+          title="Konto użytkownika | Nowy Lombard"
+          description="Logowanie i panel użytkownika."
+          path="/account"
+          noindex
+        />
         <AccountWrapper>
           <AuthForm />
         </AccountWrapper>
@@ -195,6 +206,12 @@ const AccountPage = () => {
 
   return (
     <PageContainer loading={isLoading}>
+      <SeoHead
+        title="Twoje konto | Nowy Lombard"
+        description="Panel użytkownika i historia zamówień."
+        path="/account"
+        noindex
+      />
       <AccountWrapper>
         <ProfileCard>
           <Header>
@@ -233,9 +250,26 @@ const AccountPage = () => {
                         {PAYMENT_STATUS_LABELS[order.paymentStatus] || order.paymentStatus || "-"}
                       </span>
                       <span>
-                        <strong>Suma:</strong> {Number(order.totalAmount || 0).toFixed(2)} PLN
+                        <strong>Suma:</strong> {Number(order.grandTotal || order.totalAmount || 0).toFixed(2)} PLN
+                      </span>
+                      <span>
+                        <strong>Dostawa:</strong>{" "}
+                        {DELIVERY_LABELS[order.deliveryMethod] || order.deliveryMethod || "-"}
+                      </span>
+                      <span>
+                        <strong>Metoda płatności:</strong>{" "}
+                        {PAYMENT_METHOD_LABELS[order.paymentMethod] || order.paymentMethod || "-"}
                       </span>
                     </OrderMeta>
+                    <OrderProducts>
+                      <span>
+                        Dostawa: {Number(order.deliveryPrice || 0).toFixed(2)} PLN, ETA:{" "}
+                        {order.deliveryEtaLabel || "-"}
+                      </span>
+                      {order.paymentSessionStatus && (
+                        <span>Stan checkoutu: {order.paymentSessionStatus}</span>
+                      )}
+                    </OrderProducts>
                     <OrderProducts>
                       {(order.products || []).length > 0 ? (
                         (order.products || []).map((product, index) => (

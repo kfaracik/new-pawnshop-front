@@ -6,23 +6,8 @@ export default function Document() {
     <Html lang="pl">
       <Head>
         <link rel="icon" href="/favicon.ico" />
-        <meta
-          name="description"
-          content="Lombard oferujący szybkie pożyczki pod zastaw, sprzedaż i skup produktów, oraz usługi dla osób potrzebujących szybkiej gotówki. Zaufaj doświadczeniu!"
-        />
-        <meta
-          name="keywords"
-          content="lombard, pożyczki pod zastaw, szybkie pożyczki, sprzedaż, skup, lombard online, gotówka"
-        />
         <meta name="author" content="Nowy Lombard" />
-        <meta property="og:title" content="Nowy Lombard" />
-        <meta
-          property="og:description"
-          content="Skorzystaj z oferty naszego lombardu, gdzie oferujemy szybkie pożyczki pod zastaw i inne usługi finansowe."
-        />
-        <meta property="og:image" content="/images/lombard-og-image.jpg" />
-        <meta property="og:url" content="https://www.twoj-lombard.pl" />
-        <meta property="og:type" content="website" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

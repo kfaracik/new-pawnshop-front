@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import SeoHead from "components/SeoHead";
 import Title from "components/Title";
 import PageContainer from "components/PageContainer";
 import ProductList from "components/ProductList";
@@ -42,6 +43,11 @@ export default function ProductsPage() {
 
   return (
     <PageContainer>
+      <SeoHead
+        title="Wszystkie produkty | Nowy Lombard"
+        description="Przeglądaj wszystkie dostępne produkty Nowego Lombardu. Filtruj oferty i przechodź do szczegółów produktu."
+        path={`/products${router.asPath.includes("?") ? router.asPath.slice("/products".length) : ""}`}
+      />
       <Title>Wszystkie produkty</Title>
       <ProductList
         products={data?.products || []}

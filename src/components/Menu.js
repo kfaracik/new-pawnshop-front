@@ -3,8 +3,10 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import styled from "styled-components";
 import { FaBars, FaTimes } from "react-icons/fa";
+import { IoIosArrowDown } from "react-icons/io";
 import { FiShoppingCart } from "react-icons/fi";
 import { CartContext } from "../context/CartContext";
+import { buttonBaseStyle, buttonGhostStyle } from "components/Button";
 import colors from "styles/colors";
 import { useCategories } from "services/api/categoryApi";
 
@@ -92,9 +94,7 @@ const Badge = styled.div`
 `;
 
 const StyledNav = styled.nav`
-  display: flex;
-  gap: 8px;
-  align-items: center;
+  display: none;
 
   @media screen and (max-width: 768px) {
     display: flex;
@@ -116,10 +116,91 @@ const StyledNav = styled.nav`
   }
 `;
 
+const DesktopMenuWrap = styled.div`
+  position: relative;
+  display: none;
+
+  @media screen and (min-width: 769px) {
+    display: block;
+  }
+`;
+
+const DesktopMenuButton = styled.button`
+  ${buttonBaseStyle}
+  min-height: 38px;
+  padding: 0 14px;
+  background: transparent;
+  border-color: #2b2b2b;
+  color: #efefef;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: #3a3a3a;
+  }
+`;
+
+const DesktopMenuPanel = styled.div`
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 260px;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid #2b2b2b;
+  background: rgba(18, 18, 18, 0.98);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  display: ${(props) => (props.$open ? "grid" : "none")};
+  gap: 4px;
+  z-index: 1002;
+`;
+
+const DesktopMenuLabel = styled.p`
+  margin: 6px 8px 2px;
+  color: #8f8f8f;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+`;
+
+const DesktopMenuLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  color: #ebebeb;
+  text-decoration: none;
+  border-radius: 10px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: ${colors.primaryLight};
+  }
+`;
+
+const DesktopExternalLink = styled.a`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  color: #ebebeb;
+  text-decoration: none;
+  border-radius: 10px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: ${colors.primaryLight};
+  }
+`;
+
 const MobileMenuButton = styled.button`
   display: none;
-  background: transparent;
-  border: none;
+  ${buttonBaseStyle}
+  ${buttonGhostStyle}
+  min-height: 36px;
+  padding: 0;
+  border-radius: 8px;
 
   @media screen and (max-width: 768px) {
     display: inline-flex;
@@ -129,7 +210,7 @@ const MobileMenuButton = styled.button`
     height: 36px;
     font-size: 24px;
     color: #fff;
-    cursor: pointer;
+    color: #fff;
   }
 `;
 
@@ -150,15 +231,17 @@ const CloseButton = styled.button`
   display: none;
 
   @media screen and (max-width: 768px) {
+    ${buttonBaseStyle}
+    ${buttonGhostStyle}
     display: inline-flex;
     position: absolute;
     top: 16px;
     right: 14px;
-    border: 0;
-    background: transparent;
+    min-height: 36px;
+    width: 36px;
+    padding: 0;
     color: #f2f2f2;
     font-size: 20px;
-    cursor: pointer;
   }
 `;
 
@@ -204,6 +287,7 @@ const MobileCategoryLink = styled(Link)`
 export default function Menu() {
   const router = useRouter();
   const [mobileNavActive, setMobileNavActive] = useState(false);
+  const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
   const { getCartItemCount } = useContext(CartContext);
   const { data: categoriesData } = useCategories();
   const categories = Array.isArray(categoriesData)
@@ -216,6 +300,7 @@ export default function Menu() {
 
   const toggleMobileNav = () => setMobileNavActive((prev) => !prev);
   const closeMobileNav = () => setMobileNavActive(false);
+  const closeDesktopMenu = () => setDesktopMenuOpen(false);
 
   useEffect(() => {
     if (!mobileNavActive) return undefined;
@@ -224,6 +309,35 @@ export default function Menu() {
       document.body.style.overflow = "";
     };
   }, [mobileNavActive]);
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        closeMobileNav();
+        closeDesktopMenu();
+      }
+    };
+
+    if (mobileNavActive || desktopMenuOpen) {
+      window.addEventListener("keydown", onKeyDown);
+    }
+
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileNavActive, desktopMenuOpen]);
+
+  useEffect(() => {
+    if (!desktopMenuOpen) return undefined;
+
+    const handleClickOutside = (event) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (target.closest("[data-desktop-menu]")) return;
+      setDesktopMenuOpen(false);
+    };
+
+    window.addEventListener("mousedown", handleClickOutside);
+    return () => window.removeEventListener("mousedown", handleClickOutside);
+  }, [desktopMenuOpen]);
 
   return (
     <>
@@ -234,7 +348,48 @@ export default function Menu() {
         onClick={closeMobileNav}
       />
       <HeaderActions>
-        <StyledNav mobileNavActive={mobileNavActive}>
+        <DesktopMenuWrap data-desktop-menu>
+          <DesktopMenuButton
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded={desktopMenuOpen}
+            onClick={() => setDesktopMenuOpen((prev) => !prev)}
+          >
+            Menu <IoIosArrowDown />
+          </DesktopMenuButton>
+          <DesktopMenuPanel $open={desktopMenuOpen}>
+            <DesktopMenuLink href="/" onClick={closeDesktopMenu}>Start</DesktopMenuLink>
+            <DesktopMenuLink href="/products" onClick={closeDesktopMenu}>Produkty</DesktopMenuLink>
+            <DesktopMenuLink href="/contact" onClick={closeDesktopMenu}>Kontakt</DesktopMenuLink>
+            <DesktopMenuLink href="/account" onClick={closeDesktopMenu}>Konto</DesktopMenuLink>
+            <DesktopExternalLink
+              href={FACEBOOK_AUCTIONS_URL}
+              target="_blank"
+              rel="noreferrer"
+              onClick={closeDesktopMenu}
+            >
+              Licytacje FB
+            </DesktopExternalLink>
+            {categories.length > 0 && (
+              <>
+                <DesktopMenuLabel>Kategorie</DesktopMenuLabel>
+                {categories.slice(0, 6).map((category) => (
+                  <DesktopMenuLink
+                    key={category._id}
+                    href={`/products?category=${encodeURIComponent(category._id)}&page=1`}
+                    onClick={closeDesktopMenu}
+                  >
+                    {category.name}
+                  </DesktopMenuLink>
+                ))}
+              </>
+            )}
+          </DesktopMenuPanel>
+        </DesktopMenuWrap>
+        <StyledNav
+          aria-label="Nawigacja główna"
+          mobileNavActive={mobileNavActive}
+        >
           <CloseButton type="button" aria-label="Zamknij menu" onClick={closeMobileNav}>
             <FaTimes />
           </CloseButton>
@@ -283,7 +438,7 @@ export default function Menu() {
             ))}
           </MobileCategorySection>
         </StyledNav>
-        <Link href="/cart">
+        <Link href="/cart" aria-label={`Koszyk, liczba produktów: ${cartItemCount}`}>
           <CartIconWrapper>
             <CartIcon />
             {cartItemCount > 0 && <Badge>{cartItemCount}</Badge>}

@@ -1,5 +1,6 @@
 import { createTheme } from "@mui/material/styles";
 import colors from "styles/colors";
+import tokens from "design-system/tokens";
 
 const muiTheme = createTheme({
   palette: {
@@ -30,9 +31,9 @@ const muiTheme = createTheme({
     },
     divider: "#E0E0E0",
   },
-  shape: { borderRadius: 10 },
+  shape: { borderRadius: tokens.radius.md },
   typography: {
-    fontFamily: "'Poppins', sans-serif",
+    fontFamily: tokens.typography.fontFamily,
     button: { textTransform: "none", fontWeight: 600 },
   },
   components: {

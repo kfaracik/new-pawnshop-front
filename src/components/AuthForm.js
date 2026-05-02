@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import styled from "styled-components";
+import {
+  buttonBaseStyle,
+  buttonGhostStyle,
+  buttonPrimaryStyle,
+} from "components/Button";
 import { registerUser, loginUser } from "services/api/authApi";
 import { useQueryClient } from "@tanstack/react-query";
 import colors from "styles/colors";
@@ -50,44 +55,24 @@ const StyledInput = styled.input`
 `;
 
 const StyledButton = styled.button`
+  ${buttonBaseStyle}
+  ${buttonPrimaryStyle}
   width: 100%;
-  padding: 0.75rem;
   margin-top: 0.25rem;
   margin-bottom: 0.85rem;
-  background-color: ${colors.primary};
-  color: ${colors.primaryContrastText};
-  border: none;
-  border-radius: 8px;
   font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.2s;
-
-  &:hover {
-    background-color: ${colors.primaryLight};
-    transform: translateY(-1px);
-  }
-
-  &:disabled {
-    background-color: #b9b9b9;
-    cursor: not-allowed;
-    transform: none;
-  }
 `;
 
 const ToggleButton = styled.button`
-  background: none;
-  color: ${colors.primaryDark};
-  border: none;
-  cursor: pointer;
+  ${buttonBaseStyle}
+  ${buttonGhostStyle}
+  min-height: 38px;
+  justify-content: flex-start;
+  padding: 0;
   font-size: 0.92rem;
   font-weight: 600;
   text-decoration: underline;
   margin-top: 0.5rem;
-
-  &:hover {
-    color: ${colors.primary};
-  }
 `;
 
 const FormFeedback = styled.p`

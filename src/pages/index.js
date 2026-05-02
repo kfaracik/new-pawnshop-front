@@ -1,11 +1,18 @@
 import React from "react";
 import styled from "styled-components";
+import {
+  buttonBaseStyle,
+  buttonPillStyle,
+  buttonPrimaryStyle,
+} from "components/Button";
 import PageContainer from "components/PageContainer";
+import SeoHead from "components/SeoHead";
 import { useNewProducts } from "services/api/newProductsApi";
 import { usePopularProducts } from "services/api/popularProductsApi";
 import Slogan from "components/Slogan";
 import HorizontalProductList from "components/HorizontalProductList";
 import colors from "styles/colors";
+import { getCanonicalUrl } from "lib/seo";
 
 const FACEBOOK_AUCTIONS_URL =
   process.env.NEXT_PUBLIC_FACEBOOK_AUCTIONS_URL || "https://www.facebook.com/";
@@ -44,33 +51,37 @@ const BannerText = styled.p`
 `;
 
 const BannerButton = styled.a`
+  ${buttonBaseStyle}
+  ${buttonPrimaryStyle}
+  ${buttonPillStyle}
   width: fit-content;
   margin-top: 4px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   min-height: 46px;
   padding: 0 18px;
-  border-radius: 999px;
-  background: ${colors.primary};
-  color: ${colors.primaryContrastText};
   text-decoration: none;
-  font-weight: 700;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-
-  &:hover {
-    background: ${colors.primaryLight};
-    transform: translateY(-1px);
-  }
 `;
 
 export default function HomePage() {
   const { data: newProducts, isLoading: isLoadingNew } = useNewProducts();
   const { data: popularProducts, isLoading: isLoadingPopular } =
     usePopularProducts();
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    name: "Nowy Lombard",
+    url: getCanonicalUrl("/"),
+    areaServed: "PL",
+    sameAs: [FACEBOOK_AUCTIONS_URL],
+  };
 
   return (
     <PageContainer>
+      <SeoHead
+        title="Nowy Lombard | Produkty, licytacje i kontakt"
+        description="Sprawdź aktualne produkty, oferty specjalne i licytacje Nowego Lombardu. Sprzedaż online, kontakt do oddziałów i szybki dostęp do aktualnych ofert."
+        path="/"
+        schema={organizationSchema}
+      />
       <Slogan />
       <AuctionsBanner>
         <BannerEyebrow>Licytacje</BannerEyebrow>

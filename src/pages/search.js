@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import PageContainer from "components/PageContainer";
 import ProductList from "components/ProductList";
+import SeoHead from "components/SeoHead";
 import { useSearchProducts } from "services/api/searchProductApi";
 
 const PRODUCTS_PER_PAGE = 8;
@@ -43,6 +44,16 @@ export default function SearchPage() {
 
   return (
     <PageContainer>
+      <SeoHead
+        title={
+          searchQuery
+            ? `Wyszukiwanie: ${searchQuery} | Nowy Lombard`
+            : "Wyszukiwanie | Nowy Lombard"
+        }
+        description="Wewnętrzna wyszukiwarka produktów Nowego Lombardu."
+        path={router.asPath}
+        noindex
+      />
       {searchQuery && (
         <h2>
           Wyniki wyszukiwania dla: <strong>{searchQuery}</strong>

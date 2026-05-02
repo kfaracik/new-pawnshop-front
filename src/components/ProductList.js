@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { ImageList, ImageListItem, useMediaQuery } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import Skeleton from "@mui/material/Skeleton";
@@ -23,11 +23,7 @@ const ProductList = ({
     return 4;
   };
 
-  const [columns, setColumns] = useState(calculateColumns);
-
-  useEffect(() => {
-    setColumns(calculateColumns);
-  }, [isSmallScreen, isMediumScreen, isLargeScreen]);
+  const columns = calculateColumns();
 
   return (
     <div

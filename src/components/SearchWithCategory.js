@@ -2,6 +2,11 @@ import React, { useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import styled from "styled-components";
 import { IoIosArrowDown } from "react-icons/io";
+import {
+  buttonBaseStyle,
+  buttonDarkStyle,
+  buttonPrimaryStyle,
+} from "components/Button";
 import colors from "styles/colors";
 import { useCategories } from "services/api/categoryApi";
 
@@ -26,6 +31,18 @@ const SearchForm = styled.form`
   flex: 1;
   width: 100%;
   min-width: 0;
+`;
+
+const VisuallyHiddenLabel = styled.label`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 `;
 
 const SearchInput = styled.input`
@@ -53,19 +70,12 @@ const SearchInput = styled.input`
 `;
 
 const SearchButton = styled.button`
-  background-color: ${colors.primary};
-  color: ${colors.primaryContrastText};
-  border: none;
+  ${buttonBaseStyle}
+  ${buttonPrimaryStyle}
+  min-height: auto;
   border-radius: 0 8px 8px 0;
   padding: 12px 20px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  &:hover {
-    background-color: ${colors.primaryLight};
-    transform: none;
-  }
+  transform: none !important;
   @media screen and (max-width: 768px) {
     font-size: 0.9rem;
   }
@@ -82,20 +92,14 @@ const DropdownWrapper = styled.div`
 `;
 
 const DropdownButton = styled.button`
-  background-color: #1a1a1a;
-  color: #e9e9e9;
-  border: 1px solid #2f2f2f;
+  ${buttonBaseStyle}
+  ${buttonDarkStyle}
+  min-height: auto;
   border-radius: 8px;
   padding: 10px 15px;
-  font-size: 1rem;
-  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: background-color 0.3s ease;
-  &:hover {
-    background-color: #232323;
-  }
 `;
 
 const DropdownMenu = styled.ul`
@@ -119,6 +123,10 @@ const DropdownItem = styled.li`
   color: #cfcfcf;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  border: 0;
+  width: 100%;
+  background: transparent;
+  text-align: left;
   &:hover {
     background-color: #1f1f1f;
     color: ${colors.primaryLight};
@@ -160,24 +168,38 @@ export default function SearchWithCategory() {
   return (
     <SearchWrapper>
       <SearchForm onSubmit={handleSearchSubmit}>
+        <VisuallyHiddenLabel htmlFor="site-search">
+          Wyszukaj produkty
+        </VisuallyHiddenLabel>
         <SearchInput
+          id="site-search"
+          name="query"
           type="text"
           placeholder="Wyszukaj produkty..."
           value={searchQuery}
           onChange={handleSearchChange}
         />
-        <SearchButton>SZUKAJ</SearchButton>
+        <SearchButton type="submit">SZUKAJ</SearchButton>
       </SearchForm>
       <DropdownWrapper>
-        <DropdownButton onClick={() => setDropdownOpen(!dropdownOpen)}>
+        <DropdownButton
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded={dropdownOpen}
+          aria-controls="category-menu"
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+        >
           Kategorie <IoIosArrowDown />
         </DropdownButton>
-        <DropdownMenu isOpen={dropdownOpen}>
+        <DropdownMenu id="category-menu" role="menu" isOpen={dropdownOpen}>
           {isCategoriesLoading ? (
-            <DropdownItem as="div">Ładowanie kategorii...</DropdownItem>
+            <DropdownItem as="div" aria-live="polite">Ładowanie kategorii...</DropdownItem>
           ) : categories.length > 0 ? (
             categories.map((category) => (
               <DropdownItem
+                as="button"
+                type="button"
+                role="menuitem"
                 key={category._id}
                 onClick={() => handleCategorySelect(category._id)}
               >

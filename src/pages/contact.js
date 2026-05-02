@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from "react";
 import styled from "styled-components";
+import { buttonBaseStyle } from "components/Button";
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from "react-icons/fa";
 import PageContainer from "components/PageContainer";
+import SeoHead from "components/SeoHead";
 import colors from "styles/colors";
 
 const LOCATIONS = {
@@ -47,23 +49,31 @@ const Tabs = styled.div`
   justify-content: center;
   flex-wrap: wrap;
   margin: 18px 0 10px;
+
+  @media (max-width: 520px) {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
 `;
 
 const TabButton = styled.button`
+  ${buttonBaseStyle}
   border: 1px solid
     ${(props) => (props.active ? colors.primaryDark : "rgba(0, 0, 0, 0.12)")};
   color: ${(props) => (props.active ? colors.primaryDark : colors.textPrimary)};
   background: ${(props) =>
     props.active ? "rgba(201,162,39,0.12)" : colors.backgroundPaper};
   border-radius: 999px;
-  padding: 8px 14px;
   font-size: 0.95rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
 
   &:hover {
     border-color: ${colors.primary};
+  }
+
+  @media (max-width: 520px) {
+    width: 100%;
+    justify-self: stretch;
   }
 `;
 
@@ -167,6 +177,16 @@ const InfoValue = styled.span`
   color: ${colors.textPrimary};
 `;
 
+const ContactLink = styled.a`
+  color: ${colors.primaryDark};
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 const MapCard = styled(Card)`
   padding: 10px;
 `;
@@ -189,6 +209,11 @@ export default function ContactPage() {
 
   return (
     <PageContainer>
+      <SeoHead
+        title="Kontakt | Nowy Lombard"
+        description="Dane kontaktowe i lokalizacje oddziałów Nowego Lombardu. Sprawdź adres, telefon i godziny otwarcia."
+        path="/contact"
+      />
       <PageSection>
         <Header>
           <Title>Skontaktuj się z nami</Title>
@@ -218,14 +243,20 @@ export default function ContactPage() {
                   <FaPhone />
                 </IconWrap>
                 <InfoLabel>Telefon</InfoLabel>
-                <InfoValue>+48 515 671 666</InfoValue>
+                <InfoValue>
+                  <ContactLink href="tel:+48515671666">+48 515 671 666</ContactLink>
+                </InfoValue>
               </InfoRow>
               <InfoRow>
                 <IconWrap>
                   <FaEnvelope />
                 </IconWrap>
                 <InfoLabel>E-mail</InfoLabel>
-                <InfoValue>kontakt@lombard.pl</InfoValue>
+                <InfoValue>
+                  <ContactLink href="mailto:kontakt@lombard.pl">
+                    kontakt@lombard.pl
+                  </ContactLink>
+                </InfoValue>
               </InfoRow>
               <InfoRow>
                 <IconWrap>

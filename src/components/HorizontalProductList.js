@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import Skeleton from "@mui/material/Skeleton";
+import { FaBoxOpen } from "react-icons/fa";
 import colors from "styles/colors";
 import { ProductItem } from "./ProductItem";
 
@@ -30,7 +31,7 @@ const HorizontalTrack = styled.div`
   gap: 12px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding: 10px 16px 16px;
+  padding: 16px 16px 18px;
 
   &::-webkit-scrollbar {
     height: 7px;
@@ -44,6 +45,25 @@ const HorizontalTrack = styled.div`
   @media screen and (max-width: 600px) {
     gap: 10px;
     padding: 8px 12px 12px;
+  }
+`;
+
+const EmptyState = styled.div`
+  padding: 18px 16px 20px;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  color: ${colors.textSecondary};
+  text-align: center;
+
+  svg {
+    font-size: 1.8rem;
+    color: ${colors.primaryDark};
+    opacity: 0.85;
+  }
+
+  p {
+    margin: 0;
   }
 `;
 
@@ -86,9 +106,10 @@ const HorizontalProductList = ({
           ))}
         </HorizontalTrack>
       ) : normalizedProducts.length === 0 ? (
-        <div style={{ padding: "6px 16px 16px" }}>
+        <EmptyState>
+          <FaBoxOpen aria-hidden="true" />
           <p>Nie mamy aktualnie dostępnych produktów.</p>
-        </div>
+        </EmptyState>
       ) : (
         <HorizontalTrack>
           {normalizedProducts.map((product) => (

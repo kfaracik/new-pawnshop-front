@@ -25,8 +25,12 @@ const MainContentInner = styled(LayoutInner)`
 export default function PageContainer({ children, loading = false }) {
   return (
     <Container>
+      <a className="skip-link" href="#main-content">
+        Przejdź do treści
+      </a>
       <Header />
       <AnimatedMainContent
+        id="main-content"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}

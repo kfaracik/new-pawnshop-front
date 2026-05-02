@@ -15,11 +15,12 @@ export const fetchProductsByIds = async (ids) => {
   return responses.map(({ data }) => data);
 };
 
-export const useProduct = (id) => {
+export const useProduct = (id, initialData) => {
   return useQuery({
     enabled: !!id,
     queryKey: ["product", id],
     queryFn: () => fetchProductById(id),
+    initialData,
     staleTime: 1000 * 60 * 5,
   });
 };

@@ -10,6 +10,9 @@ export const createOrder = async ({
   streetAddress,
   country,
   products,
+  deliveryMethod,
+  deliveryPrice,
+  paymentMethod,
 }) => {
   const response = await axiosInstance.post("/v1/orders", {
     name,
@@ -19,6 +22,9 @@ export const createOrder = async ({
     streetAddress,
     country,
     products,
+    deliveryMethod,
+    deliveryPrice,
+    paymentMethod,
   });
 
   return response.data;

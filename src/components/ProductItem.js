@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+import Image from "next/image";
 import styled from "styled-components";
 import Link from "next/link";
 import { keyframes } from "@emotion/react";
@@ -42,11 +43,16 @@ const CardContainer = styled.div`
   }
 `;
 
-const ProductImage = styled.img`
+const ProductImageWrapper = styled.div`
+  position: relative;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.2s ease;
+  overflow: hidden;
+
+  img {
+    object-fit: cover;
+    transition: transform 0.2s ease;
+  }
 `;
 
 const StyledImageListItemBar = styled.div`
@@ -154,6 +160,14 @@ const AvailabilityNote = styled(Typography)`
   }
 `;
 
+const LocationNote = styled(Typography)`
+  && {
+    font-size: 0.76rem;
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.35;
+  }
+`;
+
 export const ProductItem = ({ product, searchQuery }) => {
   const { addProduct, cartProducts } = useContext(CartContext);
   const url = `/product/${product._id}`;
@@ -225,17 +239,29 @@ export const ProductItem = ({ product, searchQuery }) => {
     );
   };
 
+  const productImage =
+    product.images?.[0] ||
+    "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
+  const locationLabel =
+    product?.availabilityMode === "online_only"
+      ? "Dostępne wyłącznie online"
+      : Array.isArray(product?.availableLocations) && product.availableLocations.length > 0
+        ? `Dostępne w: ${product.availableLocations.join(", ")}`
+        : "Dostępność potwierdzana indywidualnie";
+
   return (
     <Link href={url} key={product._id}>
       <CardContainer>
-        <ProductImage
-          src={
-            product.images?.[0] ||
-            "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
-          }
-          alt={product.title}
-          loading="lazy"
-        />
+        <ProductImageWrapper>
+          <Image
+            src={productImage}
+            alt={product.title}
+            fill
+            sizes="(max-width: 600px) 100vw, 33vw"
+            loader={({ src }) => src}
+            unoptimized
+          />
+        </ProductImageWrapper>
         {product.isAuction && (
           <AuctionBadge title="Licytacja">
             <RiAuctionFill />
@@ -273,6 +299,7 @@ export const ProductItem = ({ product, searchQuery }) => {
           {availabilityStatus === "unavailable" && (
             <AvailabilityNote variant="body2">Niedostępne</AvailabilityNote>
           )}
+          <LocationNote variant="body2">{locationLabel}</LocationNote>
         </StyledImageListItemBar>
       </CardContainer>
     </Link>
