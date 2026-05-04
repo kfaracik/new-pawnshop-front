@@ -1,13 +1,11 @@
-import React, { useContext } from "react";
+import React from "react";
 import Image from "next/image";
 import styled from "styled-components";
 import Link from "next/link";
 import { keyframes } from "@emotion/react";
-import { IconButton, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import colors from "styles/colors";
 import { RiAuctionFill } from "react-icons/ri";
-import { FiShoppingCart } from "react-icons/fi";
-import { CartContext } from "context/CartContext";
 
 const fadeIn = keyframes`
   0% { opacity: 0; transform: scale(0.95); }
@@ -76,24 +74,7 @@ const TitleContainer = styled.div`
   display: flex;
   justify-content: flex-start;
   align-items: flex-end;
-  gap: 10px;
   width: 100%;
-`;
-
-const CartButton = styled(IconButton)`
-  margin-left: auto;
-  width: 34px;
-  height: 34px;
-  background: ${colors.primary} !important;
-  color: ${colors.primaryContrastText} !important;
-  border-radius: 8px !important;
-  border: 1px solid ${colors.primaryDark} !important;
-  transition: background-color 0.2s ease, transform 0.2s ease !important;
-
-  &:hover {
-    background: ${colors.primaryLight} !important;
-    transform: scale(1.03);
-  }
 `;
 
 const AuctionBadge = styled.div`
@@ -169,42 +150,7 @@ const LocationNote = styled(Typography)`
 `;
 
 export const ProductItem = ({ product, searchQuery }) => {
-  const { addProduct, cartProducts } = useContext(CartContext);
   const url = `/product/${product._id}`;
-  const resolveAvailableQuantity = () => {
-    const fromQuantity = Number(product?.quantity);
-    if (Number.isFinite(fromQuantity)) {
-      return Math.max(0, fromQuantity);
-    }
-
-    const fromAvailableQuantity = Number(product?.availableQuantity);
-    if (Number.isFinite(fromAvailableQuantity)) {
-      return Math.max(0, fromAvailableQuantity);
-    }
-
-    const fromProperty = Number(product?.properties?.quantity);
-    if (Number.isFinite(fromProperty)) {
-      return Math.max(0, fromProperty);
-    }
-
-    const fromStock = Number(product?.stock);
-    if (Number.isFinite(fromStock)) {
-      return Math.max(0, fromStock);
-    }
-
-    if (product?.availabilityStatus === "available") {
-      return Infinity;
-    }
-
-    return 0;
-  };
-
-  const maxQuantity = resolveAvailableQuantity();
-  const currentInCart = (cartProducts || []).reduce((acc, item) => {
-    if (String(item.productId) !== String(product._id)) return acc;
-    return acc + Number(item.quantity || 0);
-  }, 0);
-  const isOutOfStock = currentInCart >= maxQuantity;
   const availabilityStatus = product?.availabilityStatus || "available";
   const reservationLabel = (() => {
     if (!product?.reservationExpiresAt) return "";
@@ -242,11 +188,20 @@ export const ProductItem = ({ product, searchQuery }) => {
   const productImage =
     product.images?.[0] ||
     "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
+  const locationDetails = Array.isArray(product?.availableLocationDetails)
+    ? product.availableLocationDetails
+    : [];
+  const locationNames =
+    locationDetails.length > 0
+      ? locationDetails.map((location) => location?.name).filter(Boolean)
+      : Array.isArray(product?.availableLocations)
+        ? product.availableLocations
+        : [];
   const locationLabel =
     product?.availabilityMode === "online_only"
       ? "Dostępne wyłącznie online"
-      : Array.isArray(product?.availableLocations) && product.availableLocations.length > 0
-        ? `Dostępne w: ${product.availableLocations.join(", ")}`
+      : locationNames.length > 0
+        ? `Dostępne w: ${locationNames.join(", ")}`
         : "Dostępność potwierdzana indywidualnie";
 
   return (
@@ -272,16 +227,6 @@ export const ProductItem = ({ product, searchQuery }) => {
             <ProductTitle variant="body1">
               {highlightQuery(truncateTitle(product.title, 40), searchQuery)}
             </ProductTitle>
-            <CartButton
-              aria-label="Dodaj do koszyka"
-              disabled={isOutOfStock || availabilityStatus !== "available"}
-              onClick={(e) => {
-                e.preventDefault();
-                addProduct(product._id, maxQuantity);
-              }}
-            >
-              <FiShoppingCart size={18} />
-            </CartButton>
           </TitleContainer>
           <PriceText variant="h6">
             {product.price.toFixed(2)} zł

@@ -67,7 +67,7 @@ const ToggleButton = styled.button`
   ${buttonBaseStyle}
   ${buttonGhostStyle}
   min-height: 38px;
-  justify-content: flex-start;
+  justify-content: center;
   padding: 0;
   font-size: 0.92rem;
   font-weight: 600;

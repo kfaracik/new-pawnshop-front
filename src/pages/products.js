@@ -182,10 +182,7 @@ export default function ProductsPage() {
         )}
         <ErrorState>
           <h2>Nie udało się załadować produktów</h2>
-          <p>
-            Sprawdź połączenie lub spróbuj ponownie za chwilę. Szczegóły:{" "}
-            {error?.message || "Błąd sieci."}
-          </p>
+          <p>Sprawdź połączenie lub spróbuj ponownie za chwilę.</p>
           <FilterButton type="button" onClick={() => router.reload()}>
             Spróbuj ponownie
           </FilterButton>

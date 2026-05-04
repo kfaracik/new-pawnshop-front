@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import { useRouter } from "next/router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -7,11 +7,11 @@ import PageContainer from "components/PageContainer";
 import SeoHead from "components/SeoHead";
 import { useUserData } from "services/api/useUserApi";
 import AuthForm from "components/AuthForm";
-import { FaRegSadTear, FaRegUserCircle } from "react-icons/fa";
+import { FaRegUserCircle } from "react-icons/fa";
+import { FiList } from "react-icons/fi";
 import { clearAuthToken } from "utils/authToken";
 import colors from "styles/colors";
 import { useMyOrders } from "services/api/orderApi";
-import { useMyAuctionParticipations } from "services/api/auctionApi";
 
 const AccountWrapper = styled.section`
   margin: 24px auto 40px;
@@ -169,11 +169,15 @@ const OrderProducts = styled.div`
 `;
 
 const AccountPage = () => {
+  const [isMounted, setIsMounted] = useState(false);
   const { data, error, isLoading } = useUserData();
   const { data: myOrders = [] } = useMyOrders();
-  const { data: myAuctionParticipations = [] } = useMyAuctionParticipations(!!data);
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleLogout = useCallback(() => {
     clearAuthToken();
@@ -187,6 +191,19 @@ const AccountPage = () => {
       handleLogout();
     }
   }, [error, handleLogout]);
+
+  if (!isMounted) {
+    return (
+      <PageContainer loading>
+        <SeoHead
+          title="Konto użytkownika | Nowy Lombard"
+          description="Logowanie i panel użytkownika."
+          path="/account"
+          noindex
+        />
+      </PageContainer>
+    );
+  }
 
   if (!data) {
     return (
@@ -231,7 +248,7 @@ const AccountPage = () => {
             <OrdersBody>
               {myOrders.length === 0 ? (
                 <EmptyState>
-                  <FaRegSadTear size={36} color={colors.grayDark} />
+                  <FiList size={36} color={colors.grayDark} />
                   <p>Brak historii zamówień.</p>
                 </EmptyState>
               ) : (
@@ -281,39 +298,6 @@ const AccountPage = () => {
                         <span>Brak pozycji produktów.</span>
                       )}
                     </OrderProducts>
-                  </OrderItem>
-                ))
-              )}
-            </OrdersBody>
-          </OrdersSection>
-
-          <OrdersSection>
-            <OrdersHeader>Moje licytacje</OrdersHeader>
-            <OrdersBody>
-              {myAuctionParticipations.length === 0 ? (
-                <EmptyState>
-                  <FaRegSadTear size={36} color={colors.grayDark} />
-                  <p>Nie brałeś jeszcze udziału w żadnej licytacji.</p>
-                </EmptyState>
-              ) : (
-                myAuctionParticipations.map((auction) => (
-                  <OrderItem key={auction._id}>
-                    <OrderMeta>
-                      <span>
-                        <strong>Produkt:</strong> {auction.productId?.title || "-"}
-                      </span>
-                      <span>
-                        <strong>Status:</strong> {auction.status || "-"}
-                      </span>
-                      <span>
-                        <strong>Twoja najwyższa oferta:</strong>{" "}
-                        {Number(auction.myHighestBid || 0).toFixed(2)} PLN
-                      </span>
-                      <span>
-                        <strong>Aktualna cena:</strong>{" "}
-                        {Number(auction.currentPrice || 0).toFixed(2)} PLN
-                      </span>
-                    </OrderMeta>
                   </OrderItem>
                 ))
               )}

@@ -13,6 +13,7 @@ import ProductAuctionPanel from "features/product/components/AuctionPanel";
 import ProductGallery from "features/product/components/ProductGallery";
 import { sanitizeHtml } from "features/product/lib/sanitizeHtml";
 import { getProductSeoData } from "features/product/lib/seo";
+import axiosInstance from "lib/axiosInstance";
 import { useProduct } from "services/api/useProductApi";
 import {
   getAuctionStreamUrl,
@@ -452,6 +453,23 @@ const ModalContent = styled.div`
   }
 `;
 
+const Toast = styled.div`
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1200;
+  min-width: min(360px, calc(100vw - 32px));
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid ${(props) => (props.$variant === "error" ? "#f2b8b5" : "#d8c27a")};
+  background: ${(props) => (props.$variant === "error" ? "#fff4f3" : "#fff8e6")};
+  color: ${colors.textPrimary};
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  font-size: 0.92rem;
+  line-height: 1.45;
+`;
+
 const StyledTitle = styled(Title)`
   margin: 0;
   font-size: clamp(1.35rem, 2.5vw, 1.9rem);
@@ -461,7 +479,7 @@ const StyledTitle = styled(Title)`
 const ProductPage = ({ initialProduct = null }) => {
   const { query, push } = useRouter();
   const { id } = query;
-  const { data: product, isLoading } = useProduct(id, initialProduct);
+  const { data: product, isLoading, refetch: refetchProduct } = useProduct(id, initialProduct);
   const safeDescription = useMemo(
     () => sanitizeHtml(product?.description),
     [product?.description]
@@ -490,43 +508,56 @@ const ProductPage = ({ initialProduct = null }) => {
   const [bidAmount, setBidAmount] = useState("");
   const [bidStatus, setBidStatus] = useState({ error: "", info: "" });
   const [isBidding, setIsBidding] = useState(false);
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [toast, setToast] = useState(null);
   const [liveAuction, setLiveAuction] = useState(null);
   const [liveBids, setLiveBids] = useState([]);
   const { addProduct, cartProducts } = useContext(CartContext);
   const isLoggedIn = Boolean(getAuthToken());
+
+  const showToast = (message, variant = "warning") => {
+    setToast({ message, variant });
+    if (typeof window !== "undefined") {
+      window.clearTimeout(showToast.timeoutId);
+      showToast.timeoutId = window.setTimeout(() => {
+        setToast(null);
+      }, 4500);
+    }
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       Modal.setAppElement("#__next");
     }
   }, []);
-  const maxProductQuantity = useMemo(() => {
-    const fromQuantity = Number(product?.quantity);
+  const resolveAvailableQuantity = (productData = product) => {
+    const fromQuantity = Number(productData?.quantity);
     if (Number.isFinite(fromQuantity)) {
       return Math.max(0, fromQuantity);
     }
 
-    const fromAvailableQuantity = Number(product?.availableQuantity);
+    const fromAvailableQuantity = Number(productData?.availableQuantity);
     if (Number.isFinite(fromAvailableQuantity)) {
       return Math.max(0, fromAvailableQuantity);
     }
 
-    const fromProperty = Number(product?.properties?.quantity);
+    const fromProperty = Number(productData?.properties?.quantity);
     if (Number.isFinite(fromProperty)) {
       return Math.max(0, fromProperty);
     }
 
-    const fromStock = Number(product?.stock);
-    if (Number.isFinite(fromStock)) {
+    const fromStock = Number(productData?.stock);
+    if (Number.isFinite(fromStock) && fromStock > 0) {
       return Math.max(0, fromStock);
     }
 
-    if (product?.availabilityStatus === "available") {
+    if (productData?.availabilityStatus === "available") {
       return Infinity;
     }
 
     return 0;
-  }, [product]);
+  };
+  const maxProductQuantity = useMemo(() => resolveAvailableQuantity(product), [product]);
   const currentInCart = useMemo(
     () =>
       (cartProducts || []).reduce((acc, item) => {
@@ -656,10 +687,57 @@ const ProductPage = ({ initialProduct = null }) => {
     return `${hours}:${minutes}:${secs}`;
   }, [auction, auctionStatus, now]);
 
-  const handleAddToCart = () => {
-    if (currentInCart >= maxProductQuantity) return;
-    setIsModalOpen(true);
-    addProduct(id, maxProductQuantity);
+  const handleAddToCart = async () => {
+    if (isCheckingAvailability || isModalOpen) return;
+
+    try {
+      setIsCheckingAvailability(true);
+      const response = await axiosInstance.get(`/products/${id}`);
+      const freshProduct = response?.data || null;
+      const freshMaxQuantity = resolveAvailableQuantity(freshProduct);
+      const freshAvailabilityStatus =
+        freshProduct?.availabilityStatus || "available";
+
+      if (freshAvailabilityStatus === "reserved") {
+        showToast(
+          "Ten produkt jest obecnie zarezerwowany przez innego użytkownika.",
+          "warning"
+        );
+        await refetchProduct();
+        return;
+      }
+
+      if (freshAvailabilityStatus === "unavailable" || freshMaxQuantity <= 0) {
+        showToast(
+          "Ten produkt jest już niedostępny. Ktoś mógł właśnie wykupić ostatnią sztukę.",
+          "warning"
+        );
+        await refetchProduct();
+        return;
+      }
+
+      if (currentInCart >= freshMaxQuantity) {
+        showToast(
+          freshMaxQuantity === 1
+            ? "Masz już w koszyku ostatnią dostępną sztukę tego produktu."
+            : `W koszyku masz już maksymalną dostępną ilość: ${freshMaxQuantity} szt.`,
+          "warning"
+        );
+        await refetchProduct();
+        return;
+      }
+
+      setIsModalOpen(true);
+      addProduct(id, freshMaxQuantity);
+    } catch (_error) {
+      showToast(
+        "Nie udało się sprawdzić aktualnej dostępności produktu. Spróbuj ponownie za chwilę.",
+        "error"
+      );
+      return;
+    } finally {
+      setIsCheckingAvailability(false);
+    }
   };
 
   const closeModal = () => setIsModalOpen(false);
@@ -737,11 +815,20 @@ const ProductPage = ({ initialProduct = null }) => {
 
   const { seoTitle, seoDescription, canonicalPath, productSchema } =
     getProductSeoData(product, id);
+  const locationDetails = Array.isArray(product?.availableLocationDetails)
+    ? product.availableLocationDetails
+    : [];
+  const locationNames =
+    locationDetails.length > 0
+      ? locationDetails.map((location) => location?.name).filter(Boolean)
+      : Array.isArray(product?.availableLocations)
+        ? product.availableLocations
+        : [];
   const productAvailabilityLabel =
     product?.availabilityMode === "online_only"
       ? "Produkt dostępny wyłącznie online."
-      : Array.isArray(product?.availableLocations) && product.availableLocations.length > 0
-        ? `Produkt dostępny w punktach: ${product.availableLocations.join(", ")}.`
+      : locationNames.length > 0
+        ? `Produkt dostępny w punktach: ${locationNames.join(", ")}.`
         : "Dostępność punktowa potwierdzana indywidualnie przez obsługę.";
 
   return (
@@ -798,6 +885,40 @@ const ProductPage = ({ initialProduct = null }) => {
               <Description
                 dangerouslySetInnerHTML={{ __html: safeDescription }}
               />
+              {locationDetails.length > 0 && product?.availabilityMode !== "online_only" && (
+                <div style={{ marginTop: "18px", display: "grid", gap: "10px" }}>
+                  {locationDetails.map((location) => (
+                    <div
+                      key={location._id || location.name}
+                      style={{
+                        border: "1px solid #e5e7eb",
+                        borderRadius: "12px",
+                        padding: "12px 14px",
+                        background: "#faf7ef",
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, marginBottom: "4px" }}>{location.name}</div>
+                      <div style={{ fontSize: "0.95rem", color: "#4b5563", lineHeight: 1.5 }}>
+                        {[location.city, location.addressLine1, location.addressLine2]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </div>
+                      {(location.postalCode || location.phone || location.email) && (
+                        <div style={{ fontSize: "0.92rem", color: "#6b7280", marginTop: "4px" }}>
+                          {[location.postalCode, location.phone, location.email]
+                            .filter(Boolean)
+                            .join(" | ")}
+                        </div>
+                      )}
+                      {location.description && (
+                        <div style={{ fontSize: "0.92rem", color: "#6b7280", marginTop: "6px" }}>
+                          {location.description}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
               <AvailabilityDetails>
                 <strong>Dostępność:</strong> {productAvailabilityLabel}
               </AvailabilityDetails>
@@ -841,6 +962,8 @@ const ProductPage = ({ initialProduct = null }) => {
                     primary
                     onClick={handleAddToCart}
                     disabled={
+                      isModalOpen ||
+                      isCheckingAvailability ||
                       currentInCart >= maxProductQuantity ||
                       product?.availabilityStatus === "reserved" ||
                       product?.availabilityStatus === "unavailable"
@@ -902,6 +1025,7 @@ const ProductPage = ({ initialProduct = null }) => {
               <button type="button" onClick={closeModal}>Kontynuuj zakupy</button>
             </ModalContent>
           </Modal>
+          {toast && <Toast $variant={toast.variant}>{toast.message}</Toast>}
         </>
       ) : (
         <>Ładowanie danych produktu...</>

@@ -16,6 +16,12 @@ import { CartContext } from "context/CartContext";
 import { useProducts } from "services/api/useProductApi";
 import colors from "styles/colors";
 
+const CHECKOUT_STEPS = [
+  { id: 1, label: "Koszyk" },
+  { id: 2, label: "Dostawa i płatność" },
+  { id: 3, label: "Potwierdzenie" },
+];
+
 const DELIVERY_OPTIONS = [
   {
     id: "courier_standard",
@@ -306,15 +312,15 @@ const StepItem = styled.li`
   background: ${(props) => (props.$active ? "#fff9eb" : "#fff")};
   padding: 12px;
   display: grid;
-  gap: 4px;
+  gap: 8px;
+  cursor: ${(props) => (props.$clickable ? "pointer" : "default")};
 `;
 
-const StepLabel = styled.span`
-  font-size: 0.76rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: ${colors.primaryDark};
+const StepTop = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 `;
 
 const StepTitle = styled.strong`
@@ -322,10 +328,25 @@ const StepTitle = styled.strong`
   font-size: 0.96rem;
 `;
 
-const StepMeta = styled.span`
-  color: ${colors.textSecondary};
+const StepIndex = styled.span`
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: ${colors.primaryDark};
+`;
+
+const StepCheck = styled.span`
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: ${colors.primaryDark};
+  color: #fff;
   font-size: 0.82rem;
-  line-height: 1.4;
+  font-weight: 700;
 `;
 
 const TwoCols = styled.div`
@@ -346,20 +367,41 @@ const PrimaryButton = styled.button`
   font-size: 0.98rem;
 `;
 
-const MobileOrderHint = styled.p`
-  margin: 0 0 10px;
-  font-size: 0.85rem;
-  color: ${colors.textSecondary};
-
-  @media (min-width: 980px) {
-    display: none;
-  }
-`;
-
 const Feedback = styled.p`
   margin: 4px 0 0;
   font-size: 0.88rem;
   color: ${colors.error};
+`;
+
+const StepActions = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+`;
+
+const StepButton = styled.button`
+  ${buttonBaseStyle}
+  ${buttonSecondaryStyle}
+  min-width: 140px;
+`;
+
+const Toast = styled.div`
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1200;
+  min-width: min(360px, calc(100vw - 32px));
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid ${(props) => (props.$variant === "error" ? "#f2b8b5" : "#d8c27a")};
+  background: ${(props) => (props.$variant === "error" ? "#fff4f3" : "#fff8e6")};
+  color: ${colors.textPrimary};
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  font-size: 0.92rem;
+  line-height: 1.45;
 `;
 
 const OptionGrid = styled.div`
@@ -436,13 +478,6 @@ const CheckoutBlock = styled.div`
   border-top: 1px solid #efeadc;
 `;
 
-const Note = styled.p`
-  margin: 0;
-  color: ${colors.textSecondary};
-  font-size: 0.84rem;
-  line-height: 1.5;
-`;
-
 const TotalsList = styled.div`
   margin-top: 10px;
   display: grid;
@@ -513,7 +548,19 @@ const CartPage = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [activeStep, setActiveStep] = useState(1);
   const queryClient = useQueryClient();
+
+  const showToast = (message, variant = "warning") => {
+    setToast({ message, variant });
+    if (typeof window !== "undefined") {
+      window.clearTimeout(showToast.timeoutId);
+      showToast.timeoutId = window.setTimeout(() => {
+        setToast(null);
+      }, 4500);
+    }
+  };
 
   const productIds = useMemo(
     () => cartProducts.map(({ productId }) => productId),
@@ -539,7 +586,7 @@ const CartPage = () => {
     }
 
     const fromStock = Number(product?.stock);
-    if (Number.isFinite(fromStock)) {
+    if (Number.isFinite(fromStock) && fromStock > 0) {
       return Math.max(0, fromStock);
     }
 
@@ -591,6 +638,11 @@ const CartPage = () => {
   );
   const shippingTotal = selectedDelivery.price;
   const orderGrandTotal = cartTotal + shippingTotal;
+  const contactFieldsValid =
+    Boolean(name && email && city && postalCode && streetAddress && country);
+  const stepOneComplete = cartItems.length > 0 && !isCartLoading;
+  const stepTwoComplete = stepOneComplete && contactFieldsValid;
+  const stepThreeReady = stepOneComplete && stepTwoComplete;
 
   const missingCartProductIds = useMemo(() => {
     const loadedIds = new Set(products.map((product) => String(product._id)));
@@ -620,8 +672,9 @@ const CartPage = () => {
           (item) => !missingCartProductIds.includes(String(item.productId))
         )
       );
-      setFormError(
-        "Część produktów nie jest już dostępna. Zostały usunięte z koszyka."
+      showToast(
+        "Część produktów nie jest już dostępna. Zostały automatycznie usunięte z koszyka.",
+        "warning"
       );
       return;
     }
@@ -631,8 +684,9 @@ const CartPage = () => {
     );
 
     if (unavailableItems.length > 0) {
-      setFormError(
-        "Co najmniej jeden produkt ma już zbyt małą dostępność. Popraw koszyk i spróbuj ponownie."
+      showToast(
+        "Co najmniej jeden produkt ma już zbyt małą dostępność. Popraw koszyk i spróbuj ponownie.",
+        "warning"
       );
       return;
     }
@@ -673,8 +727,9 @@ const CartPage = () => {
             (item) => !unavailableProductIds.includes(String(item.productId))
           )
         );
-        setFormError(
-          "Niektóre produkty są już niedostępne lub zarezerwowane. Zostały automatycznie usunięte z koszyka."
+        showToast(
+          "Niektóre produkty są już niedostępne lub zarezerwowane. Zostały automatycznie usunięte z koszyka.",
+          "warning"
         );
         return;
       }
@@ -692,6 +747,35 @@ const CartPage = () => {
 
   const onCloseConfirmOrderPress = () => setIsSuccess(false);
   const hasCheckoutItems = cartItems.length > 0 || isCartLoading;
+
+  const goToStep = (step) => {
+    if (step === 1) {
+      setActiveStep(1);
+      return;
+    }
+
+    if (step === 2) {
+      if (!stepOneComplete) {
+        showToast("Najpierw dodaj produkt do koszyka.", "warning");
+        return;
+      }
+      setActiveStep(2);
+      return;
+    }
+
+    if (!stepOneComplete) {
+      showToast("Najpierw uzupełnij koszyk.", "warning");
+      return;
+    }
+
+    if (!stepTwoComplete) {
+      setFormError("Uzupełnij wszystkie pola zamówienia, aby przejść dalej.");
+      showToast("Uzupełnij dane zamówienia, aby przejść do potwierdzenia.", "warning");
+      return;
+    }
+
+    setActiveStep(3);
+  };
 
   if (error) return <div>Error loading products</div>;
 
@@ -731,35 +815,39 @@ const CartPage = () => {
         <Card>
           <CheckoutHeader>
             <Title>{hasCheckoutItems ? "Finalizacja zamówienia" : "Koszyk"}</Title>
-            {hasCheckoutItems ? (
+            {!hasCheckoutItems && (
               <CheckoutIntro>
-                Sprawdź produkty, wybierz dostawę i metodę płatności, a następnie
-                przejdź do potwierdzenia zamówienia.
-              </CheckoutIntro>
-            ) : (
-              <CheckoutIntro>
-                Gdy dodasz produkty, tutaj pojawi się pełny checkout z dostawą,
-                płatnością i potwierdzeniem zamówienia.
+                Dodaj produkty do koszyka, aby przejść do zamówienia.
               </CheckoutIntro>
             )}
           </CheckoutHeader>
           {hasCheckoutItems && (
             <Stepper aria-label="Etapy zamówienia">
-              <StepItem $active>
-                <StepLabel>Krok 1</StepLabel>
-                <StepTitle>Koszyk</StepTitle>
-                <StepMeta>Sprawdź produkty i dostępność przed przejściem dalej.</StepMeta>
-              </StepItem>
-              <StepItem $active>
-                <StepLabel>Krok 2</StepLabel>
-                <StepTitle>Dostawa i płatność</StepTitle>
-                <StepMeta>Wybierz sposób odbioru oraz metodę opłacenia zamówienia.</StepMeta>
-              </StepItem>
-              <StepItem>
-                <StepLabel>Krok 3</StepLabel>
-                <StepTitle>Potwierdzenie</StepTitle>
-                <StepMeta>Zapisz zamówienie i przygotuj dalszy krok płatności.</StepMeta>
-              </StepItem>
+              {CHECKOUT_STEPS.map((step) => {
+                const isCompleted =
+                  (step.id === 1 && stepOneComplete) ||
+                  (step.id === 2 && stepTwoComplete) ||
+                  (step.id === 3 && false);
+                const isClickable =
+                  step.id === 1 ||
+                  (step.id === 2 && stepOneComplete) ||
+                  (step.id === 3 && stepTwoComplete);
+
+                return (
+                  <StepItem
+                    key={step.id}
+                    $active={activeStep === step.id}
+                    $clickable={isClickable}
+                    onClick={() => isClickable && goToStep(step.id)}
+                  >
+                    <StepTop>
+                      <StepIndex>Krok {step.id}</StepIndex>
+                      {isCompleted && <StepCheck>✓</StepCheck>}
+                    </StepTop>
+                    <StepTitle>{step.label}</StepTitle>
+                  </StepItem>
+                );
+              })}
             </Stepper>
           )}
           {isCartLoading ? (
@@ -837,151 +925,181 @@ const CartPage = () => {
                 <span>Razem</span>
                 <span>{cartTotal.toFixed(2)} zł</span>
               </TotalRow>
+              {hasCheckoutItems && activeStep === 1 && (
+                <StepActions>
+                  <span />
+                  <PrimaryButton type="button" onClick={() => goToStep(2)}>
+                    Dalej
+                  </PrimaryButton>
+                </StepActions>
+              )}
             </>
           )}
         </Card>
 
-        {!!cartItems.length && (
+        {!!cartItems.length && activeStep > 1 && (
           <SummaryCard>
-            <SectionTitle>Dane zamówienia</SectionTitle>
-            <MobileOrderHint>
-              Uzupełnij dane, wybierz dostawę i przygotuj zamówienie do przyszłej płatności online.
-            </MobileOrderHint>
+            <SectionTitle>
+              {activeStep === 2 ? "Dostawa i płatność" : "Potwierdzenie"}
+            </SectionTitle>
             <Form onSubmit={handleSubmit}>
-              <CheckoutBlock>
-                <SectionTitle as="h3">Dane kontaktowe</SectionTitle>
-                <Note>
-                  Te dane wykorzystamy do potwierdzenia zamówienia i dalszej obsługi płatności.
-                </Note>
-              </CheckoutBlock>
-              <Input
-                type="text"
-                placeholder="Imię i nazwisko"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <Input
-                type="email"
-                placeholder="Adres e-mail"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <TwoCols>
-                <Input
-                  type="text"
-                  placeholder="Miasto"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                />
-                <Input
-                  type="text"
-                  placeholder="Kod pocztowy"
-                  value={postalCode}
-                  onChange={(e) => setPostalCode(e.target.value)}
-                />
-              </TwoCols>
-              <Input
-                type="text"
-                placeholder="Adres ulicy"
-                value={streetAddress}
-                onChange={(e) => setStreetAddress(e.target.value)}
-              />
-              <Input
-                type="text"
-                placeholder="Kraj"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-              />
-              <CheckoutBlock>
-                <SectionTitle as="h3">Metoda dostawy</SectionTitle>
-                <OptionGrid>
-                  {DELIVERY_OPTIONS.map((option) => (
-                    <OptionCard
-                      key={option.id}
-                      type="button"
-                      $selected={option.id === deliveryMethod}
-                      onClick={() => setDeliveryMethod(option.id)}
-                      aria-pressed={option.id === deliveryMethod}
-                    >
-                      <OptionTopRow>
-                        <OptionTitle>{option.title}</OptionTitle>
-                        <OptionBadge>
-                          {option.price === 0 ? "Gratis" : `${option.price.toFixed(2)} zł`}
-                        </OptionBadge>
-                      </OptionTopRow>
-                      <OptionDescription>{option.description}</OptionDescription>
-                      <OptionMeta>
-                        <span>Czas: {option.eta}</span>
-                        <span>
-                          {option.price === 0
-                            ? "Bez dodatkowych kosztów"
-                            : `Dostawa: ${option.price.toFixed(2)} zł`}
-                        </span>
-                      </OptionMeta>
-                    </OptionCard>
-                  ))}
-                </OptionGrid>
-              </CheckoutBlock>
-              <CheckoutBlock>
-                <SectionTitle as="h3">Metoda płatności</SectionTitle>
-                <OptionGrid>
-                  {PAYMENT_OPTIONS.map((option) => (
-                    <OptionCard
-                      key={option.id}
-                      type="button"
-                      $selected={option.id === paymentMethod}
-                      onClick={() => setPaymentMethod(option.id)}
-                      aria-pressed={option.id === paymentMethod}
-                    >
-                      <OptionTopRow>
-                        <OptionTitle>{option.title}</OptionTitle>
-                        <OptionBadge>{option.badge}</OptionBadge>
-                      </OptionTopRow>
-                      <OptionDescription>{option.description}</OptionDescription>
-                    </OptionCard>
-                  ))}
-                </OptionGrid>
-                <Note>
-                  Wybrano: <strong>{selectedPayment.title}</strong>. Integracja Stripe nie jest
-                  jeszcze aktywna, ale checkout zapisuje już metodę płatności w modelu zamówienia.
-                </Note>
-              </CheckoutBlock>
-              <CheckoutBlock>
-                <SectionTitle as="h3">Podsumowanie checkoutu</SectionTitle>
-                <TotalsList>
-                  <TotalsRow>
-                    <span>Produkty</span>
-                    <span>{cartTotal.toFixed(2)} zł</span>
-                  </TotalsRow>
-                  <TotalsRow>
-                    <span>Dostawa</span>
-                    <span>{shippingTotal === 0 ? "0,00 zł" : `${shippingTotal.toFixed(2)} zł`}</span>
-                  </TotalsRow>
-                  <TotalsRow>
-                    <span>Płatność</span>
-                    <span>{selectedPayment.title}</span>
-                  </TotalsRow>
-                  <TotalsRow $strong>
-                    <span>Łącznie</span>
-                    <span>{orderGrandTotal.toFixed(2)} zł</span>
-                  </TotalsRow>
-                </TotalsList>
-                <Note>
-                  W kolejnym etapie ten widok można bezpiecznie podłączyć do Stripe Checkout albo
-                  Stripe Elements bez przebudowy UX. Dla opcji Stripe zapisujemy stan
-                  `sandbox_ready`, ale bez tworzenia realnej sesji płatniczej.
-                </Note>
-              </CheckoutBlock>
-              {formError && <Feedback>{formError}</Feedback>}
-              <PrimaryButton type="submit" disabled={isSubmitting}>
-                {isSubmitting
-                  ? "Tworzenie zamówienia..."
-                  : "Zapisz zamówienie i przygotuj płatność"}
-              </PrimaryButton>
+              {activeStep === 2 && (
+                <>
+                  <Input
+                    type="text"
+                    placeholder="Imię i nazwisko"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                  <Input
+                    type="email"
+                    placeholder="Adres e-mail"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <TwoCols>
+                    <Input
+                      type="text"
+                      placeholder="Miasto"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                    />
+                    <Input
+                      type="text"
+                      placeholder="Kod pocztowy"
+                      value={postalCode}
+                      onChange={(e) => setPostalCode(e.target.value)}
+                    />
+                  </TwoCols>
+                  <Input
+                    type="text"
+                    placeholder="Adres ulicy"
+                    value={streetAddress}
+                    onChange={(e) => setStreetAddress(e.target.value)}
+                  />
+                  <Input
+                    type="text"
+                    placeholder="Kraj"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                  />
+                  <CheckoutBlock>
+                    <SectionTitle as="h3">Metoda dostawy</SectionTitle>
+                    <OptionGrid>
+                      {DELIVERY_OPTIONS.map((option) => (
+                        <OptionCard
+                          key={option.id}
+                          type="button"
+                          $selected={option.id === deliveryMethod}
+                          onClick={() => setDeliveryMethod(option.id)}
+                          aria-pressed={option.id === deliveryMethod}
+                        >
+                          <OptionTopRow>
+                            <OptionTitle>{option.title}</OptionTitle>
+                            <OptionBadge>
+                              {option.price === 0 ? "Gratis" : `${option.price.toFixed(2)} zł`}
+                            </OptionBadge>
+                          </OptionTopRow>
+                          <OptionDescription>{option.description}</OptionDescription>
+                          <OptionMeta>
+                            <span>Czas: {option.eta}</span>
+                            <span>
+                              {option.price === 0
+                                ? "Bez dodatkowych kosztów"
+                                : `Dostawa: ${option.price.toFixed(2)} zł`}
+                            </span>
+                          </OptionMeta>
+                        </OptionCard>
+                      ))}
+                    </OptionGrid>
+                  </CheckoutBlock>
+                  <CheckoutBlock>
+                    <SectionTitle as="h3">Metoda płatności</SectionTitle>
+                    <OptionGrid>
+                      {PAYMENT_OPTIONS.map((option) => (
+                        <OptionCard
+                          key={option.id}
+                          type="button"
+                          $selected={option.id === paymentMethod}
+                          onClick={() => setPaymentMethod(option.id)}
+                          aria-pressed={option.id === paymentMethod}
+                        >
+                          <OptionTopRow>
+                            <OptionTitle>{option.title}</OptionTitle>
+                            <OptionBadge>{option.badge}</OptionBadge>
+                          </OptionTopRow>
+                          <OptionDescription>{option.description}</OptionDescription>
+                        </OptionCard>
+                      ))}
+                    </OptionGrid>
+                  </CheckoutBlock>
+                  {formError && <Feedback>{formError}</Feedback>}
+                  <StepActions>
+                    <StepButton type="button" onClick={() => goToStep(1)}>
+                      Wróć
+                    </StepButton>
+                    <PrimaryButton type="button" onClick={() => goToStep(3)}>
+                      Dalej
+                    </PrimaryButton>
+                  </StepActions>
+                </>
+              )}
+              {activeStep === 3 && (
+                <>
+                  <CheckoutBlock>
+                    <SectionTitle as="h3">Dane kontaktowe</SectionTitle>
+                    <TotalsList>
+                      <TotalsRow>
+                        <span>Klient</span>
+                        <span>{name}</span>
+                      </TotalsRow>
+                      <TotalsRow>
+                        <span>E-mail</span>
+                        <span>{email}</span>
+                      </TotalsRow>
+                      <TotalsRow>
+                        <span>Adres</span>
+                        <span>{`${streetAddress}, ${postalCode} ${city}, ${country}`}</span>
+                      </TotalsRow>
+                    </TotalsList>
+                  </CheckoutBlock>
+                  <CheckoutBlock>
+                    <SectionTitle as="h3">Podsumowanie</SectionTitle>
+                    <TotalsList>
+                      <TotalsRow>
+                        <span>Produkty</span>
+                        <span>{cartTotal.toFixed(2)} zł</span>
+                      </TotalsRow>
+                      <TotalsRow>
+                        <span>Dostawa</span>
+                        <span>{shippingTotal === 0 ? "0,00 zł" : `${shippingTotal.toFixed(2)} zł`}</span>
+                      </TotalsRow>
+                      <TotalsRow>
+                        <span>Płatność</span>
+                        <span>{selectedPayment.title}</span>
+                      </TotalsRow>
+                      <TotalsRow $strong>
+                        <span>Łącznie</span>
+                        <span>{orderGrandTotal.toFixed(2)} zł</span>
+                      </TotalsRow>
+                    </TotalsList>
+                  </CheckoutBlock>
+                  {formError && <Feedback>{formError}</Feedback>}
+                  <StepActions>
+                    <StepButton type="button" onClick={() => goToStep(2)}>
+                      Wróć
+                    </StepButton>
+                    <PrimaryButton type="submit" disabled={isSubmitting || !stepThreeReady}>
+                      {isSubmitting ? "Tworzenie zamówienia..." : "Złóż zamówienie"}
+                    </PrimaryButton>
+                  </StepActions>
+                </>
+              )}
             </Form>
           </SummaryCard>
         )}
       </Layout>
+      {toast && <Toast $variant={toast.variant}>{toast.message}</Toast>}
     </PageContainer>
   );
 };

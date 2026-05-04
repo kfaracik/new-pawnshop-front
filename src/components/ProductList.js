@@ -40,10 +40,10 @@ const SkeletonCard = styled.div`
   width: 100%;
   overflow: hidden;
   border-radius: 12px;
-  border: 1px solid #232323;
-  background: #0f0f0f;
+  border: 1px solid #dddddd;
+  background: linear-gradient(180deg, #f7f7f7, #eeeeee);
   aspect-ratio: 5 / 7;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.07);
 `;
 
 const SkeletonMedia = styled(Skeleton)`
@@ -51,7 +51,7 @@ const SkeletonMedia = styled(Skeleton)`
     height: 100%;
     transform: none;
     border-radius: 0;
-    background: linear-gradient(180deg, #242424, #171717);
+    background: linear-gradient(180deg, #ececec, #dddddd);
   }
 `;
 
@@ -63,9 +63,9 @@ const SkeletonOverlay = styled.div`
   gap: 8px;
   background: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.9) 0%,
-    rgba(0, 0, 0, 0.72) 65%,
-    rgba(0, 0, 0, 0) 100%
+    rgba(248, 248, 248, 0.96) 0%,
+    rgba(244, 244, 244, 0.9) 65%,
+    rgba(244, 244, 244, 0) 100%
   );
 `;
 
@@ -78,7 +78,7 @@ const SkeletonTitleRow = styled.div`
 const SkeletonText = styled(Skeleton)`
   && {
     transform: none;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.08);
   }
 `;
 
@@ -88,7 +88,7 @@ const SkeletonCart = styled(Skeleton)`
     flex: 0 0 34px;
     transform: none;
     border-radius: 8px;
-    background: rgba(201, 162, 39, 0.4);
+    background: rgba(201, 162, 39, 0.22);
   }
 `;
 

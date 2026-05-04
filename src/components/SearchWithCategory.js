@@ -216,6 +216,7 @@ export default function SearchWithCategory() {
           name="query"
           type="text"
           placeholder="Wyszukaj produkty..."
+          suppressHydrationWarning
           value={searchQuery}
           onChange={handleSearchChange}
         />
