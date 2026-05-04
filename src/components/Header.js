@@ -38,6 +38,25 @@ const TopRow = styled.div`
   }
 `;
 
+const MobileActions = styled.div`
+  display: flex;
+  align-items: center;
+
+  @media screen and (min-width: 1024px) {
+    display: none;
+  }
+`;
+
+const DesktopActions = styled.div`
+  display: none;
+
+  @media screen and (min-width: 1024px) {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+`;
+
 const SearchRow = styled.div`
   display: flex;
   justify-content: center;
@@ -54,11 +73,16 @@ const Header = () => {
       <HeaderRow>
         <TopRow>
           <Logo />
+          <MobileActions>
+            <Menu />
+          </MobileActions>
         </TopRow>
         <SearchRow>
           <SearchWithCategory />
         </SearchRow>
-        <Menu />
+        <DesktopActions>
+          <Menu />
+        </DesktopActions>
       </HeaderRow>
     </HeaderRoot>
   );
