@@ -2,7 +2,95 @@ import React from "react";
 import { ImageList, ImageListItem, useMediaQuery } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import Skeleton from "@mui/material/Skeleton";
+import styled from "styled-components";
+import colors from "styles/colors";
 import { ProductItem } from "./ProductItem";
+
+const ListShell = styled.div`
+  margin: 0 auto;
+  padding: 16px;
+  max-width: 100%;
+  overflow: hidden;
+`;
+
+const EmptyState = styled.div`
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding: 56px 20px;
+  text-align: center;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f7f7f7, #efefef);
+  color: ${colors.textSecondary};
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  h3 {
+    color: ${colors.textPrimary};
+    font-size: 1.1rem;
+  }
+`;
+
+const SkeletonCard = styled.div`
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #232323;
+  background: #0f0f0f;
+  aspect-ratio: 5 / 7;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+`;
+
+const SkeletonMedia = styled(Skeleton)`
+  && {
+    height: 100%;
+    transform: none;
+    border-radius: 0;
+    background: linear-gradient(180deg, #242424, #171717);
+  }
+`;
+
+const SkeletonOverlay = styled.div`
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.72) 65%,
+    rgba(0, 0, 0, 0) 100%
+  );
+`;
+
+const SkeletonTitleRow = styled.div`
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+`;
+
+const SkeletonText = styled(Skeleton)`
+  && {
+    transform: none;
+    background: rgba(255, 255, 255, 0.12);
+  }
+`;
+
+const SkeletonCart = styled(Skeleton)`
+  && {
+    margin-left: auto;
+    flex: 0 0 34px;
+    transform: none;
+    border-radius: 8px;
+    background: rgba(201, 162, 39, 0.4);
+  }
+`;
 
 const ProductList = ({
   products,
@@ -26,14 +114,7 @@ const ProductList = ({
   const columns = calculateColumns();
 
   return (
-    <div
-      style={{
-        margin: "0 auto",
-        padding: "16px",
-        maxWidth: "100%",
-        overflow: "hidden",
-      }}
-    >
+    <ListShell>
       <ImageList
         cols={columns}
         gap={isSmallScreen ? 8 : 16}
@@ -50,9 +131,18 @@ const ProductList = ({
         {loading
           ? Array.from({ length: 8 }).map((_, index) => (
               <ImageListItem key={index}>
-                <Skeleton variant="rectangular" width="100%" height={300} />
-                <Skeleton width="60%" sx={{ margin: "8px auto" }} />
-                <Skeleton width="40%" sx={{ margin: "4px auto" }} />
+                <SkeletonCard>
+                  <SkeletonMedia variant="rectangular" width="100%" />
+                  <SkeletonOverlay>
+                    <SkeletonTitleRow>
+                      <SkeletonText variant="text" width="68%" height={24} />
+                      <SkeletonCart variant="rounded" width={34} height={34} />
+                    </SkeletonTitleRow>
+                    <SkeletonText variant="text" width="42%" height={28} />
+                    <SkeletonText variant="text" width="55%" height={18} />
+                    <SkeletonText variant="text" width="72%" height={16} />
+                  </SkeletonOverlay>
+                </SkeletonCard>
               </ImageListItem>
             ))
           : (products || []).map((product) => (
@@ -63,6 +153,12 @@ const ProductList = ({
               />
             ))}
       </ImageList>
+      {!loading && (!products || products.length === 0) && (
+        <EmptyState>
+          <h3>Brak produktów do wyświetlenia</h3>
+          <p>Spróbuj zmienić filtr lub wróć później, gdy pojawią się nowe oferty.</p>
+        </EmptyState>
+      )}
       {totalPages > 1 && (
         <Pagination
           page={selectedPage ?? 1}
@@ -76,7 +172,7 @@ const ProductList = ({
           }}
         />
       )}
-    </div>
+    </ListShell>
   );
 };
 

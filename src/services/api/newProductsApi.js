@@ -10,5 +10,7 @@ export const useNewProducts = () => {
   return useQuery({
     queryKey: ["newProducts"],
     queryFn: () => fetchProducts(),
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
 };

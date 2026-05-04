@@ -10,5 +10,7 @@ export const usePopularProducts = () => {
   return useQuery({
     queryKey: ["popularProducts"],
     queryFn: fetchPopularProducts,
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
 };
