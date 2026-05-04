@@ -30,6 +30,23 @@ const AuctionsBanner = styled.section`
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.16);
 `;
 
+const BannerLayout = styled.div`
+  display: grid;
+  gap: 18px;
+  align-items: center;
+
+  @media screen and (min-width: 960px) {
+    grid-template-columns: minmax(0, 1.3fr) minmax(220px, 320px);
+    gap: 24px;
+  }
+`;
+
+const BannerContent = styled.div`
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+`;
+
 const BannerEyebrow = styled.span`
   font-size: 0.78rem;
   letter-spacing: 0.14em;
@@ -61,6 +78,18 @@ const BannerButton = styled.a`
   text-decoration: none;
 `;
 
+const BannerIllustration = styled.img`
+  display: none;
+  width: 100%;
+  max-width: 320px;
+  justify-self: end;
+  border-radius: 18px;
+
+  @media screen and (min-width: 960px) {
+    display: block;
+  }
+`;
+
 export default function HomePage() {
   const { data: newProducts, isLoading: isLoadingNew } = useNewProducts();
   const { data: popularProducts, isLoading: isLoadingPopular } =
@@ -84,15 +113,23 @@ export default function HomePage() {
       />
       <Slogan />
       <AuctionsBanner>
-        <BannerEyebrow>Licytacje</BannerEyebrow>
-        <BannerTitle>Aktualne licytacje znajdziesz na naszym Facebooku.</BannerTitle>
-        <BannerText>
-          Przeglądaj aktywne oferty, śledź nowe wystawienia i przejdź bezpośrednio do
-          profilu z licytacjami.
-        </BannerText>
-        <BannerButton href={FACEBOOK_AUCTIONS_URL} target="_blank" rel="noreferrer">
-          Przejdź do licytacji na Facebooku
-        </BannerButton>
+        <BannerLayout>
+          <BannerContent>
+            <BannerEyebrow>Licytacje</BannerEyebrow>
+            <BannerTitle>Aktualne licytacje znajdziesz na naszym Facebooku.</BannerTitle>
+            <BannerText>
+              Przeglądaj aktywne oferty, śledź nowe wystawienia i przejdź bezpośrednio do
+              profilu z licytacjami.
+            </BannerText>
+            <BannerButton href={FACEBOOK_AUCTIONS_URL} target="_blank" rel="noreferrer">
+              Przejdź do licytacji na Facebooku
+            </BannerButton>
+          </BannerContent>
+          <BannerIllustration
+            src="/auction-facebook-illustration.svg"
+            alt="Ilustracja sekcji licytacji odwołująca się do oferty na Facebooku."
+          />
+        </BannerLayout>
       </AuctionsBanner>
       <HorizontalProductList
         title="Nowości"

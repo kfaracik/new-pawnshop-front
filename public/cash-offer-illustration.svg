@@ -1,0 +1,19 @@
+<svg width="360" height="240" viewBox="0 0 360 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="360" height="240" rx="24" fill="#171717"/>
+  <circle cx="292" cy="58" r="42" fill="#C9A227" fill-opacity="0.18"/>
+  <circle cx="318" cy="196" r="58" fill="#C9A227" fill-opacity="0.12"/>
+  <g transform="rotate(-8 112 116)">
+    <rect x="52" y="94" width="176" height="92" rx="14" fill="#2A2A2A" stroke="#4A4A4A"/>
+    <rect x="68" y="110" width="144" height="60" rx="10" fill="#202020" stroke="#5A5A5A"/>
+    <circle cx="140" cy="140" r="18" fill="#C9A227" fill-opacity="0.9"/>
+    <path d="M140 128V152M130 140H150" stroke="#171717" stroke-width="4" stroke-linecap="round"/>
+    <path d="M84 124H108M172 156H196" stroke="#7C7C7C" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <g transform="rotate(7 196 92)">
+    <rect x="148" y="58" width="158" height="84" rx="14" fill="#353535" stroke="#6B6B6B"/>
+    <rect x="164" y="72" width="126" height="56" rx="10" fill="#252525" stroke="#7E7E7E"/>
+    <circle cx="227" cy="100" r="16" fill="#D8B652"/>
+    <path d="M220 100C220 96.5 222.8 94 226.8 94C230.2 94 232.7 95.6 234 98.2" stroke="#171717" stroke-width="3" stroke-linecap="round"/>
+    <path d="M233.5 102C233.5 105.5 230.5 108 226.6 108C223.3 108 220.7 106.3 219.5 103.8" stroke="#171717" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>

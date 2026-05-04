@@ -17,6 +17,13 @@ const HeaderRow = styled(LayoutInner)`
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  @media screen and (min-width: 1024px) {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 20px;
+  }
 `;
 
 const TopRow = styled.div`
@@ -25,12 +32,20 @@ const TopRow = styled.div`
   align-items: center;
   gap: 16px;
   min-height: 52px;
+
+  @media screen and (min-width: 1024px) {
+    min-width: 0;
+  }
 `;
 
 const SearchRow = styled.div`
   display: flex;
   justify-content: center;
   width: 100%;
+
+  @media screen and (min-width: 1024px) {
+    min-width: 0;
+  }
 `;
 
 const Header = () => {
@@ -39,11 +54,11 @@ const Header = () => {
       <HeaderRow>
         <TopRow>
           <Logo />
-          <Menu />
         </TopRow>
         <SearchRow>
           <SearchWithCategory />
         </SearchRow>
+        <Menu />
       </HeaderRow>
     </HeaderRoot>
   );

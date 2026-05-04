@@ -4,7 +4,6 @@ import styled from "styled-components";
 import { IoIosArrowDown } from "react-icons/io";
 import {
   buttonBaseStyle,
-  buttonDarkStyle,
   buttonPrimaryStyle,
 } from "components/Button";
 import colors from "styles/colors";
@@ -15,8 +14,13 @@ const SearchWrapper = styled.div`
   align-items: center;
   gap: 10px;
   width: 100%;
-  max-width: 760px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
+
+  @media screen and (min-width: 1024px) {
+    gap: 8px;
+  }
+
   @media screen and (max-width: 768px) {
     max-width: 100%;
     margin: 0;
@@ -31,6 +35,7 @@ const SearchForm = styled.form`
   flex: 1;
   width: 100%;
   min-width: 0;
+  box-shadow: none;
 `;
 
 const VisuallyHiddenLabel = styled.label`
@@ -55,10 +60,17 @@ const SearchInput = styled.input`
   color: #fff;
   font-size: 1rem;
   outline: none;
+  box-shadow: none;
   transition: border-color 0.2s ease, background-color 0.2s ease;
   &:focus {
     background-color: #202020;
     border-color: ${colors.primary};
+    outline: none;
+    box-shadow: none;
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow: none;
   }
   ::placeholder {
     color: #8f8f8f;
@@ -93,13 +105,41 @@ const DropdownWrapper = styled.div`
 
 const DropdownButton = styled.button`
   ${buttonBaseStyle}
-  ${buttonDarkStyle}
   min-height: auto;
-  border-radius: 8px;
-  padding: 10px 15px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #d2d2d2;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: none;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0.8;
+  }
+
+  &:hover {
+    color: ${colors.textInverse};
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    transform: none;
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
 `;
 
 const DropdownMenu = styled.ul`

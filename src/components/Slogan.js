@@ -24,6 +24,23 @@ const BannerShell = styled.section`
   }
 `;
 
+const BannerLayout = styled.div`
+  display: grid;
+  gap: 18px;
+  align-items: center;
+
+  @media screen and (min-width: 960px) {
+    grid-template-columns: minmax(0, 1.3fr) minmax(220px, 320px);
+    gap: 24px;
+  }
+`;
+
+const BannerContent = styled.div`
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+`;
+
 const Eyebrow = styled.span`
   font-size: 0.78rem;
   letter-spacing: 0.14em;
@@ -62,18 +79,38 @@ const BannerButton = styled(ButtonLink)`
   padding: 0 18px;
 `;
 
+const BannerIllustration = styled.img`
+  display: none;
+  width: 100%;
+  max-width: 320px;
+  justify-self: end;
+  border-radius: 18px;
+
+  @media screen and (min-width: 960px) {
+    display: block;
+  }
+`;
+
 export default function Slogan() {
   return (
     <BannerShell>
-      <Eyebrow>Oferta</Eyebrow>
-      <Title>Gotówka od ręki. Sprawdzone okazje.</Title>
-      <Desc>
-        Szybka wycena, minimum formalności i uczciwe warunki. Sprawdź
-        ofertę produktów w cenach, które mają sens.
-      </Desc>
-      <ButtonWrapper>
-        <BannerButton href="/products">Zobacz oferty</BannerButton>
-      </ButtonWrapper>
+      <BannerLayout>
+        <BannerContent>
+          <Eyebrow>Oferta</Eyebrow>
+          <Title>Gotówka od ręki. Sprawdzone okazje.</Title>
+          <Desc>
+            Szybka wycena, minimum formalności i uczciwe warunki. Sprawdź
+            ofertę produktów w cenach, które mają sens.
+          </Desc>
+          <ButtonWrapper>
+            <BannerButton href="/products">Zobacz oferty</BannerButton>
+          </ButtonWrapper>
+        </BannerContent>
+        <BannerIllustration
+          src="/cash-offer-illustration.svg"
+          alt="Ilustracja banknotów symbolizująca szybką gotówkę i ofertę lombardu."
+        />
+      </BannerLayout>
     </BannerShell>
   );
 }
