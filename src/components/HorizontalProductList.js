@@ -27,11 +27,13 @@ const Title = styled.span`
 `;
 
 const HorizontalTrack = styled.div`
+  --track-inset: 18px;
   display: flex;
   gap: 12px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding: 16px 16px 18px;
+  scroll-padding-inline: var(--track-inset);
+  padding: 16px var(--track-inset) 18px;
 
   &::-webkit-scrollbar {
     height: 7px;
@@ -43,8 +45,9 @@ const HorizontalTrack = styled.div`
   }
 
   @media screen and (max-width: 600px) {
+    --track-inset: 14px;
     gap: 10px;
-    padding: 8px 12px 12px;
+    padding: 8px var(--track-inset) 12px;
   }
 `;
 
