@@ -1,31 +1,16 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { buttonBaseStyle } from "components/Button";
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from "react-icons/fa";
 import PageContainer from "components/PageContainer";
 import SeoHead from "components/SeoHead";
 import colors from "styles/colors";
-
-const LOCATIONS = {
-  czestochowa: {
-    label: "Częstochowa NPM",
-    address: "Al. Najświętszej Maryi Panny 1, 42-200 Częstochowa",
-    mapSrc:
-      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.1246155!3d50.8125063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4710b54aa8fc5dbd%3A0x7ebed8eb0200a035!2sNowy%20Lombard%20NMP%206!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl",
-  },
-  rakow: {
-    label: "Częstochowa Raków",
-    address: "ul. Brzozowa 16, 42-216 Częstochowa - Raków",
-    mapSrc:
-      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.1246155!3d50.7817892!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4710b54aa8fc5dbd%3A0x7ebed8eb0200a035!2sNowy%20Lombard%20RAK%C3%93W!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl",
-  },
-  katowice: {
-    label: "Katowice",
-    address: "ul. Warszawska 13, 40-009 Katowice",
-    mapSrc:
-      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.438364987258!2d19.0246155!3d50.258614!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4716cf2c02be991b%3A0x72d74599feffda2!2sNowy%20Lombard%20Katowice!5e0!3m2!1spl!2spl!4v1697265932990!5m2!1spl!2spl",
-  },
-};
+import {
+  fetchLocationsForBuild,
+  getLocationAddress,
+  getLocationLabel,
+  getLocationMapUrl,
+} from "lib/locations";
 
 const PageSection = styled.section`
   margin: 24px 0 40px;
@@ -203,9 +188,26 @@ const MapFrame = styled.iframe`
   }
 `;
 
-export default function ContactPage() {
-  const [selectedKey, setSelectedKey] = useState("czestochowa");
-  const selected = useMemo(() => LOCATIONS[selectedKey], [selectedKey]);
+export default function ContactPage({ locations = [] }) {
+  const [selectedId, setSelectedId] = useState(() =>
+    locations[0]?._id ? String(locations[0]._id) : ""
+  );
+
+  useEffect(() => {
+    if (!selectedId && locations[0]?._id) {
+      setSelectedId(String(locations[0]._id));
+    }
+  }, [locations, selectedId]);
+
+  const selected = useMemo(
+    () =>
+      locations.find((location) => String(location?._id) === String(selectedId)) ||
+      locations[0] ||
+      null,
+    [locations, selectedId]
+  );
+  const address = getLocationAddress(selected);
+  const mapSrc = getLocationMapUrl(selected);
 
   return (
     <PageContainer>
@@ -217,75 +219,106 @@ export default function ContactPage() {
       <PageSection>
         <Header>
           <Title>Skontaktuj się z nami</Title>
-          <Tabs>
-            {Object.entries(LOCATIONS).map(([key, item]) => (
-              <TabButton
-                key={key}
-                type="button"
-                active={selectedKey === key}
-                onClick={() => setSelectedKey(key)}
-              >
-                {item.label}
-              </TabButton>
-            ))}
-          </Tabs>
+          {locations.length > 0 && (
+            <Tabs>
+              {locations.map((location) => (
+                <TabButton
+                  key={location._id}
+                  type="button"
+                  active={String(selected?._id) === String(location._id)}
+                  onClick={() => setSelectedId(String(location._id))}
+                >
+                  {getLocationLabel(location)}
+                </TabButton>
+              ))}
+            </Tabs>
+          )}
         </Header>
 
-        <ContentGrid>
+        {!selected ? (
           <Card>
-            <CardHeader>
-              <CardTitle>Dane kontaktowe</CardTitle>
-              <BranchPill>{selected.label}</BranchPill>
-            </CardHeader>
-            <InfoList>
-              <InfoRow>
-                <IconWrap>
-                  <FaPhone />
-                </IconWrap>
-                <InfoLabel>Telefon</InfoLabel>
-                <InfoValue>
-                  <ContactLink href="tel:+48515671666">+48 515 671 666</ContactLink>
-                </InfoValue>
-              </InfoRow>
-              <InfoRow>
-                <IconWrap>
-                  <FaEnvelope />
-                </IconWrap>
-                <InfoLabel>E-mail</InfoLabel>
-                <InfoValue>
-                  <ContactLink href="mailto:kontakt@lombard.pl">
-                    kontakt@lombard.pl
-                  </ContactLink>
-                </InfoValue>
-              </InfoRow>
-              <InfoRow>
-                <IconWrap>
-                  <FaMapMarkerAlt />
-                </IconWrap>
-                <InfoLabel>Adres</InfoLabel>
-                <InfoValue>{selected.address}</InfoValue>
-              </InfoRow>
-              <InfoRow>
-                <IconWrap>
-                  <FaClock />
-                </IconWrap>
-                <InfoLabel>Godziny</InfoLabel>
-                <InfoValue>Pon-Pt 9:00-18:30, Sob 9:00-15:00</InfoValue>
-              </InfoRow>
-            </InfoList>
+            <InfoValue>Aktualnie nie ma jeszcze opublikowanych lokalizacji.</InfoValue>
           </Card>
+        ) : (
+          <ContentGrid>
+            <Card>
+              <CardHeader>
+                <CardTitle>Dane kontaktowe</CardTitle>
+                <BranchPill>{getLocationLabel(selected)}</BranchPill>
+              </CardHeader>
+              <InfoList>
+                <InfoRow>
+                  <IconWrap>
+                    <FaPhone />
+                  </IconWrap>
+                  <InfoLabel>Telefon</InfoLabel>
+                  <InfoValue>
+                    {selected.phone ? (
+                      <ContactLink href={`tel:${selected.phone}`}>{selected.phone}</ContactLink>
+                    ) : (
+                      "Brak numeru telefonu"
+                    )}
+                  </InfoValue>
+                </InfoRow>
+                <InfoRow>
+                  <IconWrap>
+                    <FaEnvelope />
+                  </IconWrap>
+                  <InfoLabel>E-mail</InfoLabel>
+                  <InfoValue>
+                    {selected.email ? (
+                      <ContactLink href={`mailto:${selected.email}`}>{selected.email}</ContactLink>
+                    ) : (
+                      "Brak adresu e-mail"
+                    )}
+                  </InfoValue>
+                </InfoRow>
+                <InfoRow>
+                  <IconWrap>
+                    <FaMapMarkerAlt />
+                  </IconWrap>
+                  <InfoLabel>Adres</InfoLabel>
+                  <InfoValue>{address || "Brak adresu"}</InfoValue>
+                </InfoRow>
+                <InfoRow>
+                  <IconWrap>
+                    <FaClock />
+                  </IconWrap>
+                  <InfoLabel>Godziny</InfoLabel>
+                  <InfoValue>
+                    {selected.description || "Godziny otwarcia podamy po kontakcie z punktem."}
+                  </InfoValue>
+                </InfoRow>
+              </InfoList>
+            </Card>
 
-          <MapCard>
-            <MapFrame
-              src={selected.mapSrc}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              allowFullScreen
-              title={`Mapa lokalizacji: ${selected.label}`}
-            />
-          </MapCard>
-        </ContentGrid>
+            <MapCard>
+              {mapSrc ? (
+                <MapFrame
+                  src={mapSrc}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  allowFullScreen
+                  title={`Mapa lokalizacji: ${getLocationLabel(selected)}`}
+                />
+              ) : (
+                <InfoValue>Brak danych adresowych do wyświetlenia mapy.</InfoValue>
+              )}
+            </MapCard>
+          </ContentGrid>
+        )}
       </PageSection>
     </PageContainer>
   );
+}
+
+export async function getStaticProps() {
+  const locations = await fetchLocationsForBuild();
+
+  return {
+    props: {
+      locations,
+    },
+    revalidate: 300,
+  };
 }
