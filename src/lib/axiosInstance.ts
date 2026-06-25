@@ -12,6 +12,8 @@ axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  } else if (config.headers.Authorization) {
+    delete config.headers.Authorization;
   }
 
   return config;
@@ -22,6 +24,9 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       clearAuthToken();
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("auth:logout"));
+      }
     }
 
     return Promise.reject(error);
