@@ -8,11 +8,16 @@ const fetchProductById = async (id) => {
 };
 
 export const fetchProductsByIds = async (ids) => {
-  const responses = await Promise.all(
-    ids.map((id) => axiosInstance.get(`/products/${id}`))
+  const responses = await Promise.allSettled(
+    ids.map(async (id) => {
+      const response = await axiosInstance.get(`/products/${id}`);
+      return response.data;
+    })
   );
 
-  return responses.map(({ data }) => data);
+  return responses
+    .map((result) => (result.status === "fulfilled" ? result.value : null))
+    .filter(Boolean);
 };
 
 export const useProduct = (id, initialData) => {

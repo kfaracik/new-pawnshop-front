@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { createOrder } from "services/api/orderApi";
@@ -14,6 +14,7 @@ import SeoHead from "components/SeoHead";
 import Input from "components/Input";
 import { CartContext } from "context/CartContext";
 import { useProducts } from "services/api/useProductApi";
+import { useUserData } from "services/api/useUserApi";
 import colors from "styles/colors";
 
 const CHECKOUT_STEPS = [
@@ -50,16 +51,16 @@ const PAYMENT_OPTIONS = [
   {
     id: "stripe_card",
     title: "Karta / BLIK / Apple Pay",
-    description: "Docelowy checkout Stripe. Interfejs przygotowany, integracja później.",
-    badge: "Sandbox ready",
-    isFuture: true,
+    description: "Płatność online zostanie włączona po podpięciu operatora płatności.",
+    badge: "Wkrótce",
+    disabled: true,
   },
   {
     id: "bank_transfer",
     title: "Przelew tradycyjny",
-    description: "Po złożeniu zamówienia wyświetlimy dalszy krok opłacenia zamówienia.",
-    badge: "MVP",
-    isFuture: false,
+    description: "Po złożeniu zamówienia obsługa potwierdzi dane do płatności.",
+    badge: "Aktywne",
+    disabled: false,
   },
 ];
 
@@ -135,6 +136,8 @@ const SecondaryButtonLink = styled(Link)`
   ${buttonBaseStyle}
   ${buttonSecondaryStyle}
   min-height: 44px;
+  min-width: 220px;
+  justify-content: center;
   text-decoration: none;
 `;
 
@@ -234,6 +237,33 @@ const QtyButton = styled.button`
     opacity: 0.5;
     background: #f4f4f4;
   }
+`;
+
+const QuantityInput = styled.input`
+  width: 52px;
+  height: 34px;
+  border: 0;
+  border-left: 1px solid #e0e0e0;
+  border-right: 1px solid #e0e0e0;
+  text-align: center;
+  font-weight: 700;
+  color: ${colors.textPrimary};
+  background: #fff;
+  appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+`;
+
+const RemoveLineButton = styled.button`
+  ${buttonBaseStyle}
+  ${buttonSecondaryStyle}
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
 `;
 
 const ItemPrice = styled.strong`
@@ -367,6 +397,12 @@ const PrimaryButton = styled.button`
   font-size: 0.98rem;
 `;
 
+const EmptyStatePrimaryButton = styled(PrimaryButton)`
+  min-width: 220px;
+  width: auto;
+  justify-content: center;
+`;
+
 const Feedback = styled.p`
   margin: 4px 0 0;
   font-size: 0.88rem;
@@ -418,10 +454,11 @@ const OptionCard = styled.button`
   padding: 14px;
   display: grid;
   gap: 6px;
-  cursor: pointer;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  opacity: ${(props) => (props.disabled ? 0.6 : 1)};
   transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: ${colors.primary};
     transform: translateY(-1px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
@@ -535,8 +572,16 @@ const SkeletonItem = styled.div`
 `;
 
 const CartPage = () => {
-  const { cartProducts, setCartProducts, addProduct, removeProduct, clearCart } =
-    useContext(CartContext);
+  const {
+    cartProducts,
+    setCartProducts,
+    addProduct,
+    removeProduct,
+    removeProductLine,
+    setProductQuantity,
+    clearCart,
+  } = useContext(CartContext);
+  const { data: userData } = useUserData();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
@@ -546,13 +591,20 @@ const CartPage = () => {
   const [deliveryMethod, setDeliveryMethod] = useState(DELIVERY_OPTIONS[0].id);
   const [paymentMethod, setPaymentMethod] = useState(PAYMENT_OPTIONS[1].id);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [createdOrder, setCreatedOrder] = useState(null);
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
   const [activeStep, setActiveStep] = useState(1);
   const queryClient = useQueryClient();
 
-  const showToast = (message, variant = "warning") => {
+  useEffect(() => {
+    if (userData?.email && !email) {
+      setEmail(userData.email);
+    }
+  }, [email, userData?.email]);
+
+  const showToast = useCallback((message, variant = "warning") => {
     setToast({ message, variant });
     if (typeof window !== "undefined") {
       window.clearTimeout(showToast.timeoutId);
@@ -560,7 +612,7 @@ const CartPage = () => {
         setToast(null);
       }, 4500);
     }
-  };
+  }, []);
 
   const productIds = useMemo(
     () => cartProducts.map(({ productId }) => productId),
@@ -569,7 +621,7 @@ const CartPage = () => {
   const { data: products = [], isLoading, isFetching, error } = useProducts(productIds);
   const isCartLoading = productIds.length > 0 && (isLoading || isFetching);
 
-  const resolveAvailableQuantity = (product) => {
+  const resolveAvailableQuantity = useCallback((product) => {
     const fromQuantity = Number(product?.quantity);
     if (Number.isFinite(fromQuantity)) {
       return Math.max(0, fromQuantity);
@@ -595,7 +647,7 @@ const CartPage = () => {
     }
 
     return 0;
-  };
+  }, []);
 
   const cartItems = useMemo(
     () =>
@@ -617,7 +669,7 @@ const CartPage = () => {
           };
         })
         .filter(Boolean),
-    [products, cartProducts]
+    [products, cartProducts, resolveAvailableQuantity]
   );
 
   const cartTotal = useMemo(
@@ -651,6 +703,70 @@ const CartPage = () => {
       .map((item) => String(item.productId))
       .filter((productId) => !loadedIds.has(productId));
   }, [products, cartProducts]);
+
+  useEffect(() => {
+    if (isCartLoading || productIds.length === 0) {
+      return;
+    }
+
+    const availabilityByProductId = new Map(
+      products.map((product) => [
+        String(product._id),
+        resolveAvailableQuantity(product),
+      ])
+    );
+    let removedCount = 0;
+    let clampedCount = 0;
+    let changed = false;
+    const nextCart = [];
+
+    for (const item of cartProducts) {
+      const productId = String(item.productId);
+      const availableQuantity = availabilityByProductId.get(productId);
+
+      if (availableQuantity === undefined || availableQuantity <= 0) {
+        changed = true;
+        removedCount += 1;
+        continue;
+      }
+
+      const currentQuantity = Math.max(1, Math.floor(Number(item.quantity || 1)));
+      const nextQuantity = Number.isFinite(availableQuantity)
+        ? Math.min(currentQuantity, availableQuantity)
+        : currentQuantity;
+
+      if (nextQuantity !== currentQuantity) {
+        changed = true;
+        clampedCount += 1;
+      }
+
+      nextCart.push({
+        productId,
+        quantity: nextQuantity,
+      });
+    }
+
+    if (changed) {
+      setCartProducts(nextCart);
+    }
+
+    if (removedCount > 0 || clampedCount > 0) {
+      showToast(
+        removedCount > 0
+          ? "Koszyk został zaktualizowany: usunęliśmy produkty, które nie są już dostępne."
+          : "Koszyk został zaktualizowany do aktualnej dostępności produktów.",
+        "warning"
+      );
+    }
+  }, [
+    isCartLoading,
+    cartProducts,
+    productIds.length,
+    products,
+    resolveAvailableQuantity,
+    setCartProducts,
+    showToast,
+  ]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -698,7 +814,7 @@ const CartPage = () => {
         quantity: item.cartQuantity,
       }));
 
-      await createOrder({
+      const order = await createOrder({
         name,
         email,
         city,
@@ -713,6 +829,7 @@ const CartPage = () => {
 
       clearCart();
       queryClient.invalidateQueries({ queryKey: ["myOrders"] });
+      setCreatedOrder(order);
       setIsSuccess(true);
     } catch (err) {
       const unavailableProductIds = Array.isArray(
@@ -791,9 +908,16 @@ const CartPage = () => {
         <SuccessState>
           <h2>Zamówienie zostało przyjęte</h2>
           <p>
-            Potwierdzenie wyślemy na podany adres e-mail. Docelowy krok płatności
-            online będzie tu obsługiwany przez Stripe, a obecne zamówienie zapisuje już
-            wybraną dostawę i metodę płatności.
+            Potwierdzenie wyślemy na podany adres e-mail. Numer zamówienia:{" "}
+            <strong>{createdOrder?._id || "w trakcie nadawania"}</strong>.
+          </p>
+          <p>
+            Wybrana płatność:{" "}
+            <strong>
+              {PAYMENT_OPTIONS.find((option) => option.id === createdOrder?.paymentMethod)?.title ||
+                "Przelew tradycyjny"}
+            </strong>
+            . Obsługa potwierdzi dalsze kroki po weryfikacji zamówienia.
           </p>
           <CloseButton type="button" onClick={onCloseConfirmOrderPress}>
             Zamknij
@@ -815,11 +939,6 @@ const CartPage = () => {
         <Card>
           <CheckoutHeader>
             <Title>{hasCheckoutItems ? "Finalizacja zamówienia" : "Koszyk"}</Title>
-            {!hasCheckoutItems && (
-              <CheckoutIntro>
-                Dodaj produkty do koszyka, aby przejść do zamówienia.
-              </CheckoutIntro>
-            )}
           </CheckoutHeader>
           {hasCheckoutItems && (
             <Stepper aria-label="Etapy zamówienia">
@@ -865,9 +984,9 @@ const CartPage = () => {
                 płatności i potwierdzenia zamówienia.
               </EmptyStateText>
               <EmptyStateActions>
-                <PrimaryButton as={Link} href="/products">
+                <EmptyStatePrimaryButton as={Link} href="/products">
                   Przeglądaj produkty
-                </PrimaryButton>
+                </EmptyStatePrimaryButton>
                 <SecondaryButtonLink href="/">Wróć na stronę główną</SecondaryButtonLink>
               </EmptyStateActions>
             </EmptyState>
@@ -897,10 +1016,33 @@ const CartPage = () => {
                             type="button"
                             aria-label={`Zmniejsz ilość produktu ${item.title}`}
                             onClick={() => removeProduct(item._id)}
+                            disabled={item.cartQuantity <= 1}
                           >
                             -
                           </QtyButton>
-                          <span>{item.cartQuantity}</span>
+                          <QuantityInput
+                            type="number"
+                            inputMode="numeric"
+                            min="1"
+                            max={
+                              Number.isFinite(item.availableQuantity)
+                                ? item.availableQuantity
+                                : undefined
+                            }
+                            value={item.cartQuantity}
+                            aria-label={`Ilość produktu ${item.title}`}
+                            onChange={(event) => {
+                              if (event.target.value === "") {
+                                return;
+                              }
+
+                              setProductQuantity(
+                                item._id,
+                                Number(event.target.value),
+                                item.availableQuantity
+                              );
+                            }}
+                          />
                           <QtyButton
                             type="button"
                             aria-label={`Zwiększ ilość produktu ${item.title}`}
@@ -912,6 +1054,13 @@ const CartPage = () => {
                             +
                           </QtyButton>
                         </QuantityControl>
+                        <RemoveLineButton
+                          type="button"
+                          onClick={() => removeProductLine(item._id)}
+                          aria-label={`Usuń produkt ${item.title} z koszyka`}
+                        >
+                          Usuń
+                        </RemoveLineButton>
                         <ItemPrice>{item.total.toFixed(2)} zł</ItemPrice>
                       </ProductMeta>
                       {Number.isFinite(item.availableQuantity) && (
@@ -1021,7 +1170,12 @@ const CartPage = () => {
                           key={option.id}
                           type="button"
                           $selected={option.id === paymentMethod}
-                          onClick={() => setPaymentMethod(option.id)}
+                          disabled={option.disabled}
+                          onClick={() => {
+                            if (!option.disabled) {
+                              setPaymentMethod(option.id);
+                            }
+                          }}
                           aria-pressed={option.id === paymentMethod}
                         >
                           <OptionTopRow>

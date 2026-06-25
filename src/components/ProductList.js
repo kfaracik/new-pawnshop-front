@@ -2,6 +2,7 @@ import React from "react";
 import { ImageList, ImageListItem, useMediaQuery } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import Skeleton from "@mui/material/Skeleton";
+import { FaBoxOpen } from "react-icons/fa";
 import styled from "styled-components";
 import colors from "styles/colors";
 import { ProductItem } from "./ProductItem";
@@ -32,6 +33,12 @@ const EmptyState = styled.div`
   h3 {
     color: ${colors.textPrimary};
     font-size: 1.1rem;
+  }
+
+  svg {
+    font-size: 1.8rem;
+    color: ${colors.primaryDark};
+    opacity: 0.85;
   }
 `;
 
@@ -155,8 +162,8 @@ const ProductList = ({
       </ImageList>
       {!loading && (!products || products.length === 0) && (
         <EmptyState>
-          <h3>Brak produktów do wyświetlenia</h3>
-          <p>Spróbuj zmienić filtr lub wróć później, gdy pojawią się nowe oferty.</p>
+          <FaBoxOpen aria-hidden="true" />
+          <p>Nie mamy aktualnie dostępnych produktów.</p>
         </EmptyState>
       )}
       {totalPages > 1 && (

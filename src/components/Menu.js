@@ -258,13 +258,6 @@ export default function Menu() {
           >
             Kontakt
           </NavLink>
-          <NavLink
-            href="/locations"
-            $active={router.pathname === "/locations"}
-            onClick={closeMobileNav}
-          >
-            Lokalizacje
-          </NavLink>
           <ExternalNavLink
             href={FACEBOOK_AUCTIONS_URL}
             target="_blank"

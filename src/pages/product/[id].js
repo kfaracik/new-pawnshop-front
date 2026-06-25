@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import styled, { keyframes } from "styled-components";
 import Modal from "react-modal";
@@ -15,6 +15,7 @@ import { sanitizeHtml } from "features/product/lib/sanitizeHtml";
 import { getProductSeoData } from "features/product/lib/seo";
 import axiosInstance from "lib/axiosInstance";
 import { useProduct } from "services/api/useProductApi";
+import { useLocations } from "services/api/locationApi";
 import {
   getAuctionStreamUrl,
   placeAuctionBid,
@@ -480,6 +481,7 @@ const ProductPage = ({ initialProduct = null }) => {
   const { query, push } = useRouter();
   const { id } = query;
   const { data: product, isLoading, refetch: refetchProduct } = useProduct(id, initialProduct);
+  const { data: allLocations = [] } = useLocations();
   const safeDescription = useMemo(
     () => sanitizeHtml(product?.description),
     [product?.description]
@@ -530,7 +532,7 @@ const ProductPage = ({ initialProduct = null }) => {
       Modal.setAppElement("#__next");
     }
   }, []);
-  const resolveAvailableQuantity = (productData = product) => {
+  const resolveAvailableQuantity = useCallback((productData = product) => {
     const fromQuantity = Number(productData?.quantity);
     if (Number.isFinite(fromQuantity)) {
       return Math.max(0, fromQuantity);
@@ -556,8 +558,11 @@ const ProductPage = ({ initialProduct = null }) => {
     }
 
     return 0;
-  };
-  const maxProductQuantity = useMemo(() => resolveAvailableQuantity(product), [product]);
+  }, [product]);
+  const maxProductQuantity = useMemo(
+    () => resolveAvailableQuantity(product),
+    [product, resolveAvailableQuantity]
+  );
   const currentInCart = useMemo(
     () =>
       (cartProducts || []).reduce((acc, item) => {
@@ -815,20 +820,36 @@ const ProductPage = ({ initialProduct = null }) => {
 
   const { seoTitle, seoDescription, canonicalPath, productSchema } =
     getProductSeoData(product, id);
-  const locationDetails = Array.isArray(product?.availableLocationDetails)
-    ? product.availableLocationDetails
-    : [];
-  const locationNames =
-    locationDetails.length > 0
-      ? locationDetails.map((location) => location?.name).filter(Boolean)
-      : Array.isArray(product?.availableLocations)
-        ? product.availableLocations
-        : [];
+  const locationDetails = useMemo(() => {
+    const explicitDetails = Array.isArray(product?.availableLocationDetails)
+      ? product.availableLocationDetails.filter(Boolean)
+      : [];
+
+    if (explicitDetails.length > 0) {
+      return explicitDetails;
+    }
+
+    if (!Array.isArray(product?.availableLocations) || !Array.isArray(allLocations)) {
+      return [];
+    }
+
+    const locationMap = new Map(
+      allLocations.map((location) => [String(location?._id || ""), location])
+    );
+
+    return product.availableLocations
+      .map((locationId) => locationMap.get(String(locationId || "")))
+      .filter(Boolean);
+  }, [allLocations, product?.availableLocationDetails, product?.availableLocations]);
+
+  const locationNames = locationDetails
+    .map((location) => location?.name)
+    .filter(Boolean);
   const productAvailabilityLabel =
     product?.availabilityMode === "online_only"
       ? "Produkt dostępny wyłącznie online."
       : locationNames.length > 0
-        ? `Produkt dostępny w punktach: ${locationNames.join(", ")}.`
+        ? "Produkt dostępny w punktach:"
         : "Dostępność punktowa potwierdzana indywidualnie przez obsługę.";
 
   return (
@@ -885,6 +906,9 @@ const ProductPage = ({ initialProduct = null }) => {
               <Description
                 dangerouslySetInnerHTML={{ __html: safeDescription }}
               />
+              <AvailabilityDetails>
+                <strong>Dostępność:</strong> {productAvailabilityLabel}
+              </AvailabilityDetails>
               {locationDetails.length > 0 && product?.availabilityMode !== "online_only" && (
                 <div style={{ marginTop: "18px", display: "grid", gap: "10px" }}>
                   {locationDetails.map((location) => (
@@ -919,9 +943,6 @@ const ProductPage = ({ initialProduct = null }) => {
                   ))}
                 </div>
               )}
-              <AvailabilityDetails>
-                <strong>Dostępność:</strong> {productAvailabilityLabel}
-              </AvailabilityDetails>
               {product.isAuction && auction && (
                 <ProductAuctionPanel
                   auction={auction}
