@@ -13,6 +13,7 @@ Sitemap: ${siteUrl}/sitemap.xml
 `;
 
   res.setHeader("Content-Type", "text/plain");
+  res.setHeader("Cache-Control", "public, max-age=0, s-maxage=3600");
   res.write(robots);
   res.end();
 

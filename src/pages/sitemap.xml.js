@@ -1,11 +1,11 @@
-import { getSiteUrl } from "lib/seo";
+import { escapeXml, getSiteUrl } from "lib/seo";
 
 const STATIC_PATHS = ["/", "/products", "/contact", "/legal/privacy", "/legal/terms", "/legal/cookies"];
 
 const toUrlEntry = (path, lastModified) => `
   <url>
-    <loc>${`${getSiteUrl()}${path}`}</loc>
-    <lastmod>${lastModified}</lastmod>
+    <loc>${escapeXml(`${getSiteUrl()}${path}`)}</loc>
+    <lastmod>${escapeXml(lastModified)}</lastmod>
   </url>`;
 
 export async function getServerSideProps({ res }) {
@@ -47,6 +47,7 @@ ${productEntries}
 </urlset>`;
 
   res.setHeader("Content-Type", "text/xml");
+  res.setHeader("Cache-Control", "public, max-age=0, s-maxage=3600");
   res.write(sitemap);
   res.end();
 

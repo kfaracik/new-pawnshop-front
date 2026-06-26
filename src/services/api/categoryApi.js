@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "lib/axiosInstance";
+import { versionedApiPath } from "lib/apiPaths";
 
 const fetchCategories = async () => {
-  const response = await axiosInstance.get("/categories");
+  const response = await axiosInstance.get(versionedApiPath("categories"));
   return response.data;
 };
 

@@ -1,5 +1,17 @@
 import { getCanonicalUrl, getSiteUrl, stripHtml, truncate } from "lib/seo";
 
+const toAbsoluteImageUrl = (image) => {
+  if (!image || image.startsWith("data:")) {
+    return "";
+  }
+
+  if (image.startsWith("http://") || image.startsWith("https://")) {
+    return image;
+  }
+
+  return `${getSiteUrl()}${image.startsWith("/") ? image : `/${image}`}`;
+};
+
 export function getProductSeoData(product, id) {
   const seoTitle = product?.title
     ? `${product.title} | Nowy Lombard`
@@ -19,9 +31,7 @@ export function getProductSeoData(product, id) {
         name: product.title,
         description: stripHtml(product.description || ""),
         image: Array.isArray(product.images)
-          ? product.images.map((image) =>
-              image.startsWith("http") ? image : `${getSiteUrl()}${image}`
-            )
+          ? product.images.map(toAbsoluteImageUrl).filter(Boolean)
           : [],
         offers: {
           "@type": "Offer",

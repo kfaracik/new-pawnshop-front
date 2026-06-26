@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "lib/axiosInstance";
+import { absoluteVersionedApiUrl, versionedApiPath } from "lib/apiPaths";
 
 const normalizeList = (data) => {
   if (Array.isArray(data)) return data;
@@ -10,19 +11,19 @@ const normalizeList = (data) => {
 };
 
 const fetchAuctions = async ({ status, productId } = {}) => {
-  const response = await axiosInstance.get("/v1/auctions", {
+  const response = await axiosInstance.get(versionedApiPath("auctions"), {
     params: { status, productId },
   });
   return normalizeList(response.data);
 };
 
 const fetchAuctionById = async (auctionId) => {
-  const response = await axiosInstance.get(`/v1/auctions/${auctionId}`);
+  const response = await axiosInstance.get(versionedApiPath(`auctions/${auctionId}`));
   return response.data;
 };
 
 const fetchAuctionBids = async (auctionId) => {
-  const response = await axiosInstance.get(`/v1/auctions/${auctionId}/bids`);
+  const response = await axiosInstance.get(versionedApiPath(`auctions/${auctionId}/bids`));
   if (Array.isArray(response.data)) return response.data;
   if (Array.isArray(response.data?.items)) return response.data.items;
   if (Array.isArray(response.data?.bids)) return response.data.bids;
@@ -61,7 +62,7 @@ export const useMyAuctionParticipations = (enabled = true) =>
     enabled,
     queryKey: ["my-auction-participations"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/v1/auctions/my/participations");
+      const response = await axiosInstance.get(versionedApiPath("auctions/my/participations"));
       if (Array.isArray(response.data)) return response.data;
       if (Array.isArray(response.data?.items)) return response.data.items;
       return [];
@@ -70,14 +71,12 @@ export const useMyAuctionParticipations = (enabled = true) =>
   });
 
 export const placeAuctionBid = async ({ auctionId, amount }) => {
-  const response = await axiosInstance.post(`/v1/auctions/${auctionId}/bids`, {
+  const response = await axiosInstance.post(versionedApiPath(`auctions/${auctionId}/bids`), {
     amount,
   });
   return response.data;
 };
 
 export const getAuctionStreamUrl = (auctionId) => {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL || "";
-  const normalized = base.endsWith("/") ? base.slice(0, -1) : base;
-  return `${normalized}/v1/auctions/${auctionId}/stream`;
+  return absoluteVersionedApiUrl(`auctions/${auctionId}/stream`);
 };

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "lib/axiosInstance";
-import { getAuthToken } from "utils/authToken";
+import { versionedApiPath } from "lib/apiPaths";
 
 export const createOrder = async ({
   name,
@@ -14,7 +14,7 @@ export const createOrder = async ({
   deliveryPrice,
   paymentMethod,
 }) => {
-  const response = await axiosInstance.post("/v1/orders", {
+  const response = await axiosInstance.post(versionedApiPath("orders"), {
     name,
     email,
     city,
@@ -31,17 +31,15 @@ export const createOrder = async ({
 };
 
 const fetchMyOrders = async () => {
-  const response = await axiosInstance.get("/v1/orders/my");
+  const response = await axiosInstance.get(versionedApiPath("orders/my"));
   return Array.isArray(response.data) ? response.data : [];
 };
 
-export const useMyOrders = () => {
-  const token = getAuthToken();
-
+export const useMyOrders = (enabled = true) => {
   return useQuery({
     queryKey: ["myOrders"],
     queryFn: fetchMyOrders,
-    enabled: !!token,
+    enabled,
     staleTime: 60 * 1000,
   });
 };

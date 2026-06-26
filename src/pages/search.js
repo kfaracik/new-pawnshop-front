@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import PageContainer from "components/PageContainer";
 import ProductList from "components/ProductList";
 import SeoHead from "components/SeoHead";
 import { useSearchProducts } from "services/api/searchProductApi";
+import { useCategories } from "services/api/categoryApi";
 
 const PRODUCTS_PER_PAGE = 8;
 
@@ -12,8 +13,23 @@ export default function SearchPage() {
   const [page, setPage] = useState(Number(router.query.page) || 1);
   const searchQuery = router.query.query || "";
   const selectedCategory = router.query.category || "";
+  const { data: categoriesData } = useCategories();
 
-  const { data, isLoading } = useSearchProducts(
+  const categories = useMemo(() => {
+    if (Array.isArray(categoriesData)) return categoriesData;
+    if (Array.isArray(categoriesData?.categories)) return categoriesData.categories;
+    return [];
+  }, [categoriesData]);
+
+  const categoryName = useMemo(
+    () =>
+      categories.find((category) => String(category._id) === String(selectedCategory))?.name ||
+      "",
+    [categories, selectedCategory]
+  );
+
+  const hasSearchInput = Boolean(String(searchQuery).trim() || selectedCategory);
+  const { data, isLoading, isError, error } = useSearchProducts(
     searchQuery,
     page,
     PRODUCTS_PER_PAGE,
@@ -21,15 +37,17 @@ export default function SearchPage() {
   );
 
   const totalPages = Math.ceil(
-    data?.pagination.totalProducts / PRODUCTS_PER_PAGE
+    (data?.pagination?.totalProducts || 0) / PRODUCTS_PER_PAGE
   );
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
     const params = new URLSearchParams({
       page: String(newPage),
-      query: String(searchQuery),
     });
+    if (searchQuery) {
+      params.set("query", String(searchQuery));
+    }
     if (selectedCategory) {
       params.set("category", String(selectedCategory));
     }
@@ -59,8 +77,27 @@ export default function SearchPage() {
           Wyniki wyszukiwania dla: <strong>{searchQuery}</strong>
         </h2>
       )}
+      {!searchQuery && categoryName && (
+        <h2>
+          Produkty w kategorii: <strong>{categoryName}</strong>
+        </h2>
+      )}
+      {searchQuery && categoryName && (
+        <p>
+          Kategoria: <strong>{categoryName}</strong>
+        </p>
+      )}
+      {!hasSearchInput && (
+        <p>Wpisz szukaną frazę albo wybierz kategorię, aby zobaczyć produkty.</p>
+      )}
+      {isError && (
+        <p>
+          Nie udało się załadować wyników:{" "}
+          {error?.response?.data?.message || error?.message || "spróbuj ponownie."}
+        </p>
+      )}
       <ProductList
-        loading={isLoading}
+        loading={hasSearchInput && isLoading}
         products={data?.products || []}
         totalPages={totalPages}
         selectedPage={page}

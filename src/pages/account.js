@@ -171,7 +171,7 @@ const OrderProducts = styled.div`
 const AccountPage = () => {
   const [isMounted, setIsMounted] = useState(false);
   const { data, error, isLoading } = useUserData();
-  const { data: myOrders = [] } = useMyOrders();
+  const { data: myOrders = [] } = useMyOrders(Boolean(data));
   const router = useRouter();
   const queryClient = useQueryClient();
 

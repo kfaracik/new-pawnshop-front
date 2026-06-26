@@ -1,5 +1,4 @@
-import axiosInstance from "lib/axiosInstance";
-import { clearAuthToken, setAuthToken } from "utils/authToken";
+import axios from "axios";
 
 const parseAuthError = (error, fallbackMessage) => {
   if (error.code === "ECONNABORTED") {
@@ -13,14 +12,10 @@ const parseAuthError = (error, fallbackMessage) => {
 
 export const registerUser = async ({ email, password }) => {
   try {
-    const response = await axiosInstance.post("/auth/register", {
+    const response = await axios.post("/api/auth/register", {
       email: email.trim().toLowerCase(),
       password,
     });
-
-    if (response.data?.token) {
-      setAuthToken(response.data.token, response.data.expiresIn);
-    }
 
     return response.data;
   } catch (error) {
@@ -30,14 +25,10 @@ export const registerUser = async ({ email, password }) => {
 
 export const loginUser = async ({ email, password }) => {
   try {
-    const response = await axiosInstance.post("/auth/login", {
+    const response = await axios.post("/api/auth/login", {
       email: email.trim().toLowerCase(),
       password,
     });
-
-    if (response.data?.token) {
-      setAuthToken(response.data.token, response.data.expiresIn);
-    }
 
     return response.data;
   } catch (error) {
@@ -46,9 +37,5 @@ export const loginUser = async ({ email, password }) => {
 };
 
 export const logoutUser = async () => {
-  try {
-    await axiosInstance.post("/auth/logout");
-  } finally {
-    clearAuthToken();
-  }
+  await axios.post("/api/auth/logout");
 };
