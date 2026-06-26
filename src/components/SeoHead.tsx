@@ -17,7 +17,7 @@ type SeoHeadProps = {
 };
 
 const getImageUrl = (image?: string) => {
-  if (!image) {
+  if (!image || image.startsWith("data:")) {
     return `${getSiteUrl()}/favicon.ico`;
   }
 
@@ -27,6 +27,9 @@ const getImageUrl = (image?: string) => {
 
   return `${getSiteUrl()}${image.startsWith("/") ? image : `/${image}`}`;
 };
+
+const toSafeJsonLd = (item: Record<string, unknown>) =>
+  JSON.stringify(item).replace(/</g, "\\u003c");
 
 export default function SeoHead({
   title = DEFAULT_TITLE,
@@ -65,7 +68,7 @@ export default function SeoHead({
         <script
           key={index}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(item) }}
+          dangerouslySetInnerHTML={{ __html: toSafeJsonLd(item) }}
         />
       ))}
     </Head>

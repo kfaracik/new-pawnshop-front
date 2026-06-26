@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getCanonicalUrl, stripHtml, truncate } from "./seo";
+import { escapeXml, getCanonicalUrl, stripHtml, truncate } from "./seo";
 
 describe("seo helpers", () => {
   it("builds canonical urls with a leading slash", () => {
@@ -14,5 +14,11 @@ describe("seo helpers", () => {
     const value = truncate("a".repeat(170), 20);
     expect(value.length).toBeLessThanOrEqual(20);
     expect(value.endsWith("…")).toBe(true);
+  });
+
+  it("escapes sitemap xml values", () => {
+    expect(escapeXml('https://example.com/?q=a&b="<x>"')).toBe(
+      "https://example.com/?q=a&amp;b=&quot;&lt;x&gt;&quot;"
+    );
   });
 });

@@ -9,7 +9,8 @@ export const getSiteUrl = () =>
   (process.env.NEXT_PUBLIC_SITE_URL || FALLBACK_SITE_URL).replace(/\/$/, "");
 
 export const getCanonicalUrl = (path = "/") => {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const pathWithoutHash = path.split("#")[0] || "/";
+  const normalizedPath = pathWithoutHash.startsWith("/") ? pathWithoutHash : `/${pathWithoutHash}`;
   return `${getSiteUrl()}${normalizedPath}`;
 };
 
@@ -23,3 +24,11 @@ export const truncate = (value = "", maxLength = 160) => {
 
   return `${value.slice(0, maxLength - 1).trim()}…`;
 };
+
+export const escapeXml = (value = "") =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");

@@ -55,7 +55,7 @@ export default class MyDocument extends Document {
                 address: {
                   "@type": "PostalAddress",
                   streetAddress: "Al. Najświętszej Maryi Panny 1",
-                  addressLocality: "Cęstochowa",
+                  addressLocality: "Częstochowa",
                   postalCode: "42-200",
                   addressCountry: "PL",
                 },

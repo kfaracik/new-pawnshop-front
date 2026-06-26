@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "lib/axiosInstance";
+import { versionedApiPath } from "lib/apiPaths";
 
 const fetchProductById = async (id) => {
-  const response = await axiosInstance.get(`/products/${id}`);
+  const response = await axiosInstance.get(versionedApiPath(`products/${id}`));
 
   return response.data;
 };
@@ -10,7 +11,7 @@ const fetchProductById = async (id) => {
 export const fetchProductsByIds = async (ids) => {
   const responses = await Promise.allSettled(
     ids.map(async (id) => {
-      const response = await axiosInstance.get(`/products/${id}`);
+      const response = await axiosInstance.get(versionedApiPath(`products/${id}`));
       return response.data;
     })
   );

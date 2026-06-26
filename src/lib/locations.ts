@@ -10,6 +10,10 @@ export type FrontLocation = {
   description?: string;
 };
 
+const LOCATION_BUILD_TIMEOUT_MS = Number(
+  process.env.LOCATIONS_BUILD_TIMEOUT_MS || 1500
+);
+
 export const getLocationLabel = (location?: FrontLocation | null) =>
   location?.name ||
   [location?.city, location?.addressLine1].filter(Boolean).join(" - ") ||
@@ -35,23 +39,26 @@ export async function fetchLocationsForBuild() {
   }
 
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
-  const candidates = normalizedBaseUrl.endsWith("/v1")
-    ? [`${normalizedBaseUrl}/locations`, normalizedBaseUrl.replace(/\/v1$/, "/locations")]
-    : [`${normalizedBaseUrl}/locations`, `${normalizedBaseUrl}/v1/locations`];
+  const apiVersion = (process.env.NEXT_PUBLIC_API_VERSION || "v1").replace(/^\/+|\/+$/g, "");
+  const baseUrlAlreadyVersioned = apiVersion
+    ? new RegExp(`/${apiVersion}$`).test(normalizedBaseUrl)
+    : false;
+  const versionPrefix = apiVersion && !baseUrlAlreadyVersioned ? `/${apiVersion}` : "";
+  const url = `${normalizedBaseUrl}${versionPrefix}/locations`;
 
-  for (const url of candidates) {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        continue;
-      }
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), LOCATION_BUILD_TIMEOUT_MS);
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
 
-      const data = await response.json();
-      return Array.isArray(data) ? data : [];
-    } catch (_error) {
-      continue;
+    if (!response.ok) {
+      return [];
     }
-  }
 
-  return [];
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
+  } catch (_error) {
+    return [];
+  }
 }

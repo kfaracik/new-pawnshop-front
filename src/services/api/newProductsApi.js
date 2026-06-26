@@ -1,8 +1,9 @@
 import axiosInstance from "lib/axiosInstance";
+import { versionedApiPath } from "lib/apiPaths";
 import { useQuery } from "@tanstack/react-query";
 
 const fetchProducts = async () => {
-  const response = await axiosInstance.get(`products/new`);
+  const response = await axiosInstance.get(versionedApiPath("products/new"));
   return response.data;
 };
 

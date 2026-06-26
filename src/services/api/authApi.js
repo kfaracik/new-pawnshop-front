@@ -1,5 +1,4 @@
-import axiosInstance from "lib/axiosInstance";
-import { setAuthToken } from "utils/authToken";
+import axios from "axios";
 
 const parseAuthError = (error, fallbackMessage) => {
   if (error.code === "ECONNABORTED") {
@@ -13,14 +12,10 @@ const parseAuthError = (error, fallbackMessage) => {
 
 export const registerUser = async ({ email, password }) => {
   try {
-    const response = await axiosInstance.post("/auth/register", {
+    const response = await axios.post("/api/auth/register", {
       email: email.trim().toLowerCase(),
       password,
     });
-
-    if (response.data?.token) {
-      setAuthToken(response.data.token);
-    }
 
     return response.data;
   } catch (error) {
@@ -30,17 +25,17 @@ export const registerUser = async ({ email, password }) => {
 
 export const loginUser = async ({ email, password }) => {
   try {
-    const response = await axiosInstance.post("/auth/login", {
+    const response = await axios.post("/api/auth/login", {
       email: email.trim().toLowerCase(),
       password,
     });
-
-    if (response.data?.token) {
-      setAuthToken(response.data.token);
-    }
 
     return response.data;
   } catch (error) {
     throw new Error(parseAuthError(error, "Logowanie nieudane"));
   }
+};
+
+export const logoutUser = async () => {
+  await axios.post("/api/auth/logout");
 };

@@ -9,7 +9,7 @@ import { useUserData } from "services/api/useUserApi";
 import AuthForm from "components/AuthForm";
 import { FaRegUserCircle } from "react-icons/fa";
 import { FiList } from "react-icons/fi";
-import { clearAuthToken } from "utils/authToken";
+import { logoutUser } from "services/api/authApi";
 import colors from "styles/colors";
 import { useMyOrders } from "services/api/orderApi";
 
@@ -157,7 +157,7 @@ const DELIVERY_LABELS = {
 
 const PAYMENT_METHOD_LABELS = {
   bank_transfer: "Przelew tradycyjny",
-  stripe_card: "Stripe / karta / BLIK",
+  stripe_card: "Płatność online Stripe",
 };
 
 const OrderProducts = styled.div`
@@ -171,7 +171,7 @@ const OrderProducts = styled.div`
 const AccountPage = () => {
   const [isMounted, setIsMounted] = useState(false);
   const { data, error, isLoading } = useUserData();
-  const { data: myOrders = [] } = useMyOrders();
+  const { data: myOrders = [] } = useMyOrders(Boolean(data));
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -179,18 +179,28 @@ const AccountPage = () => {
     setIsMounted(true);
   }, []);
 
-  const handleLogout = useCallback(() => {
-    clearAuthToken();
+  const clearSession = useCallback(() => {
     queryClient.removeQueries({ queryKey: ["userData"] });
     queryClient.removeQueries({ queryKey: ["myOrders"] });
     router.replace("/account");
   }, [queryClient, router]);
 
+  const handleLogout = useCallback(async () => {
+    await logoutUser();
+    clearSession();
+  }, [clearSession]);
+
   useEffect(() => {
     if (error?.response?.status === 401) {
-      handleLogout();
+      clearSession();
     }
-  }, [error, handleLogout]);
+  }, [error, clearSession]);
+
+  useEffect(() => {
+    const onLogout = () => clearSession();
+    window.addEventListener("auth:logout", onLogout);
+    return () => window.removeEventListener("auth:logout", onLogout);
+  }, [clearSession]);
 
   if (!isMounted) {
     return (

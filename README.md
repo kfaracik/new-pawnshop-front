@@ -19,8 +19,13 @@ Customer storefront built with Next.js.
 ## Required environment variables
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://api.example.com/api/v1
+NEXT_PUBLIC_API_BASE_URL=https://api.example.com/api
+NEXT_PUBLIC_API_VERSION=v1
+LOCATIONS_BUILD_TIMEOUT_MS=1500
 ```
+
+`NEXT_PUBLIC_API_BASE_URL` is used server-side by the BFF proxy and should point at
+the backend API root, for example `https://api.example.com/api`.
 
 ## Scripts
 
@@ -28,11 +33,13 @@ NEXT_PUBLIC_API_BASE_URL=https://api.example.com/api/v1
 npm run dev
 npm run build
 npm run start
+npm run typecheck
 ```
 
 ## Production checklist
 
 - Replace placeholder legal company data with real entity details.
+- Keep protected API calls on the BFF path so JWT remains in the server-set `httpOnly; Secure; SameSite=Strict` cookie instead of browser-readable JavaScript storage.
 - Connect cookie choices to actual analytics/marketing tags.
 - Review remaining image optimization gaps and replace raw `<img>` where still needed.
 - Add error boundaries, monitoring and checkout analytics.
@@ -43,6 +50,9 @@ Current implementation notes:
 - Product grid cards and cart items now use optimized Next image rendering with lazy loading semantics.
 - Checkout has a visual payment and delivery flow prepared for future Stripe integration, without enabling live payment yet.
 - Orders now persist delivery method, delivery price, payment method and checkout session preparation state.
+- Storefront API calls now use `NEXT_PUBLIC_API_BASE_URL` plus `NEXT_PUBLIC_API_VERSION` instead of per-call version fallbacks.
+- Auth now goes through Next.js API routes, which set the backend JWT in an `httpOnly` cookie and proxy protected requests server-side.
+- `/contact` static build location fetching has a timeout fallback so slow API responses do not hold the build for a long time.
 
 ## Planned legal work
 

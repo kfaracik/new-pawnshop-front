@@ -83,6 +83,13 @@ const FormFeedback = styled.p`
   text-align: left;
 `;
 
+const FieldHint = styled.p`
+  margin: -4px 0 0.9rem;
+  color: ${colors.textSecondary};
+  font-size: 0.82rem;
+  line-height: 1.45;
+`;
+
 const Form = styled.form`
   display: flex;
   flex-direction: column;
@@ -100,9 +107,21 @@ const AuthForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setErrorMessage("Podaj prawidłowy adres e-mail.");
+      return;
+    }
+
+    if (!isLogin && (password.length < 8 || !/[a-zA-Z]/.test(password) || !/\d/.test(password))) {
+      setErrorMessage("Hasło musi mieć co najmniej 8 znaków oraz zawierać litery i cyfry.");
+      return;
+    }
+
     setIsSubmitting(true);
 
-    const requestData = { email, password };
+    const requestData = { email: normalizedEmail, password };
 
     try {
       if (isLogin) {
@@ -145,8 +164,12 @@ const AuthForm = () => {
           placeholder="Hasło"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          minLength={isLogin ? undefined : 8}
           required
         />
+        {!isLogin && (
+          <FieldHint>Minimum 8 znaków, przynajmniej jedna litera i jedna cyfra.</FieldHint>
+        )}
         {errorMessage && <FormFeedback>{errorMessage}</FormFeedback>}
         <StyledButton type="submit" disabled={isSubmitting}>
           {isSubmitting

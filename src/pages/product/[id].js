@@ -14,8 +14,10 @@ import ProductGallery from "features/product/components/ProductGallery";
 import { sanitizeHtml } from "features/product/lib/sanitizeHtml";
 import { getProductSeoData } from "features/product/lib/seo";
 import axiosInstance from "lib/axiosInstance";
+import { versionedApiPath } from "lib/apiPaths";
 import { useProduct } from "services/api/useProductApi";
 import { useLocations } from "services/api/locationApi";
+import { useUserData } from "services/api/useUserApi";
 import {
   getAuctionStreamUrl,
   placeAuctionBid,
@@ -25,7 +27,6 @@ import {
 } from "services/api/auctionApi";
 import { CartContext } from "context/CartContext";
 import colors from "styles/colors";
-import { getAuthToken } from "utils/authToken";
 
 const ColWrapper = styled.div`
   display: grid;
@@ -503,6 +504,7 @@ const ProductPage = ({ initialProduct = null }) => {
     auctionId,
     !!auctionId
   );
+  const { data: currentUser } = useUserData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -515,7 +517,7 @@ const ProductPage = ({ initialProduct = null }) => {
   const [liveAuction, setLiveAuction] = useState(null);
   const [liveBids, setLiveBids] = useState([]);
   const { addProduct, cartProducts } = useContext(CartContext);
-  const isLoggedIn = Boolean(getAuthToken());
+  const isLoggedIn = Boolean(currentUser);
 
   const showToast = (message, variant = "warning") => {
     setToast({ message, variant });
@@ -697,7 +699,7 @@ const ProductPage = ({ initialProduct = null }) => {
 
     try {
       setIsCheckingAvailability(true);
-      const response = await axiosInstance.get(`/products/${id}`);
+      const response = await axiosInstance.get(versionedApiPath(`products/${id}`));
       const freshProduct = response?.data || null;
       const freshMaxQuantity = resolveAvailableQuantity(freshProduct);
       const freshAvailabilityStatus =
@@ -1060,14 +1062,19 @@ export default ProductPage;
 export async function getServerSideProps(context) {
   const { id } = context.params || {};
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const apiVersion = (process.env.NEXT_PUBLIC_API_VERSION || "v1").replace(/^\/+|\/+$/g, "");
 
   if (!id || !apiBaseUrl) {
     return { props: { initialProduct: null } };
   }
 
   try {
+    const normalizedBaseUrl = apiBaseUrl.replace(/\/+$/, "");
+    const productPath = new RegExp(`/${apiVersion}$`).test(normalizedBaseUrl)
+      ? `products/${encodeURIComponent(id)}`
+      : `${apiVersion}/products/${encodeURIComponent(id)}`;
     const response = await fetch(
-      `${apiBaseUrl.replace(/\/$/, "")}/products/${encodeURIComponent(id)}`
+      `${normalizedBaseUrl}/${productPath}`
     );
 
     if (!response.ok) {
