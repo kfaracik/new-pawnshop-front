@@ -8,11 +8,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "www.apple.com",
-      },
-      {
-        protocol: "https",
-        hostname: "upload.wikimedia.org",
+        hostname: "**",
       },
     ],
   },

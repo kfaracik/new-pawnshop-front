@@ -191,10 +191,10 @@ const AccountPage = () => {
   }, [clearSession]);
 
   useEffect(() => {
-    if (error?.response?.status === 401) {
+    if (data && error?.response?.status === 401) {
       clearSession();
     }
-  }, [error, clearSession]);
+  }, [data, error, clearSession]);
 
   useEffect(() => {
     const onLogout = () => clearSession();

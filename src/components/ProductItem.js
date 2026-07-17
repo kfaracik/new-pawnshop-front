@@ -15,6 +15,9 @@ const fadeIn = keyframes`
 const truncateTitle = (title, maxLength) =>
   title.length > maxLength ? `${title.substring(0, maxLength)}...` : title;
 
+const PLACEHOLDER_IMAGE =
+  "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
+
 const CardContainer = styled.div`
   border-radius: 12px;
   overflow: hidden;
@@ -150,6 +153,7 @@ const LocationNote = styled(Typography)`
 `;
 
 export const ProductItem = ({ product, searchQuery }) => {
+  const [imageFailed, setImageFailed] = React.useState(false);
   const url = `/product/${product._id}`;
   const availabilityStatus = product?.availabilityStatus || "available";
   const reservationLabel = (() => {
@@ -186,8 +190,7 @@ export const ProductItem = ({ product, searchQuery }) => {
   };
 
   const productImage =
-    product.images?.[0] ||
-    "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
+    imageFailed || !product.images?.[0] ? PLACEHOLDER_IMAGE : product.images[0];
   const locationDetails = Array.isArray(product?.availableLocationDetails)
     ? product.availableLocationDetails
     : [];
@@ -215,6 +218,7 @@ export const ProductItem = ({ product, searchQuery }) => {
             sizes="(max-width: 600px) 100vw, 33vw"
             loader={({ src }) => src}
             unoptimized
+            onError={() => setImageFailed(true)}
           />
         </ProductImageWrapper>
         {product.isAuction && (
