@@ -45,6 +45,18 @@ export default function PrivacyPage() {
         </p>
       </section>
       <section>
+        <h2>Konto użytkownika</h2>
+        <p>
+          Zakładając konto przechowujemy Twój adres e-mail oraz — jeśli je
+          podasz — dane profilu (imię i nazwisko, telefon, adres dostawy), aby
+          przyspieszyć składanie zamówień. Możesz je w każdej chwili edytować w
+          panelu konta, zmienić adres e-mail i hasło, a także trwale usunąć
+          konto (zakładka „Prywatność”). Po usunięciu konta dane logowania są
+          kasowane; złożone zamówienia pozostają przez okres wymagany
+          przepisami podatkowymi i rachunkowymi.
+        </p>
+      </section>
+      <section>
         <h2>Dane przechowywane lokalnie w przeglądarce</h2>
         <p>
           Dla wygody zakupów część danych zapisujemy wyłącznie w pamięci lokalnej Twojej
