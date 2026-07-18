@@ -16,6 +16,8 @@ import { getProductSeoData } from "features/product/lib/seo";
 import axiosInstance from "lib/axiosInstance";
 import { versionedApiPath } from "lib/apiPaths";
 import { useProduct } from "services/api/useProductApi";
+import { useProducts } from "services/api/productApi";
+import HorizontalProductList from "components/HorizontalProductList";
 import { useLocations } from "services/api/locationApi";
 import { useUserData } from "services/api/useUserApi";
 import {
@@ -483,6 +485,20 @@ const ProductPage = ({ initialProduct = null }) => {
   const { id } = query;
   const { data: product, isLoading, refetch: refetchProduct } = useProduct(id, initialProduct);
   const { data: allLocations = [] } = useLocations();
+  const relatedCategoryId =
+    product?.category?._id || (typeof product?.category === "string" ? product.category : "");
+  const { data: relatedData, isLoading: isLoadingRelated } = useProducts(
+    1,
+    8,
+    relatedCategoryId
+  );
+  const relatedProducts = useMemo(
+    () =>
+      (relatedData?.products || [])
+        .filter((item) => String(item._id) !== String(product?._id))
+        .slice(0, 6),
+    [relatedData, product?._id]
+  );
   const safeDescription = useMemo(
     () => sanitizeHtml(product?.description),
     [product?.description]
@@ -1016,6 +1032,15 @@ const ProductPage = ({ initialProduct = null }) => {
               )}
             </InfoCard>
           </ColWrapper>
+          {relatedCategoryId && (isLoadingRelated || relatedProducts.length > 0) && (
+            <div style={{ marginTop: "clamp(32px, 5vw, 52px)" }}>
+              <HorizontalProductList
+                title="Podobne produkty"
+                products={relatedProducts}
+                loading={isLoadingRelated}
+              />
+            </div>
+          )}
           <Modal
             isOpen={isModalOpen}
             onRequestClose={closeModal}

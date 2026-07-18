@@ -418,7 +418,11 @@ export default function Menu() {
     <>
       <HeaderActions>
         <DesktopNav aria-label="Nawigacja główna">
-          <DesktopNavLink href="/products" $active={router.pathname === "/products"}>
+          <DesktopNavLink
+            href="/products"
+            $active={router.pathname === "/products"}
+            aria-current={router.pathname === "/products" ? "page" : undefined}
+          >
             Produkty
           </DesktopNavLink>
           <DesktopExternalLink
@@ -428,7 +432,11 @@ export default function Menu() {
           >
             Licytacje
           </DesktopExternalLink>
-          <DesktopNavLink href="/contact" $active={router.pathname === "/contact"}>
+          <DesktopNavLink
+            href="/contact"
+            $active={router.pathname === "/contact"}
+            aria-current={router.pathname === "/contact" ? "page" : undefined}
+          >
             Kontakt
           </DesktopNavLink>
         </DesktopNav>
