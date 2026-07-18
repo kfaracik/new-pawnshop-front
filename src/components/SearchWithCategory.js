@@ -65,22 +65,22 @@ const SearchInput = styled.input`
   width: 100%;
   min-width: 0;
   padding: 12px 44px 12px 42px;
-  background-color: #1a1a1a;
-  border: 1px solid #2f2f2f;
-  border-radius: 8px 0 0 8px;
-  color: #fff;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px 0 0 12px;
+  color: ${colors.textPrimary};
   font-size: 1rem;
   outline: none;
   box-shadow: none;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
   &:focus {
-    background-color: #202020;
     border-color: ${colors.primary};
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.24);
   }
 
   &::placeholder {
-    color: #8f8f8f;
+    color: #9a9a9a;
   }
 `;
 
@@ -97,11 +97,11 @@ const ClearButton = styled.button`
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: #cfcfcf;
+  color: #9a9a9a;
 
   &:hover {
-    background: #282828;
-    color: #fff;
+    background: #f2f2f2;
+    color: ${colors.textPrimary};
   }
 `;
 
@@ -109,7 +109,7 @@ const SearchButton = styled.button`
   ${buttonBaseStyle}
   ${buttonPrimaryStyle}
   min-height: auto;
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 12px 12px 0;
   padding: 12px 18px;
   transform: none !important;
   white-space: nowrap;
@@ -133,10 +133,10 @@ const SuggestionMenu = styled.div`
   display: ${(props) => (props.$open ? "grid" : "none")};
   gap: 4px;
   padding: 8px;
-  border: 1px solid #2f2f2f;
-  border-radius: 8px;
-  background: #141414;
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.12);
 `;
 
 const SuggestionHeader = styled.div`
@@ -156,13 +156,13 @@ const SuggestionButton = styled.button`
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: #f1f1f1;
+  color: ${colors.textPrimary};
   font-size: 0.92rem;
   text-align: left;
 
   &:hover {
-    background: #1f1f1f;
-    color: ${colors.primaryLight};
+    background: #f7f7f7;
+    color: ${colors.primaryDark};
   }
 `;
 
@@ -181,9 +181,9 @@ const DropdownButton = styled.button`
   min-height: 42px;
   padding: 0 8px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 10px;
   background: transparent;
-  color: #d2d2d2;
+  color: ${colors.textSecondary};
   display: flex;
   align-items: center;
   gap: 6px;
@@ -201,9 +201,9 @@ const DropdownButton = styled.button`
   }
 
   &:hover {
-    color: ${colors.textInverse};
-    background: #1a1a1a;
-    border-color: #2f2f2f;
+    color: ${colors.textPrimary};
+    background: #f2f2f2;
+    border-color: #e0e0e0;
     transform: none;
   }
 
@@ -216,10 +216,10 @@ const CategorySelect = styled.select`
   display: none;
   width: 100%;
   padding: 11px 12px;
-  border: 1px solid #2f2f2f;
-  border-radius: 8px;
-  background: #1a1a1a;
-  color: #f1f1f1;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  background: #fff;
+  color: ${colors.textPrimary};
   font-size: 0.95rem;
 
   @media screen and (max-width: 768px) {
@@ -231,9 +231,9 @@ const DropdownMenu = styled.ul`
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  background-color: #141414;
-  border: 1px solid #2f2f2f;
-  border-radius: 8px;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
   padding: 8px 0;
   list-style: none;
   z-index: 1000;
@@ -241,7 +241,7 @@ const DropdownMenu = styled.ul`
   min-width: 240px;
   max-height: min(420px, calc(100vh - 160px));
   overflow-y: auto;
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.12);
 `;
 
 const DropdownItem = styled.li`
@@ -252,16 +252,16 @@ const CategoryButton = styled.button`
   width: 100%;
   min-height: 38px;
   padding: 10px 16px;
-  color: ${(props) => (props.$active ? colors.primaryLight : "#cfcfcf")};
+  color: ${(props) => (props.$active ? colors.primaryDark : colors.textSecondary)};
   cursor: pointer;
   border: 0;
-  background: ${(props) => (props.$active ? "#1f1f1f" : "transparent")};
+  background: ${(props) => (props.$active ? "#fff8e8" : "transparent")};
   text-align: left;
   font-weight: ${(props) => (props.$active ? 700 : 500)};
 
   &:hover {
-    background-color: #1f1f1f;
-    color: ${colors.primaryLight};
+    background-color: #f7f7f7;
+    color: ${colors.primaryDark};
   }
 `;
 

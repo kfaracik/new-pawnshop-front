@@ -57,22 +57,23 @@ const CartIconWrapper = styled.div`
   justify-content: center;
   align-items: center;
   position: relative;
-  min-width: 36px;
-  height: 36px;
-  color: #fff;
-  border: 1px solid #2f2f2f;
-  border-radius: 8px;
-  background: #171717;
+  min-width: 44px;
+  height: 44px;
+  color: ${colors.textPrimary};
+  border: 1px solid #e0e0e0;
+  border-radius: 11px;
+  background: #fff;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  &:hover {
+    border-color: ${colors.primary};
+    background: #fff8e8;
+  }
 `;
 
 const CartIcon = styled(FiShoppingCart)`
   font-size: 20px;
-  color: #f1f1f1;
+  color: ${colors.textPrimary};
   cursor: pointer;
-  transition: color 0.2s ease;
-  &:hover {
-    color: ${colors.primaryLight};
-  }
 `;
 
 const Badge = styled.div`
@@ -117,12 +118,17 @@ const MenuButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   padding: 0;
-  border-radius: 8px;
-  font-size: 24px;
-  color: #fff;
+  border-radius: 11px;
+  font-size: 22px;
+  color: ${colors.textSecondary};
+
+  &:hover {
+    background: #f2f2f2;
+    color: ${colors.primaryDark};
+  }
 `;
 
 const MobileBackdrop = styled.button`

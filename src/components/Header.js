@@ -6,23 +6,37 @@ import Menu from "./Menu";
 import { LayoutInner } from "styles/layout";
 import colors from "styles/colors";
 
+const AnnouncementBar = styled.div`
+  background: ${colors.black};
+  color: ${colors.primaryLight};
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 9px 16px;
+`;
+
 const HeaderRoot = styled.header`
-  background: ${colors.backgroundDark};
-  padding: 12px 0 14px;
-  border-bottom: 1px solid ${colors.borderSubtle};
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #ececec;
 `;
 
 const HeaderRow = styled(LayoutInner)`
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding-top: 12px;
+  padding-bottom: 12px;
 
   @media screen and (min-width: 1024px) {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    gap: 20px;
+    gap: clamp(14px, 2vw, 28px);
   }
 `;
 
@@ -35,6 +49,7 @@ const TopRow = styled.div`
 
   @media screen and (min-width: 1024px) {
     min-width: 0;
+    min-height: auto;
   }
 `;
 
@@ -70,6 +85,9 @@ const SearchRow = styled.div`
 const Header = () => {
   return (
     <HeaderRoot>
+      <AnnouncementBar>
+        Bezpłatna wycena w 15 minut · Gotówka od ręki · 20 lat na rynku
+      </AnnouncementBar>
       <HeaderRow>
         <TopRow>
           <Logo />
