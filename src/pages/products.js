@@ -19,10 +19,10 @@ const Toolbar = styled.div`
   justify-content: space-between;
   gap: 12px;
   margin: 8px 0 12px;
-  padding: 14px 16px;
-  border: 1px solid #e6e6e6;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #fafafa, #f1f1f1);
+  padding: 14px 18px;
+  border: 1px solid #ececec;
+  border-radius: 16px;
+  background: ${colors.backgroundPaper};
 `;
 
 const ToolbarInfo = styled.div`
@@ -40,6 +40,12 @@ const FilterLabel = styled.span`
 const FilterValue = styled.strong`
   color: ${colors.textPrimary};
   font-size: 0.98rem;
+`;
+
+const FilterCount = styled.span`
+  font-size: 0.82rem;
+  color: ${colors.primaryDark};
+  font-weight: 600;
 `;
 
 const FilterButton = styled.button`
@@ -66,10 +72,16 @@ const FilterActions = styled.div`
 const FilterChip = styled.button`
   ${buttonBaseStyle}
   min-height: 38px;
-  padding: 0 14px;
-  border-color: ${(props) => (props.$active ? colors.primary : "#d8d8d8")};
-  background: ${(props) => (props.$active ? "#fff4cf" : "#fff")};
-  color: ${colors.textPrimary};
+  padding: 0 16px;
+  border-radius: 999px;
+  border-color: ${(props) => (props.$active ? colors.primary : "#e0e0e0")};
+  background: ${(props) => (props.$active ? "#fff8e8" : "#fff")};
+  color: ${(props) => (props.$active ? colors.primaryDark : colors.textPrimary)};
+  font-weight: ${(props) => (props.$active ? 700 : 500)};
+
+  &:hover {
+    border-color: ${colors.primary};
+  }
 `;
 
 const ErrorState = styled.div`
@@ -203,9 +215,12 @@ export default function ProductsPage() {
         <ToolbarInfo>
           <FilterLabel>Aktywny filtr</FilterLabel>
           <FilterValue>{selectedCategoryName}</FilterValue>
+          {!isLoading && (
+            <FilterCount>{data?.total || 0} ofert</FilterCount>
+          )}
         </ToolbarInfo>
         <FilterButton type="button" onClick={() => setFiltersOpen((prev) => !prev)}>
-          {filtersOpen ? "Ukryj filtry" : "Filtruj"}
+          {filtersOpen ? "Ukryj filtry" : "Filtry"}
         </FilterButton>
       </Toolbar>
       {filtersOpen && (

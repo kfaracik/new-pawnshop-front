@@ -15,7 +15,35 @@ import { useMyOrders } from "services/api/orderApi";
 
 const AccountWrapper = styled.section`
   margin: 24px auto 40px;
+  max-width: 760px;
 `;
+
+const PILL_TONES = {
+  green: { bg: "#e7f6ec", fg: "#1e7d43" },
+  amber: { bg: "#fff3d6", fg: "#8a6100" },
+  red: { bg: "#fdecec", fg: "#b3261e" },
+  gold: { bg: "#fff8e8", fg: "#8E7213" },
+  gray: { bg: "#eef0f2", fg: "#4a4a4a" },
+};
+
+const orderStatusTone = (status) =>
+  ({
+    paid: "green",
+    completed: "gold",
+    pending_payment: "amber",
+    canceled: "gray",
+    failed: "red",
+  })[status] || "gray";
+
+const paymentStatusTone = (status) =>
+  ({
+    paid: "green",
+    pending: "amber",
+    unpaid: "gray",
+    failed: "red",
+    canceled: "gray",
+    refunded: "gold",
+  })[status] || "gray";
 
 const ProfileCard = styled.div`
   background: ${colors.backgroundPaper};
@@ -168,6 +196,62 @@ const OrderProducts = styled.div`
   gap: 4px;
 `;
 
+const OrderTop = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+`;
+
+const OrderDate = styled.div`
+  font-size: 0.82rem;
+  color: ${colors.textSecondary};
+
+  strong {
+    display: block;
+    margin-top: 2px;
+    font-size: 1.02rem;
+    color: ${colors.textPrimary};
+  }
+`;
+
+const OrderPills = styled.div`
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+`;
+
+const StatusPill = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  background: ${(props) => (PILL_TONES[props.$tone] || PILL_TONES.gray).bg};
+  color: ${(props) => (PILL_TONES[props.$tone] || PILL_TONES.gray).fg};
+`;
+
+const OrderDetailGrid = styled.div`
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px 16px;
+  font-size: 0.86rem;
+  color: ${colors.textSecondary};
+
+  strong {
+    display: block;
+    color: ${colors.textPrimary};
+    font-weight: 600;
+    margin-top: 1px;
+  }
+`;
+
 const AccountPage = () => {
   const [isMounted, setIsMounted] = useState(false);
   const { data, error, isLoading } = useUserData();
@@ -264,44 +348,51 @@ const AccountPage = () => {
               ) : (
                 myOrders.map((order) => (
                   <OrderItem key={order._id}>
-                    <OrderMeta>
+                    <OrderTop>
+                      <OrderDate>
+                        Zamówienie
+                        <strong>
+                          {new Date(order.createdAt).toLocaleDateString("pl-PL", {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </strong>
+                      </OrderDate>
+                      <OrderPills>
+                        <StatusPill $tone={orderStatusTone(order.orderStatus)}>
+                          {ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus || "-"}
+                        </StatusPill>
+                        <StatusPill $tone={paymentStatusTone(order.paymentStatus)}>
+                          {PAYMENT_STATUS_LABELS[order.paymentStatus] || order.paymentStatus || "-"}
+                        </StatusPill>
+                      </OrderPills>
+                    </OrderTop>
+                    <OrderDetailGrid>
                       <span>
-                        <strong>Data:</strong> {new Date(order.createdAt).toLocaleString()}
+                        Suma
+                        <strong>
+                          {Number(order.grandTotal || order.totalAmount || 0).toFixed(2)} zł
+                        </strong>
                       </span>
                       <span>
-                        <strong>Status:</strong>{" "}
-                        {ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus || "-"}
+                        Dostawa
+                        <strong>
+                          {DELIVERY_LABELS[order.deliveryMethod] || order.deliveryMethod || "-"}
+                        </strong>
                       </span>
                       <span>
-                        <strong>Płatność:</strong>{" "}
-                        {PAYMENT_STATUS_LABELS[order.paymentStatus] || order.paymentStatus || "-"}
+                        Metoda płatności
+                        <strong>
+                          {PAYMENT_METHOD_LABELS[order.paymentMethod] || order.paymentMethod || "-"}
+                        </strong>
                       </span>
-                      <span>
-                        <strong>Suma:</strong> {Number(order.grandTotal || order.totalAmount || 0).toFixed(2)} PLN
-                      </span>
-                      <span>
-                        <strong>Dostawa:</strong>{" "}
-                        {DELIVERY_LABELS[order.deliveryMethod] || order.deliveryMethod || "-"}
-                      </span>
-                      <span>
-                        <strong>Metoda płatności:</strong>{" "}
-                        {PAYMENT_METHOD_LABELS[order.paymentMethod] || order.paymentMethod || "-"}
-                      </span>
-                    </OrderMeta>
-                    <OrderProducts>
-                      <span>
-                        Dostawa: {Number(order.deliveryPrice || 0).toFixed(2)} PLN, ETA:{" "}
-                        {order.deliveryEtaLabel || "-"}
-                      </span>
-                      {order.paymentSessionStatus && (
-                        <span>Stan checkoutu: {order.paymentSessionStatus}</span>
-                      )}
-                    </OrderProducts>
+                    </OrderDetailGrid>
                     <OrderProducts>
                       {(order.products || []).length > 0 ? (
                         (order.products || []).map((product, index) => (
                           <span key={`${order._id}-product-${index}`}>
-                            {product.name} x{product.quantity}
+                            {product.name} × {product.quantity}
                           </span>
                         ))
                       ) : (
