@@ -89,7 +89,10 @@ const Card = styled.div`
 
 const Title = styled.h1`
   margin: 0;
-  font-size: clamp(1.3rem, 2vw, 1.7rem);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
   color: ${colors.textPrimary};
 `;
 

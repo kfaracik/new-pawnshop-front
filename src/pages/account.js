@@ -63,7 +63,10 @@ const Header = styled.header`
 
   h1 {
     margin: 0;
-    font-size: 1.45rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
     color: ${colors.textPrimary};
   }
 

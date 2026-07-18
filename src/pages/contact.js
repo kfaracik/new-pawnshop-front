@@ -23,7 +23,9 @@ const Header = styled.header`
 
 const Title = styled.h1`
   margin: 0;
-  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
   color: ${colors.textPrimary};
   line-height: 1.2;
 `;

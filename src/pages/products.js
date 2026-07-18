@@ -7,31 +7,10 @@ import ProductList from "components/ProductList";
 import { useProducts } from "services/api/productApi";
 import { useCategories } from "services/api/categoryApi";
 import { buttonBaseStyle, buttonSecondaryStyle } from "components/Button";
+import { PageHead, PageTitle, PageMeta } from "components/PageHeading";
 import colors from "styles/colors";
 
 const PRODUCTS_PER_PAGE = 8;
-
-const HeaderRow = styled.div`
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin: 8px 0 16px;
-`;
-
-const PageTitle = styled.h1`
-  margin: 0;
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  color: ${colors.textPrimary};
-`;
-
-const OfferCount = styled.span`
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: ${colors.primaryDark};
-`;
 
 const FilterScroller = styled.div`
   display: flex;
@@ -176,12 +155,12 @@ export default function ProductsPage() {
         description="Przeglądaj wszystkie dostępne produkty Nowego Lombardu. Filtruj oferty i przechodź do szczegółów produktu."
         path={seoPath}
       />
-      <HeaderRow>
+      <PageHead>
         <PageTitle>Wszystkie produkty</PageTitle>
         {!isLoading && !isError && (
-          <OfferCount>{data?.total || 0} ofert</OfferCount>
+          <PageMeta>{data?.total || 0} ofert</PageMeta>
         )}
-      </HeaderRow>
+      </PageHead>
       {filterBar}
       {isError ? (
         <ErrorState>

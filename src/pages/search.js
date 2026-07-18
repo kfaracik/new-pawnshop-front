@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import PageContainer from "components/PageContainer";
 import ProductList from "components/ProductList";
 import SeoHead from "components/SeoHead";
+import { PageHead, PageTitle, PageMeta, PageSubtitle } from "components/PageHeading";
 import { useSearchProducts } from "services/api/searchProductApi";
 import { useCategories } from "services/api/categoryApi";
 
@@ -72,30 +73,40 @@ export default function SearchPage() {
         path={router.asPath}
         noindex
       />
-      {searchQuery && (
-        <h2>
-          Wyniki wyszukiwania dla: <strong>{searchQuery}</strong>
-        </h2>
-      )}
-      {!searchQuery && categoryName && (
-        <h2>
-          Produkty w kategorii: <strong>{categoryName}</strong>
-        </h2>
-      )}
-      {searchQuery && categoryName && (
-        <p>
-          Kategoria: <strong>{categoryName}</strong>
-        </p>
-      )}
-      {!hasSearchInput && (
-        <p>Wpisz szukaną frazę albo wybierz kategorię, aby zobaczyć produkty.</p>
-      )}
-      {isError && (
-        <p>
-          Nie udało się załadować wyników:{" "}
-          {error?.response?.data?.message || error?.message || "spróbuj ponownie."}
-        </p>
-      )}
+      <PageHead>
+        <PageTitle>
+          {hasSearchInput ? "Wyniki wyszukiwania" : "Wyszukiwarka"}
+        </PageTitle>
+        {hasSearchInput && !isLoading && !isError && (
+          <PageMeta>{data?.pagination?.totalProducts || 0} ofert</PageMeta>
+        )}
+        {!hasSearchInput && (
+          <PageSubtitle>
+            Wpisz szukaną frazę albo wybierz kategorię, aby zobaczyć produkty.
+          </PageSubtitle>
+        )}
+        {searchQuery && (
+          <PageSubtitle>
+            Fraza: <strong>{searchQuery}</strong>
+            {categoryName ? (
+              <>
+                {" · "}kategoria: <strong>{categoryName}</strong>
+              </>
+            ) : null}
+          </PageSubtitle>
+        )}
+        {!searchQuery && categoryName && (
+          <PageSubtitle>
+            Kategoria: <strong>{categoryName}</strong>
+          </PageSubtitle>
+        )}
+        {isError && (
+          <PageSubtitle>
+            Nie udało się załadować wyników:{" "}
+            {error?.response?.data?.message || error?.message || "spróbuj ponownie."}
+          </PageSubtitle>
+        )}
+      </PageHead>
       <ProductList
         loading={hasSearchInput && isLoading}
         products={data?.products || []}

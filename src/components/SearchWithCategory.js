@@ -38,7 +38,7 @@ const SearchForm = styled.form`
   transition: box-shadow 0.18s ease;
 
   &:focus-within {
-    box-shadow: 0 4px 16px rgba(201, 162, 39, 0.18), 0 0 0 3px rgba(201, 162, 39, 0.28);
+    box-shadow: 0 4px 16px rgba(201, 162, 39, 0.16), 0 0 0 2px rgba(201, 162, 39, 0.22);
   }
 `;
 
@@ -83,6 +83,15 @@ const SearchInput = styled.input`
   outline: none;
   box-shadow: none;
   transition: border-color 0.2s ease, background-color 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+
+  &::-webkit-search-cancel-button,
+  &::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+  }
 
   &:focus {
     border-color: ${colors.primary};
