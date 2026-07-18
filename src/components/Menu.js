@@ -231,6 +231,7 @@ const MobileBackdrop = styled.button`
   inset: 0;
   border: 0;
   background: rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
   z-index: 2000;
   opacity: ${(props) => (props.mobileNavActive ? 1 : 0)};

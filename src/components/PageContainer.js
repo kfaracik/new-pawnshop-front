@@ -31,10 +31,9 @@ export default function PageContainer({ children, loading = false }) {
       <Header />
       <AnimatedMainContent
         id="main-content"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
       >
         <MainContentInner>
           {loading ? <PageLoader /> : <>{children}</>}

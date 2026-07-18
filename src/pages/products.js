@@ -134,7 +134,8 @@ export default function ProductsPage() {
         params.set("category", String(selectedCategory));
       }
       router.push(`/products?${params.toString()}`, undefined, { shallow: true });
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      const scroller = document.getElementById("__next");
+      (scroller || window).scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 

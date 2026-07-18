@@ -21,6 +21,7 @@ const HeaderRoot = styled.header`
   top: 0;
   z-index: 40;
   background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid #ececec;
   transition: transform 0.3s ease;

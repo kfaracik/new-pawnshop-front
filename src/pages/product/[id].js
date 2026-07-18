@@ -181,6 +181,7 @@ const IconControlButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   cursor: pointer;
   z-index: 3;

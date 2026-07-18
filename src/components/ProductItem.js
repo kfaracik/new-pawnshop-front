@@ -113,6 +113,7 @@ const StatusChip = styled.span`
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.02em;
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   background: ${(props) =>
     props.$tone === "danger"
@@ -136,6 +137,7 @@ const AuctionBadge = styled.span`
   background: rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 `;
 
