@@ -1074,7 +1074,7 @@ export async function getServerSideProps(context) {
       ? `products/${encodeURIComponent(id)}`
       : `${apiVersion}/products/${encodeURIComponent(id)}`;
     const response = await fetch(
-      `${normalizedBaseUrl}/${productPath}`
+      `${normalizedBaseUrl}/${productPath}?trackView=1`
     );
 
     if (!response.ok) {

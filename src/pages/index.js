@@ -3,7 +3,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import PageContainer from "components/PageContainer";
 import SeoHead from "components/SeoHead";
-import { useNewProducts } from "services/api/newProductsApi";
+import { useFeaturedProducts } from "services/api/featuredProductsApi";
 import { usePopularProducts } from "services/api/popularProductsApi";
 import { useCategories } from "services/api/categoryApi";
 import HorizontalProductList from "components/HorizontalProductList";
@@ -456,7 +456,7 @@ const FacebookGlyph = ({ size = 30, fill = "#fff" }) => (
 );
 
 export default function HomePage() {
-  const { data: newProducts, isLoading: isLoadingNew } = useNewProducts();
+  const { data: newProducts, isLoading: isLoadingNew } = useFeaturedProducts();
   const { data: popularProducts, isLoading: isLoadingPopular } = usePopularProducts();
   const { data: categories } = useCategories();
 
