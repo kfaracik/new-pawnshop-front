@@ -1,28 +1,50 @@
 import React from "react";
-import { ImageList, ImageListItem, useMediaQuery } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
-import Skeleton from "@mui/material/Skeleton";
 import { FaBoxOpen } from "react-icons/fa";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import colors from "styles/colors";
 import { ProductItem } from "./ProductItem";
 
-const ListShell = styled.div`
-  margin: 0 auto;
-  padding: 16px;
-  max-width: 100%;
-  overflow: hidden;
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 18px;
+
+  @media screen and (max-width: 600px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+`;
+
+const shimmer = keyframes`
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+`;
+
+const SkeletonCard = styled.div`
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid #ededed;
+  aspect-ratio: 5 / 7;
+  background: linear-gradient(90deg, #f4f4f4 25%, #ececec 37%, #f4f4f4 63%);
+  background-size: 400% 100%;
+  animation: ${shimmer} 1.3s ease-in-out infinite;
+
+  @media screen and (max-width: 600px) {
+    aspect-ratio: 4 / 5;
+    border-radius: 14px;
+  }
 `;
 
 const EmptyState = styled.div`
   display: grid;
   gap: 10px;
   justify-items: center;
-  padding: 56px 20px;
+  padding: 60px 20px;
   text-align: center;
-  border: 1px solid #e5e5e5;
-  border-radius: 16px;
-  background: linear-gradient(180deg, #f7f7f7, #efefef);
+  border: 1px dashed #e0e0e0;
+  border-radius: 18px;
+  background: ${colors.backgroundPaper};
   color: ${colors.textSecondary};
 
   h3,
@@ -36,68 +58,35 @@ const EmptyState = styled.div`
   }
 
   svg {
-    font-size: 1.8rem;
+    font-size: 2rem;
     color: ${colors.primaryDark};
     opacity: 0.85;
   }
 `;
 
-const SkeletonCard = styled.div`
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border-radius: 12px;
-  border: 1px solid #dddddd;
-  background: linear-gradient(180deg, #f7f7f7, #eeeeee);
-  aspect-ratio: 5 / 7;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.07);
-`;
-
-const SkeletonMedia = styled(Skeleton)`
-  && {
-    height: 100%;
-    transform: none;
-    border-radius: 0;
-    background: linear-gradient(180deg, #ececec, #dddddd);
-  }
-`;
-
-const SkeletonOverlay = styled.div`
-  position: absolute;
-  inset: auto 0 0 0;
-  padding: 12px;
-  display: grid;
-  gap: 8px;
-  background: linear-gradient(
-    to top,
-    rgba(248, 248, 248, 0.96) 0%,
-    rgba(244, 244, 244, 0.9) 65%,
-    rgba(244, 244, 244, 0) 100%
-  );
-`;
-
-const SkeletonTitleRow = styled.div`
+const PaginationWrap = styled.div`
   display: flex;
-  align-items: flex-end;
-  gap: 10px;
+  justify-content: center;
+  margin-top: 28px;
 `;
 
-const SkeletonText = styled(Skeleton)`
-  && {
-    transform: none;
-    background: rgba(0, 0, 0, 0.08);
-  }
-`;
-
-const SkeletonCart = styled(Skeleton)`
-  && {
-    margin-left: auto;
-    flex: 0 0 34px;
-    transform: none;
-    border-radius: 8px;
-    background: rgba(201, 162, 39, 0.22);
-  }
-`;
+const paginationSx = {
+  "& .MuiPaginationItem-root": {
+    fontWeight: 600,
+    color: "#4a4a4a",
+    borderRadius: "10px",
+  },
+  "& .MuiPaginationItem-root:hover": {
+    backgroundColor: "#fff8e8",
+  },
+  "& .Mui-selected": {
+    backgroundColor: `${colors.primary} !important`,
+    color: "#151515",
+  },
+  "& .Mui-selected:hover": {
+    backgroundColor: `${colors.primaryLight} !important`,
+  },
+};
 
 const ProductList = ({
   products,
@@ -107,79 +96,47 @@ const ProductList = ({
   selectedPage,
   searchQuery = "",
 }) => {
-  const isSmallScreen = useMediaQuery("(max-width:600px)");
-  const isMediumScreen = useMediaQuery("(max-width:900px)");
-  const isLargeScreen = useMediaQuery("(max-width:1200px)");
+  const items = Array.isArray(products) ? products : [];
 
-  const calculateColumns = () => {
-    if (isSmallScreen) return 1;
-    if (isMediumScreen) return 2;
-    if (isLargeScreen) return 3;
-    return 4;
-  };
+  if (loading) {
+    return (
+      <Grid>
+        {Array.from({ length: 8 }).map((_, index) => (
+          <SkeletonCard key={`skeleton-${index}`} />
+        ))}
+      </Grid>
+    );
+  }
 
-  const columns = calculateColumns();
+  if (items.length === 0) {
+    return (
+      <EmptyState>
+        <FaBoxOpen aria-hidden="true" />
+        <h3>Brak produktów</h3>
+        <p>Nie znaleźliśmy produktów spełniających wybrane kryteria.</p>
+      </EmptyState>
+    );
+  }
 
   return (
-    <ListShell>
-      <ImageList
-        cols={columns}
-        gap={isSmallScreen ? 8 : 16}
-        sx={{
-          width: "100%",
-          maxWidth: "100%",
-          boxSizing: "border-box",
-          padding: { xs: "8px", sm: "16px", md: "24px" },
-          display: "grid",
-          gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-          alignItems: "stretch",
-        }}
-      >
-        {loading
-          ? Array.from({ length: 8 }).map((_, index) => (
-              <ImageListItem key={index}>
-                <SkeletonCard>
-                  <SkeletonMedia variant="rectangular" width="100%" />
-                  <SkeletonOverlay>
-                    <SkeletonTitleRow>
-                      <SkeletonText variant="text" width="68%" height={24} />
-                      <SkeletonCart variant="rounded" width={34} height={34} />
-                    </SkeletonTitleRow>
-                    <SkeletonText variant="text" width="42%" height={28} />
-                    <SkeletonText variant="text" width="55%" height={18} />
-                    <SkeletonText variant="text" width="72%" height={16} />
-                  </SkeletonOverlay>
-                </SkeletonCard>
-              </ImageListItem>
-            ))
-          : (products || []).map((product) => (
-              <ProductItem
-                key={product._id}
-                product={product}
-                searchQuery={searchQuery}
-              />
-            ))}
-      </ImageList>
-      {!loading && (!products || products.length === 0) && (
-        <EmptyState>
-          <FaBoxOpen aria-hidden="true" />
-          <p>Nie mamy aktualnie dostępnych produktów.</p>
-        </EmptyState>
-      )}
+    <>
+      <Grid>
+        {items.map((product) => (
+          <ProductItem key={product._id} product={product} searchQuery={searchQuery} />
+        ))}
+      </Grid>
       {totalPages > 1 && (
-        <Pagination
-          page={selectedPage ?? 1}
-          count={totalPages}
-          onChange={(_, page) => onPageChange(page)}
-          sx={{
-            marginTop: 2,
-            display: "flex",
-            justifyContent: "center",
-            fontFamily: "'Inter', sans-serif",
-          }}
-        />
+        <PaginationWrap>
+          <Pagination
+            page={selectedPage ?? 1}
+            count={totalPages}
+            onChange={(_, page) => onPageChange(page)}
+            shape="rounded"
+            sx={paginationSx}
+          />
+        </PaginationWrap>
       )}
-    </ListShell>
+    </>
   );
 };
 

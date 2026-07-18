@@ -3,159 +3,220 @@ import Image from "next/image";
 import styled from "styled-components";
 import Link from "next/link";
 import { keyframes } from "@emotion/react";
-import { Typography } from "@mui/material";
 import colors from "styles/colors";
 import { RiAuctionFill } from "react-icons/ri";
+import CloverMark from "./CloverMark";
 
 const fadeIn = keyframes`
-  0% { opacity: 0; transform: scale(0.95); }
-  100% { opacity: 1; transform: scale(1); }
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
 `;
 
 const truncateTitle = (title, maxLength) =>
   title.length > maxLength ? `${title.substring(0, maxLength)}...` : title;
 
-const PLACEHOLDER_IMAGE =
-  "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
+const CardLink = styled(Link)`
+  text-decoration: none;
+  display: block;
+  animation: ${fadeIn} 0.35s ease-out both;
+`;
 
-const CardContainer = styled.div`
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-  animation: ${fadeIn} 0.3s ease-out;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+const CardContainer = styled.article`
   position: relative;
   width: 100%;
-  margin: 0;
+  border-radius: 16px;
+  overflow: hidden;
   border: 1px solid #232323;
   background: #0f0f0f;
   aspect-ratio: 5 / 7;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease,
+    border-color 0.28s ease;
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24);
+    transform: translateY(-6px);
+    border-color: rgba(201, 162, 39, 0.55);
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(201, 162, 39, 0.25);
+  }
+
+  &:hover img {
+    transform: scale(1.07);
   }
 
   @media screen and (max-width: 600px) {
-    width: 100%;
-    max-width: 100%;
     aspect-ratio: 4 / 5;
+    border-radius: 14px;
   }
 `;
 
 const ProductImageWrapper = styled.div`
-  position: relative;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
 
   img {
     object-fit: cover;
-    transition: transform 0.2s ease;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   }
 `;
 
-const StyledImageListItemBar = styled.div`
+const Placeholder = styled.div`
   position: absolute;
-  bottom: 0;
-  width: 100%;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  background: radial-gradient(120% 120% at 50% 0%, #1c1c1c 0%, #0f0f0f 70%);
+  color: #3a3a3a;
+
+  span {
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #5a5a5a;
+  }
+`;
+
+const Overlay = styled.div`
+  position: absolute;
+  inset: 48% 0 0 0;
   background: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.86) 0%,
-    rgba(0, 0, 0, 0.7) 60%,
+    rgba(0, 0, 0, 0.93) 0%,
+    rgba(0, 0, 0, 0.72) 52%,
     rgba(0, 0, 0, 0) 100%
   );
-  padding: 12px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
+  justify-content: flex-end;
+  gap: 5px;
+  padding: 16px 14px 14px;
 `;
 
-const TitleContainer = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-end;
-  width: 100%;
-`;
-
-const AuctionBadge = styled.div`
+const TopChips = styled.div`
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  top: 12px;
+  left: 12px;
+  right: 12px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
   z-index: 2;
 `;
 
-const ProductTitle = styled(Typography)`
-  && {
-    color: ${colors.textInverse};
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 170px;
-    font-size: 0.95rem;
-    line-height: 1.3;
+const StatusChip = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(4px);
+  background: ${(props) =>
+    props.$tone === "danger"
+      ? "rgba(179, 38, 30, 0.9)"
+      : props.$tone === "warning"
+        ? "rgba(201, 162, 39, 0.92)"
+        : "rgba(0, 0, 0, 0.55)"};
+  color: ${(props) => (props.$tone === "warning" ? "#1a1400" : "#fff")};
+  border: 1px solid rgba(255, 255, 255, 0.14);
+`;
 
-    @media screen and (max-width: 600px) {
-      max-width: 75%;
-      font-size: 0.9rem;
-    }
+const AuctionBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  margin-left: auto;
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  backdrop-filter: blur(4px);
+`;
+
+const ProductTitle = styled.h3`
+  margin: 0;
+  color: #fff;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @media screen and (max-width: 600px) {
+    font-size: 0.92rem;
   }
 `;
 
-const PriceText = styled(Typography)`
-  && {
-    font-weight: 700;
-    color: ${colors.primaryLight};
-    font-size: 1.05rem;
-    letter-spacing: 0.2px;
-
-    @media screen and (max-width: 600px) {
-      font-size: 1rem;
-    }
-  }
+const PriceRow = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 `;
 
-const AuctionTimer = styled(Typography)`
-  && {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #ffe79a;
-    letter-spacing: 0.2px;
-  }
+const PriceText = styled.span`
+  font-weight: 800;
+  color: ${colors.primaryLight};
+  font-size: 1.15rem;
+  letter-spacing: 0.2px;
 `;
 
-const AvailabilityNote = styled(Typography)`
-  && {
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: #ffd7d7;
-    letter-spacing: 0.2px;
-  }
+const AuctionTimer = styled.span`
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ffe79a;
 `;
 
-const LocationNote = styled(Typography)`
-  && {
-    font-size: 0.76rem;
-    color: rgba(255, 255, 255, 0.82);
-    line-height: 1.35;
-  }
+const LocationNote = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
+
+const highlightQuery = (text, query) => {
+  if (!query) return text;
+  const parts = text.split(new RegExp(`(${query})`, "gi"));
+  return parts.map((part, index) =>
+    part.toLowerCase() === query.toLowerCase() ? (
+      <span key={index} style={{ color: colors.primaryLight, fontWeight: 700 }}>
+        {part}
+      </span>
+    ) : (
+      part
+    )
+  );
+};
+
+const PinIcon = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path
+      d="M12 21s7-6.4 7-11a7 7 0 10-14 0c0 4.6 7 11 7 11z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+    <circle cx="12" cy="10" r="2.4" stroke="currentColor" strokeWidth="2" />
+  </svg>
+);
 
 export const ProductItem = ({ product, searchQuery }) => {
   const [imageFailed, setImageFailed] = React.useState(false);
   const url = `/product/${product._id}`;
   const availabilityStatus = product?.availabilityStatus || "available";
+  const hasImage = !imageFailed && Boolean(product.images?.[0]);
+
   const reservationLabel = (() => {
     if (!product?.reservationExpiresAt) return "";
     const remaining = Math.max(
@@ -169,28 +230,6 @@ export const ProductItem = ({ product, searchQuery }) => {
     return d > 0 ? `${d} dni ${h}:${m}:${s}` : `${h}:${m}:${s}`;
   })();
 
-  const highlightQuery = (text, query) => {
-    if (!query) return text;
-    const parts = text.split(new RegExp(`(${query})`, "gi"));
-    return parts.map((part, index) =>
-      part.toLowerCase() === query.toLowerCase() ? (
-        <span
-          key={index}
-          style={{
-            fontWeight: "bold",
-            color: colors.secondary,
-          }}
-        >
-          {part}
-        </span>
-      ) : (
-        part
-      )
-    );
-  };
-
-  const productImage =
-    imageFailed || !product.images?.[0] ? PLACEHOLDER_IMAGE : product.images[0];
   const locationDetails = Array.isArray(product?.availableLocationDetails)
     ? product.availableLocationDetails
     : [];
@@ -202,55 +241,65 @@ export const ProductItem = ({ product, searchQuery }) => {
         : [];
   const locationLabel =
     product?.availabilityMode === "online_only"
-      ? "Dostępne wyłącznie online"
+      ? "Dostępne online"
       : locationNames.length > 0
-        ? `Dostępne w: ${locationNames.join(", ")}`
-        : "Dostępność potwierdzana indywidualnie";
+        ? locationNames.join(", ")
+        : "Dostępność indywidualna";
 
   return (
-    <Link href={url} key={product._id}>
+    <CardLink href={url} aria-label={product.title}>
       <CardContainer>
         <ProductImageWrapper>
-          <Image
-            src={productImage}
-            alt={product.title}
-            fill
-            sizes="(max-width: 600px) 100vw, 33vw"
-            loader={({ src }) => src}
-            unoptimized
-            onError={() => setImageFailed(true)}
-          />
+          {hasImage ? (
+            <Image
+              src={product.images[0]}
+              alt={product.title}
+              fill
+              sizes="(max-width: 600px) 50vw, (max-width: 1200px) 33vw, 25vw"
+              loader={({ src }) => src}
+              unoptimized
+              onError={() => setImageFailed(true)}
+            />
+          ) : (
+            <Placeholder>
+              <CloverMark size={40} color="#2a2a2a" />
+              <span>Brak zdjęcia</span>
+            </Placeholder>
+          )}
         </ProductImageWrapper>
-        {product.isAuction && (
-          <AuctionBadge title="Licytacja">
-            <RiAuctionFill />
-          </AuctionBadge>
-        )}
-        <StyledImageListItemBar>
-          <TitleContainer>
-            <ProductTitle variant="body1">
-              {highlightQuery(truncateTitle(product.title, 40), searchQuery)}
-            </ProductTitle>
-          </TitleContainer>
-          <PriceText variant="h6">
-            {product.price.toFixed(2)} zł
-          </PriceText>
-          {product.isAuction && product.auctionTimerLabel && (
-            <AuctionTimer variant="body2">
-              Koniec za: {product.auctionTimerLabel}
-            </AuctionTimer>
+
+        <TopChips>
+          {availabilityStatus === "unavailable" && (
+            <StatusChip $tone="danger">Niedostępne</StatusChip>
           )}
           {availabilityStatus === "reserved" && (
-            <AvailabilityNote variant="body2">
-              Zarezerwowane{reservationLabel ? ` (${reservationLabel})` : ""}
-            </AvailabilityNote>
+            <StatusChip $tone="warning">
+              Zarezerwowane{reservationLabel ? ` · ${reservationLabel}` : ""}
+            </StatusChip>
           )}
-          {availabilityStatus === "unavailable" && (
-            <AvailabilityNote variant="body2">Niedostępne</AvailabilityNote>
+          {product.isAuction && (
+            <AuctionBadge title="Licytacja">
+              <RiAuctionFill />
+            </AuctionBadge>
           )}
-          <LocationNote variant="body2">{locationLabel}</LocationNote>
-        </StyledImageListItemBar>
+        </TopChips>
+
+        <Overlay>
+          <ProductTitle>
+            {highlightQuery(truncateTitle(product.title, 44), searchQuery)}
+          </ProductTitle>
+          <PriceRow>
+            <PriceText>{product.price.toFixed(2)} zł</PriceText>
+            {product.isAuction && product.auctionTimerLabel && (
+              <AuctionTimer>· {product.auctionTimerLabel}</AuctionTimer>
+            )}
+          </PriceRow>
+          <LocationNote>
+            <PinIcon />
+            {locationLabel}
+          </LocationNote>
+        </Overlay>
       </CardContainer>
-    </Link>
+    </CardLink>
   );
 };

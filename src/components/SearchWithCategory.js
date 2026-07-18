@@ -33,12 +33,12 @@ const SearchForm = styled.form`
   flex: 1;
   width: 100%;
   min-width: 0;
-  border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
   transition: box-shadow 0.18s ease;
 
   &:focus-within {
-    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.22);
+    box-shadow: 0 4px 16px rgba(201, 162, 39, 0.18), 0 0 0 3px rgba(201, 162, 39, 0.28);
   }
 `;
 
@@ -49,11 +49,11 @@ const SearchField = styled.div`
 
 const SearchIcon = styled(FiSearch)`
   position: absolute;
-  left: 16px;
+  left: 17px;
   top: 50%;
   transform: translateY(-50%);
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   color: ${colors.primaryDark};
   pointer-events: none;
 `;
@@ -73,23 +73,24 @@ const VisuallyHiddenLabel = styled.label`
 const SearchInput = styled.input`
   width: 100%;
   min-width: 0;
-  padding: 13px 44px 13px 46px;
-  background-color: #fff;
-  border: 1px solid #dcdcdc;
+  padding: 15px 44px 15px 48px;
+  background-color: #faf9f6;
+  border: 1px solid #e6e2d6;
   border-right: 0;
-  border-radius: 14px 0 0 14px;
+  border-radius: 16px 0 0 16px;
   color: ${colors.textPrimary};
   font-size: 1rem;
   outline: none;
   box-shadow: none;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 
   &:focus {
     border-color: ${colors.primary};
+    background-color: #fff;
   }
 
   &::placeholder {
-    color: #8f8a80;
+    color: #9a9488;
   }
 `;
 
@@ -118,19 +119,29 @@ const SearchButton = styled.button`
   ${buttonBaseStyle}
   ${buttonPrimaryStyle}
   min-height: auto;
-  border-radius: 0 14px 14px 0;
-  padding: 12px 22px;
+  border-radius: 0 16px 16px 0;
+  padding: 12px 26px;
   font-weight: 700;
+  letter-spacing: 0.01em;
   transform: none !important;
   white-space: nowrap;
+  background: linear-gradient(180deg, ${colors.primaryLight} 0%, ${colors.primary} 55%, ${colors.primaryDark} 100%);
+  border: 0;
+  color: #1a1400;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: filter 0.15s ease;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.06);
+  }
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.55;
     cursor: not-allowed;
   }
 
   @media screen and (max-width: 420px) {
-    padding-inline: 16px;
+    padding-inline: 18px;
   }
 `;
 
@@ -190,8 +201,8 @@ const DropdownButton = styled.button`
   ${buttonBaseStyle}
   min-height: 46px;
   padding: 0 14px;
-  border: 1px solid #dcdcdc;
-  border-radius: 14px;
+  border: 1px solid #e6e2d6;
+  border-radius: 16px;
   background: #fff;
   color: ${colors.textSecondary};
   display: flex;
@@ -226,8 +237,8 @@ const CategorySelect = styled.select`
   display: none;
   width: 100%;
   padding: 13px 14px;
-  border: 1px solid #dcdcdc;
-  border-radius: 14px;
+  border: 1px solid #e6e2d6;
+  border-radius: 16px;
   background: #fff;
   color: ${colors.textPrimary};
   font-size: 0.95rem;
