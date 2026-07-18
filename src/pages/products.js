@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import styled from "styled-components";
 import SeoHead from "components/SeoHead";
-import Title from "components/Title";
 import PageContainer from "components/PageContainer";
 import ProductList from "components/ProductList";
 import { useProducts } from "services/api/productApi";
@@ -12,75 +11,61 @@ import colors from "styles/colors";
 
 const PRODUCTS_PER_PAGE = 8;
 
-const Toolbar = styled.div`
+const HeaderRow = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
+  align-items: baseline;
   gap: 12px;
-  margin: 8px 0 12px;
-  padding: 14px 18px;
-  border: 1px solid #ececec;
-  border-radius: 16px;
-  background: ${colors.backgroundPaper};
-`;
-
-const ToolbarInfo = styled.div`
-  display: grid;
-  gap: 4px;
-`;
-
-const FilterLabel = styled.span`
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: ${colors.textSecondary};
-`;
-
-const FilterValue = styled.strong`
-  color: ${colors.textPrimary};
-  font-size: 0.98rem;
-`;
-
-const FilterCount = styled.span`
-  font-size: 0.82rem;
-  color: ${colors.primaryDark};
-  font-weight: 600;
-`;
-
-const FilterButton = styled.button`
-  ${buttonBaseStyle}
-  ${buttonSecondaryStyle}
-`;
-
-const FilterPanel = styled.div`
-  display: grid;
-  gap: 10px;
-  margin-bottom: 18px;
-  padding: 14px 16px;
-  border: 1px solid #e6e6e6;
-  border-radius: 14px;
-  background: #fafafa;
-`;
-
-const FilterActions = styled.div`
-  display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  margin: 8px 0 16px;
+`;
+
+const PageTitle = styled.h1`
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: ${colors.textPrimary};
+`;
+
+const OfferCount = styled.span`
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: ${colors.primaryDark};
+`;
+
+const FilterScroller = styled.div`
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 2px 2px 12px;
+  margin-bottom: 12px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const FilterChip = styled.button`
-  ${buttonBaseStyle}
-  min-height: 38px;
-  padding: 0 16px;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  min-height: 40px;
+  padding: 0 18px;
   border-radius: 999px;
-  border-color: ${(props) => (props.$active ? colors.primary : "#e0e0e0")};
-  background: ${(props) => (props.$active ? "#fff8e8" : "#fff")};
-  color: ${(props) => (props.$active ? colors.primaryDark : colors.textPrimary)};
+  border: 1px solid ${(props) => (props.$active ? colors.primary : "#e3e3e3")};
+  background: ${(props) => (props.$active ? colors.primary : "#fff")};
+  color: ${(props) => (props.$active ? colors.black : colors.textPrimary)};
+  font-size: 0.92rem;
   font-weight: ${(props) => (props.$active ? 700 : 500)};
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.15s;
 
   &:hover {
     border-color: ${colors.primary};
+    background: ${(props) => (props.$active ? colors.primaryLight : "#fff8e8")};
+    transform: translateY(-1px);
   }
 `;
 
@@ -103,10 +88,15 @@ const ErrorState = styled.div`
   }
 `;
 
+const RetryButton = styled.button`
+  ${buttonBaseStyle}
+  ${buttonSecondaryStyle}
+  justify-self: start;
+`;
+
 export default function ProductsPage() {
   const router = useRouter();
   const [page, setPage] = useState(Number(router.query.page) || 1);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const selectedCategory = router.query.category || "";
   const { data: categoriesData } = useCategories();
   const categories = useMemo(() => {
@@ -114,11 +104,8 @@ export default function ProductsPage() {
     if (Array.isArray(categoriesData?.categories)) return categoriesData.categories;
     return [];
   }, [categoriesData]);
-  const selectedCategoryName =
-    categories.find((category) => String(category._id) === String(selectedCategory))?.name ||
-    "Wszystkie kategorie";
 
-  const { data, isLoading, isError, error } = useProducts(
+  const { data, isLoading, isError } = useProducts(
     page,
     PRODUCTS_PER_PAGE,
     selectedCategory
@@ -151,108 +138,67 @@ export default function ProductsPage() {
     }
   };
 
-  if (isError) {
-    return (
-      <PageContainer>
-        <SeoHead
-          title="Wszystkie produkty | Nowy Lombard"
-          description="Przeglądaj wszystkie dostępne produkty Nowego Lombardu. Filtruj oferty i przechodź do szczegółów produktu."
-          path={`/products${router.asPath.includes("?") ? router.asPath.slice("/products".length) : ""}`}
-        />
-        <Title>Wszystkie produkty</Title>
-        <Toolbar>
-          <ToolbarInfo>
-            <FilterLabel>Aktywny filtr</FilterLabel>
-            <FilterValue>{selectedCategoryName}</FilterValue>
-          </ToolbarInfo>
-          <FilterButton type="button" onClick={() => setFiltersOpen((prev) => !prev)}>
-            {filtersOpen ? "Ukryj filtry" : "Filtruj"}
-          </FilterButton>
-        </Toolbar>
-        {filtersOpen && (
-          <FilterPanel>
-            <FilterActions>
-              <FilterChip
-                type="button"
-                $active={!selectedCategory}
-                onClick={() => navigateWithCategory("")}
-              >
-                Wszystkie
-              </FilterChip>
-              {categories.map((category) => (
-                <FilterChip
-                  key={category._id}
-                  type="button"
-                  $active={String(category._id) === String(selectedCategory)}
-                  onClick={() => navigateWithCategory(category._id)}
-                >
-                  {category.name}
-                </FilterChip>
-              ))}
-            </FilterActions>
-          </FilterPanel>
-        )}
-        <ErrorState>
-          <h2>Nie udało się załadować produktów</h2>
-          <p>Sprawdź połączenie lub spróbuj ponownie za chwilę.</p>
-          <FilterButton type="button" onClick={() => router.reload()}>
-            Spróbuj ponownie
-          </FilterButton>
-        </ErrorState>
-      </PageContainer>
-    );
-  }
+  const seoPath = `/products${
+    router.asPath.includes("?") ? router.asPath.slice("/products".length) : ""
+  }`;
+
+  const filterBar = (
+    <FilterScroller role="tablist" aria-label="Filtruj po kategorii">
+      <FilterChip
+        type="button"
+        role="tab"
+        aria-selected={!selectedCategory}
+        $active={!selectedCategory}
+        onClick={() => navigateWithCategory("")}
+      >
+        Wszystkie
+      </FilterChip>
+      {categories.map((category) => (
+        <FilterChip
+          key={category._id}
+          type="button"
+          role="tab"
+          aria-selected={String(category._id) === String(selectedCategory)}
+          $active={String(category._id) === String(selectedCategory)}
+          onClick={() => navigateWithCategory(category._id)}
+        >
+          {category.name}
+        </FilterChip>
+      ))}
+    </FilterScroller>
+  );
 
   return (
     <PageContainer>
       <SeoHead
         title="Wszystkie produkty | Nowy Lombard"
         description="Przeglądaj wszystkie dostępne produkty Nowego Lombardu. Filtruj oferty i przechodź do szczegółów produktu."
-        path={`/products${router.asPath.includes("?") ? router.asPath.slice("/products".length) : ""}`}
+        path={seoPath}
       />
-      <Title>Wszystkie produkty</Title>
-      <Toolbar>
-        <ToolbarInfo>
-          <FilterLabel>Aktywny filtr</FilterLabel>
-          <FilterValue>{selectedCategoryName}</FilterValue>
-          {!isLoading && (
-            <FilterCount>{data?.total || 0} ofert</FilterCount>
-          )}
-        </ToolbarInfo>
-        <FilterButton type="button" onClick={() => setFiltersOpen((prev) => !prev)}>
-          {filtersOpen ? "Ukryj filtry" : "Filtry"}
-        </FilterButton>
-      </Toolbar>
-      {filtersOpen && (
-        <FilterPanel>
-          <FilterActions>
-            <FilterChip
-              type="button"
-              $active={!selectedCategory}
-              onClick={() => navigateWithCategory("")}
-            >
-              Wszystkie
-            </FilterChip>
-            {categories.map((category) => (
-              <FilterChip
-                key={category._id}
-                type="button"
-                $active={String(category._id) === String(selectedCategory)}
-                onClick={() => navigateWithCategory(category._id)}
-              >
-                {category.name}
-              </FilterChip>
-            ))}
-          </FilterActions>
-        </FilterPanel>
+      <HeaderRow>
+        <PageTitle>Wszystkie produkty</PageTitle>
+        {!isLoading && !isError && (
+          <OfferCount>{data?.total || 0} ofert</OfferCount>
+        )}
+      </HeaderRow>
+      {filterBar}
+      {isError ? (
+        <ErrorState>
+          <h2>Nie udało się załadować produktów</h2>
+          <p>Sprawdź połączenie lub spróbuj ponownie za chwilę.</p>
+          <RetryButton type="button" onClick={() => router.reload()}>
+            Spróbuj ponownie
+          </RetryButton>
+        </ErrorState>
+      ) : (
+        <ProductList
+          products={data?.products || []}
+          loading={isLoading}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          selectedPage={page}
+        />
       )}
-      <ProductList
-        products={data?.products || []}
-        loading={isLoading}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-        selectedPage={page}
-      />
     </PageContainer>
   );
 }

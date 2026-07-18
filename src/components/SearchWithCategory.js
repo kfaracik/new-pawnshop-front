@@ -33,6 +33,13 @@ const SearchForm = styled.form`
   flex: 1;
   width: 100%;
   min-width: 0;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.18s ease;
+
+  &:focus-within {
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.22);
+  }
 `;
 
 const SearchField = styled.div`
@@ -42,10 +49,12 @@ const SearchField = styled.div`
 
 const SearchIcon = styled(FiSearch)`
   position: absolute;
-  left: 14px;
+  left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: #8f8f8f;
+  width: 18px;
+  height: 18px;
+  color: ${colors.primaryDark};
   pointer-events: none;
 `;
 
@@ -64,23 +73,23 @@ const VisuallyHiddenLabel = styled.label`
 const SearchInput = styled.input`
   width: 100%;
   min-width: 0;
-  padding: 12px 44px 12px 42px;
+  padding: 13px 44px 13px 46px;
   background-color: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px 0 0 12px;
+  border: 1px solid #dcdcdc;
+  border-right: 0;
+  border-radius: 14px 0 0 14px;
   color: ${colors.textPrimary};
   font-size: 1rem;
   outline: none;
   box-shadow: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease;
 
   &:focus {
     border-color: ${colors.primary};
-    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.24);
   }
 
   &::placeholder {
-    color: #9a9a9a;
+    color: #8f8a80;
   }
 `;
 
@@ -109,18 +118,19 @@ const SearchButton = styled.button`
   ${buttonBaseStyle}
   ${buttonPrimaryStyle}
   min-height: auto;
-  border-radius: 0 12px 12px 0;
-  padding: 12px 18px;
+  border-radius: 0 14px 14px 0;
+  padding: 12px 22px;
+  font-weight: 700;
   transform: none !important;
   white-space: nowrap;
 
   &:disabled {
-    opacity: 0.65;
+    opacity: 0.6;
     cursor: not-allowed;
   }
 
   @media screen and (max-width: 420px) {
-    padding-inline: 14px;
+    padding-inline: 16px;
   }
 `;
 
@@ -178,21 +188,21 @@ const DropdownWrapper = styled.div`
 
 const DropdownButton = styled.button`
   ${buttonBaseStyle}
-  min-height: 42px;
-  padding: 0 8px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  background: transparent;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid #dcdcdc;
+  border-radius: 14px;
+  background: #fff;
   color: ${colors.textSecondary};
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   white-space: nowrap;
-  box-shadow: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 
   svg {
     width: 16px;
@@ -201,9 +211,9 @@ const DropdownButton = styled.button`
   }
 
   &:hover {
-    color: ${colors.textPrimary};
-    background: #f2f2f2;
-    border-color: #e0e0e0;
+    color: ${colors.primaryDark};
+    background: #fff8e8;
+    border-color: ${colors.primary};
     transform: none;
   }
 
@@ -215,12 +225,19 @@ const DropdownButton = styled.button`
 const CategorySelect = styled.select`
   display: none;
   width: 100%;
-  padding: 11px 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
+  padding: 13px 14px;
+  border: 1px solid #dcdcdc;
+  border-radius: 14px;
   background: #fff;
   color: ${colors.textPrimary};
   font-size: 0.95rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  &:focus {
+    outline: none;
+    border-color: ${colors.primary};
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.22);
+  }
 
   @media screen and (max-width: 768px) {
     display: block;
