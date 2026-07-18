@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Link from "next/link";
 import { LayoutInner } from "styles/layout";
 import colors from "styles/colors";
+import CloverMark from "./CloverMark";
 
 const FACEBOOK_AUCTIONS_URL =
   process.env.NEXT_PUBLIC_FACEBOOK_AUCTIONS_URL || "https://www.facebook.com/";
@@ -38,16 +39,15 @@ const Brand = styled.div`
 `;
 
 const BrandTile = styled.div`
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, ${colors.primaryLight}, ${colors.primaryDark});
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: #171717;
+  border: 1px solid #2a2a2a;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${colors.black};
-  font-weight: 800;
-  font-size: 18px;
+  color: ${colors.primary};
 `;
 
 const BrandName = styled.div`
@@ -116,7 +116,9 @@ export default function Footer() {
       <FooterGrid>
         <div>
           <Brand>
-            <BrandTile aria-hidden="true">L</BrandTile>
+            <BrandTile aria-hidden="true">
+              <CloverMark size={20} />
+            </BrandTile>
             <BrandName>Nowy Lombard</BrandName>
           </Brand>
           <BrandText>
@@ -161,7 +163,7 @@ export default function Footer() {
       <BottomBar>
         <BottomInner>
           <span>© 2026 Nowy Lombard. Wszystkie prawa zastrzeżone.</span>
-          <span>Poppins · Gold #C9A227</span>
+          <span>Bezpieczne płatności · Szybka gotówka</span>
         </BottomInner>
       </BottomBar>
     </FooterContainer>

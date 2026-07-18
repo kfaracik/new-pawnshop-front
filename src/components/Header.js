@@ -10,75 +10,62 @@ const AnnouncementBar = styled.div`
   background: ${colors.black};
   color: ${colors.primaryLight};
   text-align: center;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  padding: 9px 16px;
+  padding: 8px 16px;
 `;
 
 const HeaderRoot = styled.header`
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
   border-bottom: 1px solid #ececec;
 `;
 
 const HeaderRow = styled(LayoutInner)`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 12px;
   padding-top: 12px;
   padding-bottom: 12px;
 
   @media screen and (min-width: 1024px) {
-    display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
-    gap: clamp(14px, 2vw, 28px);
+    column-gap: clamp(16px, 2.4vw, 32px);
+    row-gap: 0;
   }
 `;
 
-const TopRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  min-height: 52px;
+const LogoCell = styled.div`
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+`;
+
+const ActionsCell = styled.div`
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  min-width: 0;
 
   @media screen and (min-width: 1024px) {
-    min-width: 0;
-    min-height: auto;
+    grid-column: 3;
   }
 `;
 
-const MobileActions = styled.div`
-  display: flex;
-  align-items: center;
+const SearchCell = styled.div`
+  grid-column: 1 / -1;
+  grid-row: 2;
+  min-width: 0;
 
   @media screen and (min-width: 1024px) {
-    display: none;
-  }
-`;
-
-const DesktopActions = styled.div`
-  display: none;
-
-  @media screen and (min-width: 1024px) {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-  }
-`;
-
-const SearchRow = styled.div`
-  display: flex;
-  justify-content: center;
-  width: 100%;
-
-  @media screen and (min-width: 1024px) {
-    min-width: 0;
+    grid-column: 2;
+    grid-row: 1;
   }
 `;
 
@@ -89,18 +76,15 @@ const Header = () => {
         Bezpłatna wycena w 15 minut · Gotówka od ręki · 20 lat na rynku
       </AnnouncementBar>
       <HeaderRow>
-        <TopRow>
+        <LogoCell>
           <Logo />
-          <MobileActions>
-            <Menu />
-          </MobileActions>
-        </TopRow>
-        <SearchRow>
+        </LogoCell>
+        <SearchCell>
           <SearchWithCategory />
-        </SearchRow>
-        <DesktopActions>
+        </SearchCell>
+        <ActionsCell>
           <Menu />
-        </DesktopActions>
+        </ActionsCell>
       </HeaderRow>
     </HeaderRoot>
   );

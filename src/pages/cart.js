@@ -16,7 +16,6 @@ import {
 } from "components/Button";
 import PageContainer from "components/PageContainer";
 import SeoHead from "components/SeoHead";
-import Input from "components/Input";
 import { CartContext } from "context/CartContext";
 import { useProducts } from "services/api/useProductApi";
 import { useUserData } from "services/api/useUserApi";
@@ -293,17 +292,6 @@ const TotalRow = styled.div`
   color: ${colors.textPrimary};
 `;
 
-const SummaryCard = styled(Card)`
-  @media (min-width: 980px) {
-    position: sticky;
-    top: 14px;
-  }
-
-  @media (max-width: 979px) {
-    order: -1;
-  }
-`;
-
 const SectionTitle = styled.h2`
   margin: 0 0 12px;
   font-size: 1.05rem;
@@ -320,11 +308,6 @@ const SectionLead = styled.p`
   color: ${colors.textSecondary};
   font-size: 0.9rem;
   line-height: 1.45;
-`;
-
-const Form = styled.form`
-  display: grid;
-  gap: 14px;
 `;
 
 const CheckoutHeader = styled.div`
@@ -386,16 +369,6 @@ const StepCheck = styled.span`
   color: #fff;
   font-size: 0.82rem;
   font-weight: 700;
-`;
-
-const TwoCols = styled.div`
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 1fr;
-
-  @media (min-width: 560px) {
-    grid-template-columns: 1fr 1fr;
-  }
 `;
 
 const PrimaryButton = styled.button`
@@ -533,13 +506,6 @@ const OptionMeta = styled.div`
   flex-wrap: wrap;
 `;
 
-const CheckoutBlock = styled.div`
-  display: grid;
-  gap: 10px;
-  padding-top: 12px;
-  border-top: 1px solid #efeadc;
-`;
-
 const CheckoutNotice = styled.div`
   border: 1px solid #d8c27a;
   border-radius: 12px;
@@ -637,6 +603,97 @@ const SkeletonItem = styled.div`
       background-position: 0 0;
     }
   }
+`;
+
+const CheckoutForm = styled.form`
+  display: grid;
+  gap: 16px;
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+
+  @media (min-width: 980px) {
+    grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.9fr);
+  }
+`;
+
+const CheckoutMain = styled.div`
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+`;
+
+const CheckoutSide = styled(Card)`
+  display: grid;
+  gap: 14px;
+
+  @media (min-width: 980px) {
+    position: sticky;
+    top: 14px;
+  }
+`;
+
+const FieldsGrid = styled.div`
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 560px) {
+    grid-template-columns: 1fr 1fr;
+  }
+`;
+
+const Field = styled.label`
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  grid-column: ${(props) => (props.$full ? "1 / -1" : "auto")};
+`;
+
+const FieldLabel = styled.span`
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: ${colors.textSecondary};
+`;
+
+const TextInput = styled.input`
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 11px;
+  background: #fff;
+  color: ${colors.textPrimary};
+  font-size: 0.95rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &::placeholder {
+    color: #b0aca2;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${colors.primary};
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.2);
+  }
+`;
+
+const SideDivider = styled.div`
+  height: 1px;
+  background: #efeadc;
+`;
+
+const OptionCheck = styled.span`
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: ${colors.primaryDark};
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 700;
 `;
 
 const CartPage = () => {
@@ -1107,324 +1164,362 @@ const CartPage = () => {
         path="/cart"
         noindex
       />
-      <Layout>
-        <Card>
-          <CheckoutHeader>
-            <Title>{hasCheckoutItems ? "Finalizacja zamówienia" : "Koszyk"}</Title>
-          </CheckoutHeader>
-          {hasCheckoutItems && (
-            <Stepper aria-label="Etapy zamówienia">
-              {CHECKOUT_STEPS.map((step) => {
-                const isCompleted =
-                  (step.id === 1 && stepOneComplete) ||
-                  (step.id === 2 && stepTwoComplete);
-                const isClickable =
-                  step.id === 1 ||
-                  (step.id === 2 && stepOneComplete);
+      {hasCheckoutItems && (
+        <CheckoutHeader>
+          <Title>Finalizacja zamówienia</Title>
+          <Stepper aria-label="Etapy zamówienia">
+            {CHECKOUT_STEPS.map((step) => {
+              const isCompleted =
+                (step.id === 1 && stepOneComplete) ||
+                (step.id === 2 && stepTwoComplete);
+              const isClickable =
+                step.id === 1 || (step.id === 2 && stepOneComplete);
 
-                return (
-                  <StepItem
-                    key={step.id}
-                    $active={activeStep === step.id}
-                    $clickable={isClickable}
-                    onClick={() => isClickable && goToStep(step.id)}
+              return (
+                <StepItem
+                  key={step.id}
+                  $active={activeStep === step.id}
+                  $clickable={isClickable}
+                  onClick={() => isClickable && goToStep(step.id)}
+                >
+                  <StepTop>
+                    <StepIndex>Krok {step.id}</StepIndex>
+                    {isCompleted && <StepCheck>✓</StepCheck>}
+                  </StepTop>
+                  <StepTitle>{step.label}</StepTitle>
+                </StepItem>
+              );
+            })}
+          </Stepper>
+        </CheckoutHeader>
+      )}
+
+      {activeStep === 2 && cartItems.length > 0 ? (
+        <CheckoutForm onSubmit={handleSubmit}>
+          <CheckoutMain>
+            <Card>
+              <SectionHeader>
+                <SectionTitle as="h2">Dane odbiorcy</SectionTitle>
+                <SectionLead>Uzupełnij dane do wysyłki i kontaktu.</SectionLead>
+              </SectionHeader>
+              <FieldsGrid>
+                <Field $full>
+                  <FieldLabel>Imię i nazwisko</FieldLabel>
+                  <TextInput
+                    type="text"
+                    autoComplete="name"
+                    placeholder="np. Jan Kowalski"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </Field>
+                <Field $full>
+                  <FieldLabel>Adres e-mail</FieldLabel>
+                  <TextInput
+                    type="email"
+                    autoComplete="email"
+                    placeholder="np. jan@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>Miasto</FieldLabel>
+                  <TextInput
+                    type="text"
+                    autoComplete="address-level2"
+                    placeholder="np. Częstochowa"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>Kod pocztowy</FieldLabel>
+                  <TextInput
+                    type="text"
+                    autoComplete="postal-code"
+                    placeholder="np. 42-200"
+                    value={postalCode}
+                    onChange={(e) => setPostalCode(e.target.value)}
+                  />
+                </Field>
+                <Field $full>
+                  <FieldLabel>Ulica i numer</FieldLabel>
+                  <TextInput
+                    type="text"
+                    autoComplete="street-address"
+                    placeholder="np. Al. NMP 1/2"
+                    value={streetAddress}
+                    onChange={(e) => setStreetAddress(e.target.value)}
+                  />
+                </Field>
+                <Field $full>
+                  <FieldLabel>Kraj</FieldLabel>
+                  <TextInput
+                    type="text"
+                    autoComplete="country-name"
+                    placeholder="np. Polska"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                  />
+                </Field>
+              </FieldsGrid>
+            </Card>
+
+            <Card>
+              <SectionHeader>
+                <SectionTitle as="h2">Dostawa</SectionTitle>
+                <SectionLead>Wybierz sposób dostarczenia zamówienia.</SectionLead>
+              </SectionHeader>
+              <OptionGrid>
+                {DELIVERY_OPTIONS.map((option) => (
+                  <OptionCard
+                    key={option.id}
+                    type="button"
+                    $selected={option.id === deliveryMethod}
+                    onClick={() => setDeliveryMethod(option.id)}
+                    aria-pressed={option.id === deliveryMethod}
                   >
-                    <StepTop>
-                      <StepIndex>Krok {step.id}</StepIndex>
-                      {isCompleted && <StepCheck>✓</StepCheck>}
-                    </StepTop>
-                    <StepTitle>{step.label}</StepTitle>
-                  </StepItem>
-                );
-              })}
-            </Stepper>
-          )}
-          {isCartLoading ? (
-            <ItemsList>
-              {Array.from({ length: Math.min(productIds.length || 3, 4) }).map((_, index) => (
-                <SkeletonItem key={`cart-skeleton-${index}`} />
-              ))}
-            </ItemsList>
-          ) : !cartItems.length ? (
-            <EmptyState>
-              <EmptyStateEyebrow>Pusty koszyk</EmptyStateEyebrow>
-              <EmptyStateTitle>Nie masz jeszcze żadnych produktów</EmptyStateTitle>
-              <EmptyStateText>
-                Dodaj produkty do koszyka, aby przejść do wyboru dostawy, metody
-                płatności i potwierdzenia zamówienia.
-              </EmptyStateText>
-              <EmptyStateActions>
-                <EmptyStatePrimaryButton as={Link} href="/products">
-                  Przeglądaj produkty
-                </EmptyStatePrimaryButton>
-                <SecondaryButtonLink href="/">Wróć na stronę główną</SecondaryButtonLink>
-              </EmptyStateActions>
-            </EmptyState>
-          ) : (
-            <>
-              <ItemsList>
-                {cartItems.map((item) => (
-                  <ItemCard key={item._id}>
-                    <ProductImageWrapper>
-                      <Image
-                        src={
-                          item.images?.[0] ||
-                          "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
-                        }
-                        alt={item.title}
-                        fill
-                        sizes="(max-width: 420px) 100vw, 72px"
-                        loader={({ src }) => src}
-                        unoptimized
-                      />
-                    </ProductImageWrapper>
-                    <div>
-                      <ProductName>{item.title}</ProductName>
-                      <ProductMeta>
-                        <QuantityControl>
-                          <QtyButton
-                            type="button"
-                            aria-label={`Zmniejsz ilość produktu ${item.title}`}
-                            onClick={() => removeProduct(item._id)}
-                            disabled={item.cartQuantity <= 1}
-                          >
-                            -
-                          </QtyButton>
-                          <QuantityInput
-                            type="number"
-                            inputMode="numeric"
-                            min="1"
-                            max={
-                              Number.isFinite(item.availableQuantity)
-                                ? item.availableQuantity
-                                : undefined
-                            }
-                            value={item.cartQuantity}
-                            aria-label={`Ilość produktu ${item.title}`}
-                            onChange={(event) => {
-                              if (event.target.value === "") {
-                                return;
-                              }
-
-                              setProductQuantity(
-                                item._id,
-                                Number(event.target.value),
-                                item.availableQuantity
-                              );
-                            }}
-                          />
-                          <QtyButton
-                            type="button"
-                            aria-label={`Zwiększ ilość produktu ${item.title}`}
-                            onClick={() =>
-                              addProduct(item._id, item.availableQuantity)
-                            }
-                            disabled={item.cartQuantity >= item.availableQuantity}
-                          >
-                            +
-                          </QtyButton>
-                        </QuantityControl>
-                        <RemoveLineButton
-                          type="button"
-                          onClick={() => removeProductLine(item._id)}
-                          aria-label={`Usuń produkt ${item.title} z koszyka`}
-                        >
-                          Usuń
-                        </RemoveLineButton>
-                        <ItemPrice>{item.total.toFixed(2)} zł</ItemPrice>
-                      </ProductMeta>
-                      {Number.isFinite(item.availableQuantity) && (
-                        <StockHint>Dostępne: {item.availableQuantity} szt.</StockHint>
+                    <OptionTopRow>
+                      <OptionTitle>{option.title}</OptionTitle>
+                      {option.id === deliveryMethod ? (
+                        <OptionCheck aria-hidden="true">✓</OptionCheck>
+                      ) : (
+                        <OptionBadge>
+                          {option.price === 0 ? "Gratis" : `${option.price.toFixed(2)} zł`}
+                        </OptionBadge>
                       )}
+                    </OptionTopRow>
+                    <OptionDescription>{option.description}</OptionDescription>
+                    <OptionMeta>
+                      <span>{option.eta}</span>
+                      <span>
+                        {option.price === 0
+                          ? "Bez dodatkowych kosztów"
+                          : `Dostawa: ${option.price.toFixed(2)} zł`}
+                      </span>
+                    </OptionMeta>
+                  </OptionCard>
+                ))}
+              </OptionGrid>
+            </Card>
+
+            <Card>
+              <SectionHeader>
+                <SectionTitle as="h2">Płatność</SectionTitle>
+                <SectionLead>Zapłać online lub wybierz przelew tradycyjny.</SectionLead>
+              </SectionHeader>
+              <OptionGrid>
+                {PAYMENT_OPTIONS.map((option) => (
+                  <PaymentCard
+                    key={option.id}
+                    type="button"
+                    $selected={option.id === paymentMethod}
+                    disabled={option.disabled}
+                    onClick={() => {
+                      if (!option.disabled) {
+                        setPaymentMethod(option.id);
+                      }
+                    }}
+                    aria-pressed={option.id === paymentMethod}
+                  >
+                    <RadioDot $selected={option.id === paymentMethod} />
+                    <div>
+                      <OptionTopRow>
+                        <OptionTitle>{option.title}</OptionTitle>
+                        <OptionBadge>{option.badge}</OptionBadge>
+                      </OptionTopRow>
+                      <OptionDescription>{option.description}</OptionDescription>
                     </div>
-                  </ItemCard>
+                  </PaymentCard>
+                ))}
+              </OptionGrid>
+              {paymentMethod === "stripe_card" && (
+                <CheckoutNotice>
+                  <strong>Płatność online (tryb testowy)</strong>
+                  Po kliknięciu przycisku przejdziesz do bezpiecznej płatności Stripe. Użyj karty testowej 4242 4242 4242 4242, dowolnej przyszłej daty i CVC.
+                </CheckoutNotice>
+              )}
+            </Card>
+          </CheckoutMain>
+
+          <CheckoutSide>
+            <SectionTitle as="h2">Podsumowanie</SectionTitle>
+            <CompactOrderList>
+              {cartItems.map((item) => (
+                <CompactOrderItem key={`summary-${item._id}`}>
+                  <span>
+                    {item.title} × {item.cartQuantity}
+                  </span>
+                  <strong>{item.total.toFixed(2)} zł</strong>
+                </CompactOrderItem>
+              ))}
+            </CompactOrderList>
+            <SideDivider />
+            <TotalsList>
+              <TotalsRow>
+                <span>Produkty</span>
+                <span>{cartTotal.toFixed(2)} zł</span>
+              </TotalsRow>
+              <TotalsRow>
+                <span>Dostawa</span>
+                <span>{shippingTotal === 0 ? "Gratis" : `${shippingTotal.toFixed(2)} zł`}</span>
+              </TotalsRow>
+              <TotalsRow>
+                <span>Płatność</span>
+                <span>{selectedPayment.title}</span>
+              </TotalsRow>
+            </TotalsList>
+            <SideDivider />
+            <TotalsList>
+              <TotalsRow $strong>
+                <span>Do zapłaty</span>
+                <span>{orderGrandTotal.toFixed(2)} zł</span>
+              </TotalsRow>
+            </TotalsList>
+
+            {formError && <Feedback>{formError}</Feedback>}
+
+            <PrimaryButton type="submit" disabled={isSubmitting || !stepTwoComplete}>
+              {isSubmitting
+                ? "Tworzenie zamówienia..."
+                : paymentMethod === "stripe_card"
+                  ? `Zapłać ${orderGrandTotal.toFixed(2)} zł`
+                  : "Złóż zamówienie"}
+            </PrimaryButton>
+            <StepButton type="button" onClick={() => goToStep(1)}>
+              Wróć do koszyka
+            </StepButton>
+            <SecureHint>
+              Dane zamówienia są weryfikowane po stronie serwera, a płatność online
+              jest obsługiwana przez Stripe.
+            </SecureHint>
+          </CheckoutSide>
+        </CheckoutForm>
+      ) : (
+        <Layout>
+          <Card>
+            {!hasCheckoutItems && (
+              <CheckoutHeader>
+                <Title>Koszyk</Title>
+              </CheckoutHeader>
+            )}
+            {isCartLoading ? (
+              <ItemsList>
+                {Array.from({ length: Math.min(productIds.length || 3, 4) }).map((_, index) => (
+                  <SkeletonItem key={`cart-skeleton-${index}`} />
                 ))}
               </ItemsList>
-              <TotalRow>
-                <span>Razem</span>
-                <span>{cartTotal.toFixed(2)} zł</span>
-              </TotalRow>
-              {hasCheckoutItems && activeStep === 1 && (
+            ) : !cartItems.length ? (
+              <EmptyState>
+                <EmptyStateEyebrow>Pusty koszyk</EmptyStateEyebrow>
+                <EmptyStateTitle>Nie masz jeszcze żadnych produktów</EmptyStateTitle>
+                <EmptyStateText>
+                  Dodaj produkty do koszyka, aby przejść do wyboru dostawy, metody
+                  płatności i potwierdzenia zamówienia.
+                </EmptyStateText>
+                <EmptyStateActions>
+                  <EmptyStatePrimaryButton as={Link} href="/products">
+                    Przeglądaj produkty
+                  </EmptyStatePrimaryButton>
+                  <SecondaryButtonLink href="/">Wróć na stronę główną</SecondaryButtonLink>
+                </EmptyStateActions>
+              </EmptyState>
+            ) : (
+              <>
+                <ItemsList>
+                  {cartItems.map((item) => (
+                    <ItemCard key={item._id}>
+                      <ProductImageWrapper>
+                        <Image
+                          src={
+                            item.images?.[0] ||
+                            "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
+                          }
+                          alt={item.title}
+                          fill
+                          sizes="(max-width: 420px) 100vw, 72px"
+                          loader={({ src }) => src}
+                          unoptimized
+                        />
+                      </ProductImageWrapper>
+                      <div>
+                        <ProductName>{item.title}</ProductName>
+                        <ProductMeta>
+                          <QuantityControl>
+                            <QtyButton
+                              type="button"
+                              aria-label={`Zmniejsz ilość produktu ${item.title}`}
+                              onClick={() => removeProduct(item._id)}
+                              disabled={item.cartQuantity <= 1}
+                            >
+                              -
+                            </QtyButton>
+                            <QuantityInput
+                              type="number"
+                              inputMode="numeric"
+                              min="1"
+                              max={
+                                Number.isFinite(item.availableQuantity)
+                                  ? item.availableQuantity
+                                  : undefined
+                              }
+                              value={item.cartQuantity}
+                              aria-label={`Ilość produktu ${item.title}`}
+                              onChange={(event) => {
+                                if (event.target.value === "") {
+                                  return;
+                                }
+
+                                setProductQuantity(
+                                  item._id,
+                                  Number(event.target.value),
+                                  item.availableQuantity
+                                );
+                              }}
+                            />
+                            <QtyButton
+                              type="button"
+                              aria-label={`Zwiększ ilość produktu ${item.title}`}
+                              onClick={() =>
+                                addProduct(item._id, item.availableQuantity)
+                              }
+                              disabled={item.cartQuantity >= item.availableQuantity}
+                            >
+                              +
+                            </QtyButton>
+                          </QuantityControl>
+                          <RemoveLineButton
+                            type="button"
+                            onClick={() => removeProductLine(item._id)}
+                            aria-label={`Usuń produkt ${item.title} z koszyka`}
+                          >
+                            Usuń
+                          </RemoveLineButton>
+                          <ItemPrice>{item.total.toFixed(2)} zł</ItemPrice>
+                        </ProductMeta>
+                        {Number.isFinite(item.availableQuantity) && (
+                          <StockHint>Dostępne: {item.availableQuantity} szt.</StockHint>
+                        )}
+                      </div>
+                    </ItemCard>
+                  ))}
+                </ItemsList>
+                <TotalRow>
+                  <span>Razem</span>
+                  <span>{cartTotal.toFixed(2)} zł</span>
+                </TotalRow>
                 <StepActions>
                   <span />
                   <PrimaryButton type="button" onClick={() => goToStep(2)}>
                     Przejdź do dostawy i płatności
                   </PrimaryButton>
                 </StepActions>
-              )}
-            </>
-          )}
-        </Card>
-
-        {!!cartItems.length && activeStep > 1 && (
-          <SummaryCard>
-            <SectionHeader>
-              <SectionTitle>Dostawa, płatność i podsumowanie</SectionTitle>
-              <SectionLead>
-                Uzupełnij dane raz, wybierz dostawę i przejdź do płatności Stripe.
-              </SectionLead>
-            </SectionHeader>
-            <Form onSubmit={handleSubmit}>
-              <CheckoutBlock>
-                <SectionTitle as="h3">Dane odbiorcy</SectionTitle>
-                <Input
-                  type="text"
-                  placeholder="Imię i nazwisko"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-                <Input
-                  type="email"
-                  placeholder="Adres e-mail"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <TwoCols>
-                  <Input
-                    type="text"
-                    placeholder="Miasto"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                  />
-                  <Input
-                    type="text"
-                    placeholder="Kod pocztowy"
-                    value={postalCode}
-                    onChange={(e) => setPostalCode(e.target.value)}
-                  />
-                </TwoCols>
-                <Input
-                  type="text"
-                  placeholder="Ulica i numer"
-                  value={streetAddress}
-                  onChange={(e) => setStreetAddress(e.target.value)}
-                />
-                <Input
-                  type="text"
-                  placeholder="Kraj"
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                />
-              </CheckoutBlock>
-
-              <CheckoutBlock>
-                <SectionTitle as="h3">Dostawa</SectionTitle>
-                <OptionGrid>
-                  {DELIVERY_OPTIONS.map((option) => (
-                    <OptionCard
-                      key={option.id}
-                      type="button"
-                      $selected={option.id === deliveryMethod}
-                      onClick={() => setDeliveryMethod(option.id)}
-                      aria-pressed={option.id === deliveryMethod}
-                    >
-                      <OptionTopRow>
-                        <OptionTitle>{option.title}</OptionTitle>
-                        <OptionBadge>
-                          {option.price === 0 ? "Gratis" : `${option.price.toFixed(2)} zł`}
-                        </OptionBadge>
-                      </OptionTopRow>
-                      <OptionDescription>{option.description}</OptionDescription>
-                      <OptionMeta>
-                        <span>{option.eta}</span>
-                        <span>
-                          {option.price === 0
-                            ? "Bez dodatkowych kosztów"
-                            : `Dostawa: ${option.price.toFixed(2)} zł`}
-                        </span>
-                      </OptionMeta>
-                    </OptionCard>
-                  ))}
-                </OptionGrid>
-              </CheckoutBlock>
-
-              <CheckoutBlock>
-                <SectionTitle as="h3">Płatność</SectionTitle>
-                <OptionGrid>
-                  {PAYMENT_OPTIONS.map((option) => (
-                    <PaymentCard
-                      key={option.id}
-                      type="button"
-                      $selected={option.id === paymentMethod}
-                      disabled={option.disabled}
-                      onClick={() => {
-                        if (!option.disabled) {
-                          setPaymentMethod(option.id);
-                        }
-                      }}
-                      aria-pressed={option.id === paymentMethod}
-                    >
-                      <RadioDot $selected={option.id === paymentMethod} />
-                      <div>
-                        <OptionTopRow>
-                          <OptionTitle>{option.title}</OptionTitle>
-                          <OptionBadge>{option.badge}</OptionBadge>
-                        </OptionTopRow>
-                        <OptionDescription>{option.description}</OptionDescription>
-                      </div>
-                    </PaymentCard>
-                  ))}
-                </OptionGrid>
-                {paymentMethod === "stripe_card" && (
-                  <CheckoutNotice>
-                    <strong>Płatność online (tryb testowy)</strong>
-                    Po kliknięciu przycisku przejdziesz do bezpiecznej płatności Stripe. Użyj karty testowej 4242 4242 4242 4242, dowolnej przyszłej daty i CVC.
-                  </CheckoutNotice>
-                )}
-              </CheckoutBlock>
-
-              <CheckoutBlock>
-                <SectionTitle as="h3">Podsumowanie</SectionTitle>
-                <CompactOrderList>
-                  {cartItems.map((item) => (
-                    <CompactOrderItem key={`summary-${item._id}`}>
-                      <span>
-                        {item.title} x{item.cartQuantity}
-                      </span>
-                      <strong>{item.total.toFixed(2)} zł</strong>
-                    </CompactOrderItem>
-                  ))}
-                </CompactOrderList>
-                <TotalsList>
-                  <TotalsRow>
-                    <span>Produkty</span>
-                    <span>{cartTotal.toFixed(2)} zł</span>
-                  </TotalsRow>
-                  <TotalsRow>
-                    <span>Dostawa</span>
-                    <span>{shippingTotal === 0 ? "0,00 zł" : `${shippingTotal.toFixed(2)} zł`}</span>
-                  </TotalsRow>
-                  <TotalsRow>
-                    <span>Płatność</span>
-                    <span>{selectedPayment.title}</span>
-                  </TotalsRow>
-                  <TotalsRow $strong>
-                    <span>Do zapłaty</span>
-                    <span>{orderGrandTotal.toFixed(2)} zł</span>
-                  </TotalsRow>
-                </TotalsList>
-              </CheckoutBlock>
-
-              {formError && <Feedback>{formError}</Feedback>}
-              <StepActions>
-                <StepButton type="button" onClick={() => goToStep(1)}>
-                  Wróć do koszyka
-                </StepButton>
-                <PrimaryButton type="submit" disabled={isSubmitting || !stepTwoComplete}>
-                  {isSubmitting
-                    ? "Tworzenie zamówienia..."
-                    : paymentMethod === "stripe_card"
-                      ? "Przejdź do płatności"
-                      : "Złóż zamówienie"}
-                </PrimaryButton>
-              </StepActions>
-              <SecureHint>
-                Dane zamówienia są weryfikowane po stronie serwera, a płatność online będzie obsługiwana przez Stripe.
-              </SecureHint>
-            </Form>
-          </SummaryCard>
-        )}
-      </Layout>
+              </>
+            )}
+          </Card>
+        </Layout>
+      )}
       {toast && <Toast $variant={toast.variant}>{toast.message}</Toast>}
     </PageContainer>
   );

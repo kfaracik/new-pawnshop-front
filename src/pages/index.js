@@ -167,36 +167,49 @@ const SectionLink = styled(Link)`
   white-space: nowrap;
 `;
 
-const CategoryGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 14px;
+const CategoryRow = styled.div`
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding: 4px 2px 8px;
+  margin: 0 -2px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const CategoryChip = styled(Link)`
+  flex: 0 0 auto;
+  scroll-snap-align: start;
   text-decoration: none;
   background: ${colors.backgroundPaper};
   border: 1px solid #ececec;
-  border-radius: 14px;
-  padding: 20px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  border-radius: 999px;
+  padding: 9px 18px 9px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
   color: ${colors.textPrimary};
-  transition: all 0.18s;
+  white-space: nowrap;
+  transition: border-color 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s;
 
   &:hover {
     border-color: ${colors.primary};
     color: ${colors.primaryDark};
     transform: translateY(-2px);
-    box-shadow: 0 8px 18px rgba(201, 162, 39, 0.14);
+    box-shadow: 0 8px 18px rgba(201, 162, 39, 0.16);
   }
 `;
 
 const CategoryIcon = styled.span`
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 999px;
   background: #fff8e8;
   color: ${colors.primaryDark};
   display: flex;
@@ -206,7 +219,7 @@ const CategoryIcon = styled.span`
 
 const CategoryName = styled.span`
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14.5px;
 `;
 
 const TrustGrid = styled.div`
@@ -498,7 +511,7 @@ export default function HomePage() {
             <SectionTitle>Kategorie</SectionTitle>
             <SectionLink href="/products">Zobacz wszystko →</SectionLink>
           </SectionHead>
-          <CategoryGrid>
+          <CategoryRow>
             {categoryList.map((category) => (
               <CategoryChip
                 key={category._id}
@@ -510,7 +523,7 @@ export default function HomePage() {
                 <CategoryName>{category.name}</CategoryName>
               </CategoryChip>
             ))}
-          </CategoryGrid>
+          </CategoryRow>
         </Section>
       )}
 

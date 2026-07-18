@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import styled from "styled-components";
 import colors from "styles/colors";
+import CloverMark from "./CloverMark";
 
 const LogoLink = styled(Link)`
   display: inline-flex;
@@ -11,58 +12,40 @@ const LogoLink = styled(Link)`
   flex-shrink: 0;
 `;
 
-const Tile = styled.div`
+const Tile = styled.span`
   width: 40px;
   height: 40px;
-  border-radius: 10px;
-  background: linear-gradient(
-    135deg,
-    ${colors.primaryLight},
-    ${colors.primary} 60%,
-    ${colors.primaryDark}
-  );
+  border-radius: 12px;
+  background: ${colors.black};
+  border: 1px solid #232323;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${colors.black};
-  font-weight: 800;
-  font-size: 20px;
+  color: ${colors.primary};
   flex-shrink: 0;
-`;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
-const LogoText = styled.div`
-  line-height: 1;
-`;
-
-const Name = styled.div`
-  font-weight: 800;
-  font-size: 17px;
-  letter-spacing: -0.01em;
-  color: ${colors.textPrimary};
-`;
-
-const Sub = styled.div`
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: ${colors.primaryDark};
-  margin-top: 3px;
-  white-space: nowrap;
-
-  @media screen and (max-width: 1080px) {
-    display: none;
+  ${LogoLink}:hover & {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(201, 162, 39, 0.25);
   }
+`;
+
+const Name = styled.span`
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  color: ${colors.textPrimary};
+  white-space: nowrap;
 `;
 
 export default function Logo() {
   return (
     <LogoLink href="/" aria-label="Nowy Lombard — strona główna">
-      <Tile aria-hidden="true">L</Tile>
-      <LogoText>
-        <Name>Nowy Lombard</Name>
-        <Sub>Złoto · Zegarki · Elektronika</Sub>
-      </LogoText>
+      <Tile aria-hidden="true">
+        <CloverMark size={22} />
+      </Tile>
+      <Name>Nowy Lombard</Name>
     </LogoLink>
   );
 }

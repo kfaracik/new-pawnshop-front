@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useContext } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import styled from "styled-components";
 import { FaBars, FaTimes } from "react-icons/fa";
-import { FiShoppingCart } from "react-icons/fi";
+import { FiShoppingCart, FiUser } from "react-icons/fi";
 import { CartContext } from "../context/CartContext";
 import { buttonBaseStyle, buttonGhostStyle } from "components/Button";
 import colors from "styles/colors";
@@ -101,15 +102,33 @@ const StyledNav = styled.nav`
   top: 0;
   right: 0;
   bottom: 0;
-  width: min(82vw, 320px);
-  background-color: #121212;
-  border-left: 1px solid #2b2b2b;
-  padding: 72px 18px 18px;
-  z-index: 1001;
+  width: min(86vw, 340px);
+  background-color: #0f0f0f;
+  border-left: 1px solid #232323;
+  padding: 24px 18px 24px;
+  z-index: 2001;
   overflow-y: auto;
-  transition: transform 0.25s ease;
+  box-shadow: -24px 0 60px rgba(0, 0, 0, 0.5);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
   transform: ${(props) =>
-    props.mobileNavActive ? "translateX(0)" : "translateX(100%)"};
+    props.mobileNavActive ? "translateX(0)" : "translateX(101%)"};
+`;
+
+const DrawerBrand = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 4px 8px 18px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #232323;
+  color: ${colors.primary};
+  font-weight: 800;
+  font-size: 16px;
+
+  span {
+    color: #f5f5f5;
+  }
 `;
 
 const MenuButton = styled.button`
@@ -129,29 +148,116 @@ const MenuButton = styled.button`
     background: #f2f2f2;
     color: ${colors.primaryDark};
   }
+
+  @media screen and (min-width: 1024px) {
+    display: none;
+  }
+`;
+
+const DesktopNav = styled.nav`
+  display: none;
+
+  @media screen and (min-width: 1024px) {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-right: 6px;
+  }
+`;
+
+const DesktopNavLink = styled(Link)`
+  color: ${colors.textSecondary};
+  text-decoration: none;
+  font-size: 0.94rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 9px;
+  white-space: nowrap;
+  transition: color 0.15s ease, background 0.15s ease;
+  color: ${(props) => (props.$active ? colors.primaryDark : colors.textSecondary)};
+  background: ${(props) => (props.$active ? "#fff8e8" : "transparent")};
+
+  &:hover {
+    color: ${colors.primaryDark};
+    background: #f6f6f6;
+  }
+`;
+
+const DesktopExternalLink = styled.a`
+  color: ${colors.textSecondary};
+  text-decoration: none;
+  font-size: 0.94rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 9px;
+  white-space: nowrap;
+  transition: color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    color: ${colors.primaryDark};
+    background: #f6f6f6;
+  }
+`;
+
+const IconButton = styled.button`
+  ${buttonBaseStyle}
+  ${buttonGhostStyle}
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 11px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  font-size: 19px;
+  color: ${colors.textPrimary};
+
+  &:hover {
+    border-color: ${colors.primary};
+    background: #fff8e8;
+    color: ${colors.primaryDark};
+  }
+
+  @media screen and (min-width: 1024px) {
+    display: inline-flex;
+  }
 `;
 
 const MobileBackdrop = styled.button`
-  display: ${(props) => (props.mobileNavActive ? "block" : "none")};
+  display: block;
   position: fixed;
   inset: 0;
   border: 0;
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 1000;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 2000;
+  opacity: ${(props) => (props.mobileNavActive ? 1 : 0)};
+  pointer-events: ${(props) => (props.mobileNavActive ? "auto" : "none")};
+  transition: opacity 0.28s ease;
 `;
 
 const CloseButton = styled.button`
   ${buttonBaseStyle}
   ${buttonGhostStyle}
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   position: absolute;
-  top: 16px;
+  top: 18px;
   right: 14px;
   min-height: 36px;
   width: 36px;
   padding: 0;
+  border-radius: 10px;
   color: #f2f2f2;
   font-size: 20px;
+
+  &:hover {
+    background: #1c1c1c;
+    color: ${colors.primaryLight};
+  }
 `;
 
 const HeaderActions = styled.div`
@@ -196,6 +302,7 @@ const MobileCategoryLink = styled(Link)`
 export default function Menu() {
   const router = useRouter();
   const [mobileNavActive, setMobileNavActive] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { getCartItemCount } = useContext(CartContext);
   const { data: categoriesData } = useCategories();
   const categories = Array.isArray(categoriesData)
@@ -208,6 +315,14 @@ export default function Menu() {
 
   const toggleMobileNav = () => setMobileNavActive((prev) => !prev);
   const closeMobileNav = () => setMobileNavActive(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    closeMobileNav();
+  }, [router.asPath]);
 
   useEffect(() => {
     if (!mobileNavActive) return undefined;
@@ -231,67 +346,97 @@ export default function Menu() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [mobileNavActive]);
 
-  return (
+  const drawer = (
     <>
       <MobileBackdrop
         type="button"
         aria-label="Zamknij menu"
         mobileNavActive={mobileNavActive}
         onClick={closeMobileNav}
+        tabIndex={mobileNavActive ? 0 : -1}
       />
-      <HeaderActions>
-        <StyledNav
-          aria-label="Nawigacja główna"
-          mobileNavActive={mobileNavActive}
+      <StyledNav
+        aria-label="Nawigacja główna"
+        aria-hidden={!mobileNavActive}
+        mobileNavActive={mobileNavActive}
+      >
+        <DrawerBrand>
+          Nowy <span>Lombard</span>
+        </DrawerBrand>
+        <CloseButton type="button" aria-label="Zamknij menu" onClick={closeMobileNav}>
+          <FaTimes />
+        </CloseButton>
+        <NavLink href="/" $active={router.pathname === "/"} onClick={closeMobileNav}>
+          Home
+        </NavLink>
+        <NavLink
+          href="/products"
+          $active={router.pathname === "/products"}
+          onClick={closeMobileNav}
         >
-          <CloseButton type="button" aria-label="Zamknij menu" onClick={closeMobileNav}>
-            <FaTimes />
-          </CloseButton>
-          <NavLink href="/" $active={router.pathname === "/"} onClick={closeMobileNav}>
-            Home
-          </NavLink>
-          <NavLink
-            href="/products"
-            $active={router.pathname === "/products"}
-            onClick={closeMobileNav}
-          >
+          Produkty
+        </NavLink>
+        <NavLink
+          href="/contact"
+          $active={router.pathname === "/contact"}
+          onClick={closeMobileNav}
+        >
+          Kontakt
+        </NavLink>
+        <ExternalNavLink
+          href={FACEBOOK_AUCTIONS_URL}
+          target="_blank"
+          rel="noreferrer"
+          onClick={closeMobileNav}
+        >
+          Licytacje FB
+        </ExternalNavLink>
+        <NavLink
+          href="/account"
+          $active={router.pathname === "/account"}
+          onClick={closeMobileNav}
+        >
+          Konto
+        </NavLink>
+        <MobileCategorySection>
+          <MobileCategoryTitle>Kategorie</MobileCategoryTitle>
+          {categories.map((category) => (
+            <MobileCategoryLink
+              key={category._id}
+              href={`/products?category=${encodeURIComponent(category._id)}&page=1`}
+              onClick={closeMobileNav}
+            >
+              {category.name}
+            </MobileCategoryLink>
+          ))}
+        </MobileCategorySection>
+      </StyledNav>
+    </>
+  );
+
+  return (
+    <>
+      <HeaderActions>
+        <DesktopNav aria-label="Nawigacja główna">
+          <DesktopNavLink href="/products" $active={router.pathname === "/products"}>
             Produkty
-          </NavLink>
-          <NavLink
-            href="/contact"
-            $active={router.pathname === "/contact"}
-            onClick={closeMobileNav}
-          >
-            Kontakt
-          </NavLink>
-          <ExternalNavLink
+          </DesktopNavLink>
+          <DesktopExternalLink
             href={FACEBOOK_AUCTIONS_URL}
             target="_blank"
             rel="noreferrer"
-            onClick={closeMobileNav}
           >
-            Licytacje FB
-          </ExternalNavLink>
-          <NavLink
-            href="/account"
-            $active={router.pathname === "/account"}
-            onClick={closeMobileNav}
-          >
-            Konto
-          </NavLink>
-          <MobileCategorySection>
-            <MobileCategoryTitle>Kategorie</MobileCategoryTitle>
-            {categories.map((category) => (
-              <MobileCategoryLink
-                key={category._id}
-                href={`/products?category=${encodeURIComponent(category._id)}&page=1`}
-                onClick={closeMobileNav}
-              >
-                {category.name}
-              </MobileCategoryLink>
-            ))}
-          </MobileCategorySection>
-        </StyledNav>
+            Licytacje
+          </DesktopExternalLink>
+          <DesktopNavLink href="/contact" $active={router.pathname === "/contact"}>
+            Kontakt
+          </DesktopNavLink>
+        </DesktopNav>
+        <Link href="/account" aria-label="Twoje konto">
+          <IconButton as="span">
+            <FiUser />
+          </IconButton>
+        </Link>
         <Link href="/cart" aria-label={`Koszyk, liczba produktów: ${cartItemCount}`}>
           <CartIconWrapper>
             <CartIcon />
@@ -301,11 +446,13 @@ export default function Menu() {
         <MenuButton
           type="button"
           aria-label={mobileNavActive ? "Zamknij menu" : "Otwórz menu"}
+          aria-expanded={mobileNavActive}
           onClick={toggleMobileNav}
         >
           <FaBars />
         </MenuButton>
       </HeaderActions>
+      {mounted ? createPortal(drawer, document.body) : null}
     </>
   );
 }
