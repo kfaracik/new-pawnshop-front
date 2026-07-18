@@ -665,6 +665,7 @@ const CartPage = () => {
   const [toast, setToast] = useState(null);
   const [activeStep, setActiveStep] = useState(1);
   const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
+  const [pendingStripeOrder, setPendingStripeOrder] = useState(null);
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -703,6 +704,7 @@ const CartPage = () => {
         .then((result) => {
           if (!active) return;
           if (result?.paid) {
+            setPendingStripeOrder(null);
             clearCart();
             queryClient.invalidateQueries({ queryKey: ["myOrders"] });
             setCreatedOrder(result.order || { _id: orderId });
@@ -941,7 +943,7 @@ const CartPage = () => {
         quantity: item.cartQuantity,
       }));
 
-      const order = await createOrder({
+      const orderPayload = {
         name,
         email,
         city,
@@ -952,16 +954,35 @@ const CartPage = () => {
         deliveryMethod,
         deliveryPrice: shippingTotal,
         paymentMethod,
-      });
+      };
 
       if (paymentMethod === "stripe_card") {
+        const signature = JSON.stringify({ productsPayload, deliveryMethod });
+        let stripeOrder =
+          pendingStripeOrder?.signature === signature ? pendingStripeOrder.order : null;
+
+        if (!stripeOrder) {
+          stripeOrder = await createOrder(orderPayload);
+          setPendingStripeOrder({ order: stripeOrder, signature });
+        }
+
         try {
-          const { url } = await createCheckoutSession(order._id);
+          const { url, alreadyPaid } = await createCheckoutSession(stripeOrder._id);
           if (url) {
             window.location.href = url;
             return;
           }
+          if (alreadyPaid) {
+            setPendingStripeOrder(null);
+            clearCart();
+            queryClient.invalidateQueries({ queryKey: ["myOrders"] });
+            setCreatedOrder(stripeOrder);
+            setIsSuccess(true);
+            return;
+          }
+          throw new Error("no_session_url");
         } catch (sessionErr) {
+          setPendingStripeOrder(null);
           setFormError(
             "Zamówienie zostało zapisane, ale nie udało się rozpocząć płatności online. Spróbuj ponownie za chwilę."
           );
@@ -969,6 +990,7 @@ const CartPage = () => {
         }
       }
 
+      const order = await createOrder(orderPayload);
       clearCart();
       queryClient.invalidateQueries({ queryKey: ["myOrders"] });
       setCreatedOrder(order);
