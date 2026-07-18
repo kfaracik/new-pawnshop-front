@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import styled from "styled-components";
-import { FiSearch, FiX } from "react-icons/fi";
+import { FiSearch, FiX, FiSliders } from "react-icons/fi";
 import { IoIosArrowDown } from "react-icons/io";
 import { buttonBaseStyle, buttonPrimaryStyle } from "components/Button";
 import colors from "styles/colors";
@@ -193,8 +193,46 @@ const DropdownWrapper = styled.div`
   align-items: center;
 
   @media screen and (max-width: 768px) {
-    width: 100%;
+    width: auto;
+    align-self: flex-start;
   }
+`;
+
+const MobileFilterButton = styled.button`
+  display: none;
+
+  @media screen and (max-width: 768px) {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 15px;
+    border-radius: 999px;
+    border: 1px solid #e6e2d6;
+    background: #fff;
+    color: ${colors.textSecondary};
+    font-size: 0.88rem;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &[aria-expanded="true"] {
+    border-color: ${colors.primary};
+    color: ${colors.primaryDark};
+    background: #fff8e8;
+  }
+`;
+
+const ActiveBadge = styled.span`
+  color: ${colors.primaryDark};
+  font-weight: 700;
 `;
 
 const DropdownButton = styled.button`
@@ -233,28 +271,6 @@ const DropdownButton = styled.button`
   }
 `;
 
-const CategorySelect = styled.select`
-  display: none;
-  width: 100%;
-  padding: 13px 14px;
-  border: 1px solid #e6e2d6;
-  border-radius: 16px;
-  background: #fff;
-  color: ${colors.textPrimary};
-  font-size: 0.95rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-
-  &:focus {
-    outline: none;
-    border-color: ${colors.primary};
-    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.22);
-  }
-
-  @media screen and (max-width: 768px) {
-    display: block;
-  }
-`;
-
 const DropdownMenu = styled.ul`
   position: absolute;
   top: calc(100% + 6px);
@@ -270,6 +286,12 @@ const DropdownMenu = styled.ul`
   max-height: min(420px, calc(100vh - 160px));
   overflow-y: auto;
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.12);
+
+  @media screen and (max-width: 768px) {
+    right: auto;
+    left: 0;
+    min-width: min(280px, 82vw);
+  }
 `;
 
 const DropdownItem = styled.li`
@@ -479,19 +501,17 @@ export default function SearchWithCategory() {
         >
           {selectedCategoryName} <IoIosArrowDown />
         </DropdownButton>
-        <CategorySelect
-          aria-label="Wybierz kategorię"
-          value={selectedCategory}
-          disabled={isCategoriesLoading}
-          onChange={(event) => handleCategorySelect(event.target.value)}
+        <MobileFilterButton
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded={dropdownOpen}
+          aria-controls="category-menu"
+          onClick={() => setDropdownOpen((isOpen) => !isOpen)}
         >
-          <option value="">Wszystkie kategorie</option>
-          {categories.map((category) => (
-            <option key={category._id} value={category._id}>
-              {category.name}
-            </option>
-          ))}
-        </CategorySelect>
+          <FiSliders />
+          Filtry
+          {selectedCategory && <ActiveBadge>· {selectedCategoryName}</ActiveBadge>}
+        </MobileFilterButton>
         <DropdownMenu id="category-menu" role="menu" $open={dropdownOpen}>
           <DropdownItem>
             <CategoryButton

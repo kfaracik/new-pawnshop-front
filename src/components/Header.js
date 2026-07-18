@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import Logo from "./Logo";
 import SearchWithCategory from "./SearchWithCategory";
@@ -23,6 +23,11 @@ const HeaderRoot = styled.header`
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid #ececec;
+  transition: transform 0.3s ease;
+
+  @media screen and (max-width: 768px) {
+    transform: translateY(${(props) => (props.$hidden ? "-100%" : "0")});
+  }
 `;
 
 const HeaderRow = styled(LayoutInner)`
@@ -70,8 +75,45 @@ const SearchCell = styled.div`
 `;
 
 const Header = () => {
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const nextEl = document.getElementById("__next");
+    const getY = () =>
+      Math.max(
+        window.scrollY || 0,
+        nextEl?.scrollTop || 0,
+        document.documentElement?.scrollTop || 0
+      );
+
+    lastScrollY.current = getY();
+
+    const handleScroll = () => {
+      const currentY = getY();
+      const delta = currentY - lastScrollY.current;
+
+      if (Math.abs(delta) < 6) return;
+
+      if (delta > 0 && currentY > 120) {
+        setHidden(true);
+      } else if (delta < 0) {
+        setHidden(false);
+      }
+
+      lastScrollY.current = currentY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    nextEl?.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      nextEl?.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
-    <HeaderRoot>
+    <HeaderRoot $hidden={hidden}>
       <AnnouncementBar>
         Bezpłatna wycena w 15 minut · Gotówka od ręki · 20 lat na rynku
       </AnnouncementBar>
