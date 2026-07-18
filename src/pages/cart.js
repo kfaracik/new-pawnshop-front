@@ -1,7 +1,12 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { createOrder } from "services/api/orderApi";
+import { useRouter } from "next/router";
+import {
+  createOrder,
+  createCheckoutSession,
+  confirmPayment,
+} from "services/api/orderApi";
 import styled from "styled-components";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -50,7 +55,7 @@ const PAYMENT_OPTIONS = [
   {
     id: "stripe_card",
     title: "Płatność online Stripe",
-    description: "Karta, BLIK, Apple Pay i Google Pay. Sesję płatności podepniemy po konfiguracji Stripe.",
+    description: "Karta, BLIK, Apple Pay i Google Pay. Bezpieczna płatność w środowisku testowym Stripe.",
     badge: "Domyślnie",
     disabled: false,
   },
@@ -659,13 +664,73 @@ const CartPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
   const [activeStep, setActiveStep] = useState(1);
+  const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   useEffect(() => {
     if (userData?.email && !email) {
       setEmail(userData.email);
     }
   }, [email, userData?.email]);
+
+  useEffect(() => {
+    if (!router.isReady) {
+      return;
+    }
+
+    const { payment, orderId, session_id: sessionId } = router.query;
+    if (!payment) {
+      return;
+    }
+
+    const clearPaymentQuery = () => {
+      router.replace("/cart", undefined, { shallow: true });
+    };
+
+    if (payment === "canceled") {
+      setFormError(
+        "Płatność została anulowana. Zamówienie czeka na opłacenie — możesz spróbować ponownie."
+      );
+      clearPaymentQuery();
+      return;
+    }
+
+    if (payment === "success" && orderId) {
+      let active = true;
+      setIsConfirmingPayment(true);
+      confirmPayment(String(orderId), sessionId ? String(sessionId) : undefined)
+        .then((result) => {
+          if (!active) return;
+          if (result?.paid) {
+            clearCart();
+            queryClient.invalidateQueries({ queryKey: ["myOrders"] });
+            setCreatedOrder(result.order || { _id: orderId });
+            setIsSuccess(true);
+          } else {
+            setFormError(
+              "Nie potwierdziliśmy jeszcze płatności. Jeśli pobrano środki, status zaktualizuje się wkrótce."
+            );
+          }
+        })
+        .catch(() => {
+          if (!active) return;
+          setFormError(
+            "Nie udało się potwierdzić płatności. Skontaktuj się z nami, jeśli środki zostały pobrane."
+          );
+        })
+        .finally(() => {
+          if (active) {
+            setIsConfirmingPayment(false);
+          }
+          clearPaymentQuery();
+        });
+
+      return () => {
+        active = false;
+      };
+    }
+  }, [router.isReady, router.query, clearCart, queryClient, router]);
 
   const showToast = useCallback((message, variant = "warning") => {
     setToast({ message, variant });
@@ -889,6 +954,21 @@ const CartPage = () => {
         paymentMethod,
       });
 
+      if (paymentMethod === "stripe_card") {
+        try {
+          const { url } = await createCheckoutSession(order._id);
+          if (url) {
+            window.location.href = url;
+            return;
+          }
+        } catch (sessionErr) {
+          setFormError(
+            "Zamówienie zostało zapisane, ale nie udało się rozpocząć płatności online. Spróbuj ponownie za chwilę."
+          );
+          return;
+        }
+      }
+
       clearCart();
       queryClient.invalidateQueries({ queryKey: ["myOrders"] });
       setCreatedOrder(order);
@@ -947,6 +1027,23 @@ const CartPage = () => {
 
   if (error) return <div>Error loading products</div>;
 
+  if (isConfirmingPayment) {
+    return (
+      <PageContainer>
+        <SeoHead
+          title="Koszyk | Nowy Lombard"
+          description="Koszyk i finalizacja zamówienia."
+          path="/cart"
+          noindex
+        />
+        <SuccessState>
+          <h2>Potwierdzamy płatność…</h2>
+          <p>Chwila cierpliwości, weryfikujemy status transakcji.</p>
+        </SuccessState>
+      </PageContainer>
+    );
+  }
+
   if (isSuccess) {
     return (
       <PageContainer>
@@ -968,7 +1065,9 @@ const CartPage = () => {
               {PAYMENT_OPTIONS.find((option) => option.id === createdOrder?.paymentMethod)?.title ||
                 "Płatność online Stripe"}
             </strong>
-            . Po konfiguracji Stripe ten krok przekieruje klienta bezpośrednio do płatności online.
+            {createdOrder?.paid
+              ? ". Płatność została potwierdzona — dziękujemy!"
+              : ". Zamówienie oczekuje na potwierdzenie płatności."}
           </p>
           <CloseButton type="button" onClick={onCloseConfirmOrderPress}>
             Zamknij
@@ -1246,8 +1345,8 @@ const CartPage = () => {
                 </OptionGrid>
                 {paymentMethod === "stripe_card" && (
                   <CheckoutNotice>
-                    <strong>Docelowy przebieg Stripe</strong>
-                    Po kliknięciu przycisku zamówienie zostanie zapisane, a po konfiguracji Stripe klient zostanie przekierowany do bezpiecznej płatności.
+                    <strong>Płatność online (tryb testowy)</strong>
+                    Po kliknięciu przycisku przejdziesz do bezpiecznej płatności Stripe. Użyj karty testowej 4242 4242 4242 4242, dowolnej przyszłej daty i CVC.
                   </CheckoutNotice>
                 )}
               </CheckoutBlock>

@@ -30,6 +30,21 @@ export const createOrder = async ({
   return response.data;
 };
 
+export const createCheckoutSession = async (orderId) => {
+  const response = await axiosInstance.post(
+    versionedApiPath(`orders/${orderId}/checkout-session`)
+  );
+  return response.data;
+};
+
+export const confirmPayment = async (orderId, sessionId) => {
+  const response = await axiosInstance.post(
+    versionedApiPath(`orders/${orderId}/confirm-payment`),
+    sessionId ? { sessionId } : {}
+  );
+  return response.data;
+};
+
 const fetchMyOrders = async () => {
   const response = await axiosInstance.get(versionedApiPath("orders/my"));
   return Array.isArray(response.data) ? response.data : [];
