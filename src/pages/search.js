@@ -7,7 +7,7 @@ import { PageHead, PageTitle, PageMeta, PageSubtitle } from "components/PageHead
 import { useSearchProducts } from "services/api/searchProductApi";
 import { useCategories } from "services/api/categoryApi";
 
-const PRODUCTS_PER_PAGE = 8;
+const PRODUCTS_PER_PAGE = 12;
 
 export default function SearchPage() {
   const router = useRouter();

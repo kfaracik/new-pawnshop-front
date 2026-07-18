@@ -62,13 +62,17 @@ const ArrowButton = styled.button`
 `;
 
 const Track = styled.div`
-  --track-inset: 2px;
+  --track-inset: 16px;
   display: flex;
   gap: 14px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-padding-inline: var(--track-inset);
-  padding: 4px var(--track-inset) 12px;
+  /* Generous padding + matching negative margin so card shadows (and the hover
+     lift) are never clipped by the scroll container, while cards stay flush
+     with the section title. */
+  padding: 16px var(--track-inset) 30px;
+  margin-inline: calc(var(--track-inset) * -1);
   scroll-behavior: smooth;
   scrollbar-width: none;
 
@@ -78,6 +82,7 @@ const Track = styled.div`
 
   @media screen and (max-width: 600px) {
     gap: 12px;
+    --track-inset: 12px;
   }
 `;
 

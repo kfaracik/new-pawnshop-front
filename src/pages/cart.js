@@ -713,6 +713,36 @@ const PanelBody = styled.div`
   gap: 14px;
 `;
 
+const ProfileHint = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  border: 1px solid #eadfae;
+  border-radius: 10px;
+  background: #fffaf0;
+  font-size: 0.86rem;
+  color: ${colors.textSecondary};
+
+  button {
+    flex: 0 0 auto;
+    border: 0;
+    background: transparent;
+    color: ${colors.primaryDark};
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+  }
+
+  button:hover {
+    background: #fff2d6;
+  }
+`;
+
 const PanelActions = styled.div`
   display: flex;
   align-items: center;
@@ -785,6 +815,28 @@ const OptionCheck = styled.span`
   font-weight: 700;
 `;
 
+const CHECKOUT_PROFILE_KEY = "checkoutProfile";
+
+const readCheckoutProfile = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(CHECKOUT_PROFILE_KEY);
+    const value = raw ? JSON.parse(raw) : null;
+    return value && typeof value === "object" ? value : null;
+  } catch {
+    return null;
+  }
+};
+
+const saveCheckoutProfile = (profile) => {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(CHECKOUT_PROFILE_KEY, JSON.stringify(profile));
+  } catch {
+    /* storage unavailable (private mode / quota) — ignore */
+  }
+};
+
 const CartPage = () => {
   const {
     cartProducts,
@@ -813,6 +865,7 @@ const CartPage = () => {
   const [checkoutSection, setCheckoutSection] = useState(1);
   const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
   const [pendingStripeOrder, setPendingStripeOrder] = useState(null);
+  const [prefilledFromProfile, setPrefilledFromProfile] = useState(false);
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -821,6 +874,36 @@ const CartPage = () => {
       setEmail(userData.email);
     }
   }, [email, userData?.email]);
+
+  // Returning buyers: prefill the checkout form from their last order (stored
+  // locally in the browser, never sent anywhere until they place a new order).
+  useEffect(() => {
+    const profile = readCheckoutProfile();
+    if (!profile) return;
+
+    let didFill = false;
+    const fill = (value, current, setter) => {
+      if (value && !current) {
+        setter(String(value));
+        didFill = true;
+      }
+    };
+
+    fill(profile.name, name, setName);
+    fill(profile.email, email, setEmail);
+    fill(profile.city, city, setCity);
+    fill(profile.postalCode, postalCode, setPostalCode);
+    fill(profile.streetAddress, streetAddress, setStreetAddress);
+    fill(profile.country, country, setCountry);
+    if (profile.deliveryMethod &&
+      DELIVERY_OPTIONS.some((option) => option.id === profile.deliveryMethod)) {
+      setDeliveryMethod(profile.deliveryMethod);
+    }
+
+    if (didFill) setPrefilledFromProfile(true);
+    // Run once on mount — later edits must not be overwritten.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!router.isReady) {
@@ -1103,6 +1186,16 @@ const CartPage = () => {
         paymentMethod,
       };
 
+      saveCheckoutProfile({
+        name,
+        email,
+        city,
+        postalCode,
+        streetAddress,
+        country,
+        deliveryMethod,
+      });
+
       if (paymentMethod === "stripe_card") {
         const signature = JSON.stringify({ productsPayload, deliveryMethod });
         let stripeOrder =
@@ -1129,9 +1222,10 @@ const CartPage = () => {
           }
           throw new Error("no_session_url");
         } catch (sessionErr) {
-          setPendingStripeOrder(null);
+          // Keep the already-created order so a retry reuses it (matched by
+          // signature) instead of creating a duplicate order each time.
           setFormError(
-            "Zamówienie zostało zapisane, ale nie udało się rozpocząć płatności online. Spróbuj ponownie za chwilę."
+            "Zamówienie zostało zapisane, ale nie udało się rozpocząć płatności online. Spróbuj ponownie za chwilę — wykorzystamy to samo zamówienie."
           );
           return;
         }
@@ -1329,6 +1423,30 @@ const CartPage = () => {
               </PanelHead>
               {checkoutSection === 1 && (
                 <PanelBody>
+                  {prefilledFromProfile && (
+                    <ProfileHint>
+                      <span>
+                        Uzupełniliśmy dane z Twojego ostatniego zamówienia — sprawdź i popraw w razie potrzeby.
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setName("");
+                          setCity("");
+                          setPostalCode("");
+                          setStreetAddress("");
+                          setCountry("");
+                          if (!userData?.email) setEmail("");
+                          setPrefilledFromProfile(false);
+                          if (typeof window !== "undefined") {
+                            window.localStorage.removeItem(CHECKOUT_PROFILE_KEY);
+                          }
+                        }}
+                      >
+                        Wyczyść
+                      </button>
+                    </ProfileHint>
+                  )}
                   <FieldsGrid>
                     <Field $full>
                       <FieldLabel>Imię i nazwisko</FieldLabel>

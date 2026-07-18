@@ -10,7 +10,7 @@ import { buttonBaseStyle, buttonSecondaryStyle } from "components/Button";
 import { PageHead, PageTitle, PageMeta } from "components/PageHeading";
 import colors from "styles/colors";
 
-const PRODUCTS_PER_PAGE = 8;
+const PRODUCTS_PER_PAGE = 12;
 
 const FilterScroller = styled.div`
   display: flex;

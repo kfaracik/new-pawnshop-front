@@ -7,8 +7,12 @@ import { ProductItem } from "./ProductItem";
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
+
+  @media screen and (max-width: 1024px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 
   @media screen and (max-width: 600px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -101,7 +105,7 @@ const ProductList = ({
   if (loading) {
     return (
       <Grid>
-        {Array.from({ length: 8 }).map((_, index) => (
+        {Array.from({ length: 12 }).map((_, index) => (
           <SkeletonCard key={`skeleton-${index}`} />
         ))}
       </Grid>

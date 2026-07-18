@@ -45,6 +45,19 @@ export default function PrivacyPage() {
         </p>
       </section>
       <section>
+        <h2>Dane przechowywane lokalnie w przeglądarce</h2>
+        <p>
+          Dla wygody zakupów część danych zapisujemy wyłącznie w pamięci lokalnej Twojej
+          przeglądarki (localStorage), a nie na naszych serwerach. Dotyczy to zawartości koszyka,
+          ostatnich wyszukiwań, wyboru dotyczącego cookies oraz danych do formularza zamówienia
+          (imię i nazwisko, adres e-mail, adres dostawy i wybrana metoda dostawy) — te ostatnie
+          zapamiętujemy po złożeniu zamówienia, aby móc podpowiedzieć je przy kolejnych zakupach.
+          Dane te pozostają na Twoim urządzeniu do czasu ich wyczyszczenia i są wysyłane do nas
+          dopiero w chwili złożenia zamówienia. Możesz je w każdej chwili usunąć przyciskiem
+          „Wyczyść” w formularzu zamówienia lub czyszcząc dane przeglądarki.
+        </p>
+      </section>
+      <section>
         <h2>Prawa użytkownika</h2>
         <p>
           Użytkownik ma prawo dostępu do danych, ich sprostowania, usunięcia, ograniczenia
