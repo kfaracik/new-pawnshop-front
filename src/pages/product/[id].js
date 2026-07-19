@@ -141,6 +141,78 @@ const ImagesWrapper = styled.div`
   display: contents;
 `;
 
+const Breadcrumbs = styled.nav`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 14px;
+  font-size: 0.85rem;
+  color: ${colors.textSecondary};
+
+  a {
+    color: ${colors.textSecondary};
+    text-decoration: none;
+  }
+  a:hover {
+    color: ${colors.primaryDark};
+  }
+  .current {
+    color: ${colors.textPrimary};
+    font-weight: 600;
+    max-width: 44ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .sep {
+    color: #cbcbcb;
+  }
+`;
+
+const LowStock = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #fff4e5;
+  color: #b45309;
+  font-size: 0.86rem;
+  font-weight: 600;
+
+  svg {
+    flex-shrink: 0;
+  }
+`;
+
+const Reassurance = styled.ul`
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 14px 0 0;
+  border-top: 1px solid #efeadc;
+  display: grid;
+  gap: 11px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-size: 0.9rem;
+    color: ${colors.textSecondary};
+    line-height: 1.35;
+  }
+  svg {
+    color: ${colors.primaryDark};
+    flex-shrink: 0;
+  }
+  strong {
+    color: ${colors.textPrimary};
+    font-weight: 600;
+  }
+`;
+
 const FullscreenImageContainer = styled.div`
   position: relative;
   display: flex;
@@ -891,6 +963,13 @@ const ProductPage = ({ initialProduct = null }) => {
       />
       {!!product ? (
         <>
+          <Breadcrumbs aria-label="Ścieżka nawigacji">
+            <Link href="/">Strona główna</Link>
+            <span className="sep" aria-hidden="true">/</span>
+            <Link href="/products">Produkty</Link>
+            <span className="sep" aria-hidden="true">/</span>
+            <span className="current" aria-current="page">{product.title}</span>
+          </Breadcrumbs>
           <ColWrapper>
             <ImagesWrapper>
               <ProductGallery
@@ -931,6 +1010,19 @@ const ProductPage = ({ initialProduct = null }) => {
                 )}
               </MetaRow>
               <Price>{product.price.toFixed(2)} zł</Price>
+              {!product.isAuction &&
+                Number.isFinite(maxProductQuantity) &&
+                maxProductQuantity > 0 &&
+                maxProductQuantity <= 3 && (
+                  <LowStock>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 9v4M12 17h.01M10.29 3.86l-8.48 14.7A2 2 0 0 0 3.53 21h16.94a2 2 0 0 0 1.72-2.44L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    </svg>
+                    {maxProductQuantity === 1
+                      ? "Ostatnia sztuka — została 1"
+                      : `Ostatnie sztuki — zostało ${maxProductQuantity}`}
+                  </LowStock>
+                )}
               <Description
                 dangerouslySetInnerHTML={{ __html: safeDescription }}
               />
@@ -1038,6 +1130,30 @@ const ProductPage = ({ initialProduct = null }) => {
                       <strong>Status:</strong> niedostępne.
                     </ReservationNotice>
                   )}
+                  <Reassurance>
+                    <li>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z" />
+                        <path d="M9 12l2 2 4-4" />
+                      </svg>
+                      <span><strong>Bezpieczna płatność</strong> — szyfrowana obsługa przez Stripe (BLIK, karta, Apple/Google Pay).</span>
+                    </li>
+                    <li>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 3h13v13H1zM14 8h4l3 3v5h-7" />
+                        <circle cx="5.5" cy="18.5" r="1.5" />
+                        <circle cx="17.5" cy="18.5" r="1.5" />
+                      </svg>
+                      <span><strong>Szybka wysyłka</strong> — 1–2 dni robocze kurierem lub do paczkomatu.</span>
+                    </li>
+                    <li>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 7v6h6" />
+                        <path d="M3 13a9 9 0 1 0 3-7.7L3 8" />
+                      </svg>
+                      <span><strong>14 dni na zwrot</strong> — prawo odstąpienia zgodnie z regulaminem.</span>
+                    </li>
+                  </Reassurance>
                 </ActionGroup>
               )}
             </InfoCard>

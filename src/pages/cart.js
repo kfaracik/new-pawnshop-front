@@ -157,6 +157,20 @@ const SecondaryButtonLink = styled(Link)`
   text-decoration: none;
 `;
 
+const ContinueShoppingLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: ${colors.textSecondary};
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  &:hover {
+    color: ${colors.primaryDark};
+  }
+`;
+
 const ItemsList = styled.div`
   display: grid;
   gap: 10px;
@@ -810,6 +824,27 @@ const TextInput = styled.input`
 const SideDivider = styled.div`
   height: 1px;
   background: #efeadc;
+`;
+
+const CheckoutTrust = styled.ul`
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 9px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 0.82rem;
+    color: ${colors.textSecondary};
+    line-height: 1.35;
+  }
+  svg {
+    color: ${colors.primaryDark};
+    flex-shrink: 0;
+  }
 `;
 
 const OptionCheck = styled.span`
@@ -1692,6 +1727,31 @@ const CartPage = () => {
                 <span>{orderGrandTotal.toFixed(2)} zł</span>
               </TotalsRow>
             </TotalsList>
+            <SideDivider />
+            <CheckoutTrust>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                Bezpieczna, szyfrowana płatność (Stripe)
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 3h13v13H1zM14 8h4l3 3v5h-7" />
+                  <circle cx="5.5" cy="18.5" r="1.5" />
+                  <circle cx="17.5" cy="18.5" r="1.5" />
+                </svg>
+                Wysyłka w 1–2 dni robocze
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 7v6h6" />
+                  <path d="M3 13a9 9 0 1 0 3-7.7L3 8" />
+                </svg>
+                14 dni na zwrot towaru
+              </li>
+            </CheckoutTrust>
           </CheckoutSide>
         </CheckoutForm>
       ) : (
@@ -1807,7 +1867,9 @@ const CartPage = () => {
                   <span>{cartTotal.toFixed(2)} zł</span>
                 </TotalRow>
                 <StepActions>
-                  <span />
+                  <ContinueShoppingLink href="/products">
+                    ← Kontynuuj zakupy
+                  </ContinueShoppingLink>
                   <PrimaryButton type="button" onClick={() => goToStep(2)}>
                     Przejdź do dostawy i płatności
                   </PrimaryButton>
