@@ -1,5 +1,5 @@
 import React from "react";
-import Image from "next/image";
+import SmartImage from "components/SmartImage";
 import Modal from "react-modal";
 import { MdChevronLeft, MdChevronRight, MdClose } from "react-icons/md";
 
@@ -46,13 +46,12 @@ export default function ProductGallery({
               onClick={() => setSelectedImageIndex(index)}
               aria-label={`Pokaż zdjęcie ${index + 1}`}
             >
-              <Image
+              <SmartImage
                 className="thumb-image"
                 src={image}
                 alt={`${product.title} miniatura ${index + 1}`}
                 width={120}
                 height={120}
-                unoptimized
               />
             </ThumbButton>
           ))}

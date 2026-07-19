@@ -1,5 +1,5 @@
 import React from "react";
-import Pagination from "@mui/material/Pagination";
+import Pagination from "components/Pagination";
 import { FaBoxOpen } from "react-icons/fa";
 import styled, { keyframes } from "styled-components";
 import colors from "styles/colors";
@@ -74,24 +74,6 @@ const PaginationWrap = styled.div`
   margin-top: 28px;
 `;
 
-const paginationSx = {
-  "& .MuiPaginationItem-root": {
-    fontWeight: 600,
-    color: "#4a4a4a",
-    borderRadius: "10px",
-  },
-  "& .MuiPaginationItem-root:hover": {
-    backgroundColor: "#fff8e8",
-  },
-  "& .Mui-selected": {
-    backgroundColor: `${colors.primary} !important`,
-    color: "#151515",
-  },
-  "& .Mui-selected:hover": {
-    backgroundColor: `${colors.primaryLight} !important`,
-  },
-};
-
 const ProductList = ({
   products,
   loading,
@@ -134,9 +116,7 @@ const ProductList = ({
           <Pagination
             page={selectedPage ?? 1}
             count={totalPages}
-            onChange={(_, page) => onPageChange(page)}
-            shape="rounded"
-            sx={paginationSx}
+            onChange={(page) => onPageChange(page)}
           />
         </PaginationWrap>
       )}

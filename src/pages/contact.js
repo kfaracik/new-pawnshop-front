@@ -11,6 +11,7 @@ import {
   getLocationLabel,
   getLocationMapUrl,
 } from "lib/locations";
+import { getBranchesGraph } from "lib/structuredData";
 
 const PageSection = styled.section`
   margin: 24px 0 40px;
@@ -214,9 +215,10 @@ export default function ContactPage({ locations = [] }) {
   return (
     <PageContainer>
       <SeoHead
-        title="Kontakt | Nowy Lombard"
-        description="Dane kontaktowe i lokalizacje oddziałów Nowego Lombardu. Sprawdź adres, telefon i godziny otwarcia."
+        title="Kontakt i oddziały — Częstochowa, Katowice | Nowy Lombard"
+        description="Adresy, telefony i godziny otwarcia oddziałów Nowego Lombardu w Częstochowie i Katowicach. Zapraszamy po wycenę i gotówkę od ręki."
         path="/contact"
+        schema={getBranchesGraph(locations)}
       />
       <PageSection>
         <Header>

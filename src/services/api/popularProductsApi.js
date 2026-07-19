@@ -7,11 +7,12 @@ const fetchPopularProducts = async () => {
   return response.data;
 };
 
-export const usePopularProducts = () => {
+export const usePopularProducts = (initialData) => {
   return useQuery({
     queryKey: ["popularProducts"],
     queryFn: fetchPopularProducts,
     retry: 1,
     refetchOnWindowFocus: false,
+    initialData: initialData ?? undefined,
   });
 };

@@ -4,8 +4,9 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import styled from "styled-components";
 import { FaBars, FaTimes } from "react-icons/fa";
-import { FiShoppingCart, FiUser } from "react-icons/fi";
+import { FiShoppingCart, FiUser, FiHeart } from "react-icons/fi";
 import { CartContext } from "../context/CartContext";
+import { WishlistContext } from "../context/WishlistContext";
 import { buttonBaseStyle, buttonGhostStyle } from "components/Button";
 import colors from "styles/colors";
 import { useCategories } from "services/api/categoryApi";
@@ -305,6 +306,7 @@ export default function Menu() {
   const [mobileNavActive, setMobileNavActive] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { getCartItemCount } = useContext(CartContext);
+  const { wishlistCount } = useContext(WishlistContext);
   const { data: categoriesData } = useCategories();
   const categories = Array.isArray(categoriesData)
     ? categoriesData
@@ -445,6 +447,17 @@ export default function Menu() {
           <IconButton as="span">
             <FiUser />
           </IconButton>
+        </Link>
+        <Link
+          href="/wishlist"
+          aria-label={`Ulubione, liczba produktów: ${wishlistCount}`}
+        >
+          <CartIconWrapper>
+            <IconButton as="span">
+              <FiHeart />
+            </IconButton>
+            {wishlistCount > 0 && <Badge>{wishlistCount}</Badge>}
+          </CartIconWrapper>
         </Link>
         <Link href="/cart" aria-label={`Koszyk, liczba produktów: ${cartItemCount}`}>
           <CartIconWrapper>

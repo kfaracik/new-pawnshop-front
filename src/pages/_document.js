@@ -33,34 +33,25 @@ export default class MyDocument extends Document {
     return (
       <Html lang="pl">
         <Head>
-          <link rel="icon" href="/favicon.ico" />
+          <link rel="icon" href="/favicon.ico" sizes="any" />
+          <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+          <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+          <link rel="manifest" href="/site.webmanifest" />
+          <meta name="theme-color" content="#0F0F0F" />
+          <meta name="apple-mobile-web-app-title" content="Nowy Lombard" />
           <meta name="author" content="Nowy Lombard" />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "PawnShop",
-                name: "Nowy Lombard",
-                description:
-                  "Nowy Lombard oferuje szybkie pożyczki pod zastaw oraz usługi związane z handlem produktami. Szeroka oferta i indywidualne podejście do klienta.",
-                contactPoint: {
-                  "@type": "ContactPoint",
-                  contactType: "customer service",
-                  telephone: "+48 515 671 666",
-                  areaServed: "PL",
-                  availableLanguage: "Polish",
-                },
-                address: {
-                  "@type": "PostalAddress",
-                  streetAddress: "Al. Najświętszej Maryi Panny 1",
-                  addressLocality: "Częstochowa",
-                  postalCode: "42-200",
-                  addressCountry: "PL",
-                },
-              }),
-            }}
-          />
+          {process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION && (
+            <meta
+              name="google-site-verification"
+              content={process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION}
+            />
+          )}
+          {process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION && (
+            <meta
+              name="msvalidate.01"
+              content={process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION}
+            />
+          )}
         </Head>
         <body>
           <Main />

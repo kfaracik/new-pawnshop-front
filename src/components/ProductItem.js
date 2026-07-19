@@ -1,11 +1,11 @@
 import React from "react";
-import Image from "next/image";
-import styled from "styled-components";
+import SmartImage from "components/SmartImage";
+import styled, { keyframes } from "styled-components";
 import Link from "next/link";
-import { keyframes } from "@emotion/react";
 import colors from "styles/colors";
-import { RiAuctionFill } from "react-icons/ri";
+import { RiAuctionFill, RiHeartLine, RiHeartFill } from "react-icons/ri";
 import CloverMark from "./CloverMark";
+import { WishlistContext } from "context/WishlistContext";
 
 const fadeIn = keyframes`
   0% { opacity: 0; transform: translateY(8px); }
@@ -97,12 +97,43 @@ const TopChips = styled.div`
   position: absolute;
   top: 12px;
   left: 12px;
-  right: 12px;
+  right: 56px;
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 8px;
   z-index: 2;
+`;
+
+const WishButton = styled.button`
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  color: ${(props) => (props.$active ? "#e0245e" : "#555")};
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    transform: scale(1.08);
+    color: #e0245e;
+  }
+
+  &:active {
+    transform: scale(0.92);
+  }
 `;
 
 const StatusChip = styled.span`
@@ -215,6 +246,14 @@ const PinIcon = () => (
 
 export const ProductItem = ({ product, searchQuery }) => {
   const [imageFailed, setImageFailed] = React.useState(false);
+  const { isWishlisted, toggleWishlist } = React.useContext(WishlistContext);
+  const wished = isWishlisted(product._id);
+
+  const handleWishToggle = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleWishlist(product._id);
+  };
   const url = `/product/${product._id}`;
   const availabilityStatus = product?.availabilityStatus || "available";
   const hasImage = !imageFailed && Boolean(product.images?.[0]);
@@ -253,13 +292,11 @@ export const ProductItem = ({ product, searchQuery }) => {
       <CardContainer>
         <ProductImageWrapper>
           {hasImage ? (
-            <Image
+            <SmartImage
               src={product.images[0]}
               alt={product.title}
               fill
               sizes="(max-width: 600px) 50vw, (max-width: 1200px) 33vw, 25vw"
-              loader={({ src }) => src}
-              unoptimized
               onError={() => setImageFailed(true)}
             />
           ) : (
@@ -285,6 +322,17 @@ export const ProductItem = ({ product, searchQuery }) => {
             </AuctionBadge>
           )}
         </TopChips>
+
+        <WishButton
+          type="button"
+          onClick={handleWishToggle}
+          $active={wished}
+          aria-pressed={wished}
+          aria-label={wished ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
+          title={wished ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
+        >
+          {wished ? <RiHeartFill /> : <RiHeartLine />}
+        </WishButton>
 
         <Overlay>
           <ProductTitle>

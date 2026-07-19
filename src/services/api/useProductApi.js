@@ -26,7 +26,7 @@ export const useProduct = (id, initialData) => {
     enabled: !!id,
     queryKey: ["product", id],
     queryFn: () => fetchProductById(id),
-    initialData,
+    initialData: initialData ?? undefined,
     staleTime: 1000 * 60 * 5,
   });
 };

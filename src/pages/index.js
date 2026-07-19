@@ -8,7 +8,8 @@ import { usePopularProducts } from "services/api/popularProductsApi";
 import { useCategories } from "services/api/categoryApi";
 import HorizontalProductList from "components/HorizontalProductList";
 import colors from "styles/colors";
-import { getCanonicalUrl } from "lib/seo";
+import { getOrganizationSchema, getWebsiteSchema } from "lib/structuredData";
+import { fetchApiResource } from "lib/serverApi";
 
 const FACEBOOK_AUCTIONS_URL =
   process.env.NEXT_PUBLIC_FACEBOOK_AUCTIONS_URL || "https://www.facebook.com/";
@@ -236,6 +237,13 @@ const TrustCard = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
+  transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+
+  &:hover {
+    border-color: ${colors.primary};
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(201, 162, 39, 0.14);
+  }
 `;
 
 const TrustIcon = styled.span`
@@ -373,6 +381,101 @@ const AuctionsButton = styled.a`
   }
 `;
 
+const HeroStats = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(22px, 4vw, 40px);
+  margin-top: 32px;
+  padding-top: 26px;
+  border-top: 1px solid #242424;
+`;
+
+const HeroStat = styled.div`
+  min-width: 0;
+`;
+
+const HeroStatNum = styled.div`
+  font-size: clamp(21px, 3vw, 27px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: ${colors.primaryLight};
+`;
+
+const HeroStatLabel = styled.div`
+  margin-top: 7px;
+  font-size: 12.5px;
+  color: #9a9a9a;
+`;
+
+const SectionEyebrow = styled.span`
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: ${colors.primaryDark};
+  margin-bottom: 8px;
+`;
+
+const SectionSub = styled.p`
+  margin: 6px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: ${colors.grayDark};
+  max-width: 60ch;
+`;
+
+const Steps = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+`;
+
+const StepCard = styled.div`
+  position: relative;
+  background: ${colors.backgroundPaper};
+  border: 1px solid #ececec;
+  border-radius: 16px;
+  padding: 24px 22px;
+  transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+
+  &:hover {
+    border-color: ${colors.primary};
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(201, 162, 39, 0.14);
+  }
+`;
+
+const StepNum = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: ${colors.black};
+  color: ${colors.primaryLight};
+  font-weight: 800;
+  font-size: 16px;
+  margin-bottom: 16px;
+`;
+
+const StepTitle = styled.h3`
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: ${colors.textPrimary};
+`;
+
+const StepText = styled.p`
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: ${colors.grayDark};
+`;
+
 const stroke = {
   fill: "none",
   stroke: "currentColor",
@@ -380,6 +483,24 @@ const stroke = {
   strokeLinecap: "round",
   strokeLinejoin: "round",
 };
+
+const STEPS = [
+  {
+    n: "1",
+    title: "Wyceniamy",
+    text: "Przynosisz przedmiot, a my wyceniamy go bezpłatnie w kilka minut — bez żadnych zobowiązań.",
+  },
+  {
+    n: "2",
+    title: "Wypłacamy",
+    text: "Akceptujesz kwotę i odbierasz gotówkę od ręki. Bez zaświadczeń, bez BIK-u, bez czekania.",
+  },
+  {
+    n: "3",
+    title: "Odkupujesz",
+    text: "Wracasz po swój przedmiot w dogodnym terminie. Zawsze z pełną dyskrecją i jasnymi zasadami.",
+  },
+];
 
 const CloverPattern = () => (
   <HeroPattern preserveAspectRatio="xMidYMid slice" viewBox="0 0 1200 500" fill="none">
@@ -455,29 +576,26 @@ const FacebookGlyph = ({ size = 30, fill = "#fff" }) => (
   </svg>
 );
 
-export default function HomePage() {
-  const { data: newProducts, isLoading: isLoadingNew } = useFeaturedProducts();
-  const { data: popularProducts, isLoading: isLoadingPopular } = usePopularProducts();
-  const { data: categories } = useCategories();
+export default function HomePage({
+  initialFeatured = null,
+  initialPopular = null,
+  initialCategories = null,
+}) {
+  const { data: newProducts, isLoading: isLoadingNew } =
+    useFeaturedProducts(initialFeatured);
+  const { data: popularProducts, isLoading: isLoadingPopular } =
+    usePopularProducts(initialPopular);
+  const { data: categories } = useCategories(initialCategories);
 
   const categoryList = Array.isArray(categories) ? categories.slice(0, 8) : [];
-
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Store",
-    name: "Nowy Lombard",
-    url: getCanonicalUrl("/"),
-    areaServed: "PL",
-    sameAs: [FACEBOOK_AUCTIONS_URL],
-  };
 
   return (
     <PageContainer>
       <SeoHead
-        title="Nowy Lombard | Produkty, licytacje i kontakt"
-        description="Sprawdź aktualne produkty, oferty specjalne i licytacje Nowego Lombardu. Sprzedaż online, kontakt do oddziałów i szybki dostęp do aktualnych ofert."
+        title="Nowy Lombard — lombard w Częstochowie i Katowicach"
+        description="Pożyczki pod zastaw, skup złota oraz sprzedaż i licytacje sprawdzonych przedmiotów. Lombard w Częstochowie i Katowicach — szybka wycena i gotówka od ręki."
         path="/"
-        schema={organizationSchema}
+        schema={[getOrganizationSchema(), getWebsiteSchema()]}
       />
 
       <Hero>
@@ -485,23 +603,37 @@ export default function HomePage() {
         <HeroGlow />
         <HeroInner>
           <Badge>
-            <span /> Oferta
+            <span /> Zaufany lombard od 2004 roku
           </Badge>
           <HeroTitle>
             Gotówka od ręki.
             <br />
-            <span>Sprawdzone okazje.</span>
+            <span>Okazje, które kuszą.</span>
           </HeroTitle>
           <HeroText>
-            Szybka wycena, minimum formalności i uczciwe warunki. Sprawdź ofertę
-            produktów w cenach, które mają sens.
+            Pożyczka pod zastaw bez zbędnych formalności albo wyjątkowe przedmioty
+            w uczciwych cenach — wszystko w jednym miejscu.
           </HeroText>
           <HeroActions>
-            <HeroPrimary href="/products">Przeglądaj ofertę</HeroPrimary>
+            <HeroPrimary href="/products">Przeglądaj okazje</HeroPrimary>
             <HeroGhost href={FACEBOOK_AUCTIONS_URL} target="_blank" rel="noreferrer">
               Zobacz licytacje
             </HeroGhost>
           </HeroActions>
+          <HeroStats>
+            <HeroStat>
+              <HeroStatNum>20 lat</HeroStatNum>
+              <HeroStatLabel>na rynku, od 2004</HeroStatLabel>
+            </HeroStat>
+            <HeroStat>
+              <HeroStatNum>15 min</HeroStatNum>
+              <HeroStatLabel>do wypłaty gotówki</HeroStatLabel>
+            </HeroStat>
+            <HeroStat>
+              <HeroStatNum>0 zł</HeroStatNum>
+              <HeroStatLabel>za wycenę przedmiotu</HeroStatLabel>
+            </HeroStat>
+          </HeroStats>
         </HeroInner>
       </Hero>
 
@@ -530,6 +662,7 @@ export default function HomePage() {
       <Section>
         <HorizontalProductList
           title="Polecane okazje"
+          subtitle="Świeżo wycenione przedmioty w cenach, które szybko znikają."
           products={newProducts}
           loading={isLoadingNew}
         />
@@ -538,9 +671,27 @@ export default function HomePage() {
       <Section>
         <HorizontalProductList
           title="Popularne"
+          subtitle="To, po co klienci wracają najczęściej."
           products={popularProducts}
           loading={isLoadingPopular}
         />
+      </Section>
+
+      <Section>
+        <SectionEyebrow>Prosto i bez stresu</SectionEyebrow>
+        <SectionTitle>Jak to działa</SectionTitle>
+        <SectionSub>
+          Trzy kroki dzielą Cię od gotówki — bez kolejek i papierologii.
+        </SectionSub>
+        <Steps>
+          {STEPS.map((step) => (
+            <StepCard key={step.n}>
+              <StepNum>{step.n}</StepNum>
+              <StepTitle>{step.title}</StepTitle>
+              <StepText>{step.text}</StepText>
+            </StepCard>
+          ))}
+        </Steps>
       </Section>
 
       <AuctionsBanner>
@@ -556,11 +707,11 @@ export default function HomePage() {
                 <span /> Aukcje na żywo
               </AuctionsBadge>
               <AuctionsTitle>
-                Aktualne licytacje znajdziesz na naszym Facebooku
+                Licytacje na żywo — najlepsze okazje znikają pierwsze
               </AuctionsTitle>
               <AuctionsText>
-                Nowe przedmioty, licytacje na żywo i najlepsze okazje ogłaszamy w
-                naszej społeczności.
+                Nowe przedmioty i licytacje ogłaszamy na bieżąco w naszej
+                społeczności na Facebooku. Dołącz i licytuj, zanim zrobią to inni.
               </AuctionsText>
             </div>
           </AuctionsInfo>
@@ -572,7 +723,12 @@ export default function HomePage() {
       </AuctionsBanner>
 
       <Section>
-        <TrustGrid>
+        <SectionEyebrow>Dlaczego my</SectionEyebrow>
+        <SectionTitle>Lombard, któremu zaufasz</SectionTitle>
+        <SectionSub>
+          Uczciwe zasady, konkretne warunki i dyskrecja na każdym kroku.
+        </SectionSub>
+        <TrustGrid style={{ marginTop: 22 }}>
           {TRUST.map((item) => (
             <TrustCard key={item.title}>
               <TrustIcon>{item.icon}</TrustIcon>
@@ -586,4 +742,21 @@ export default function HomePage() {
       </Section>
     </PageContainer>
   );
+}
+
+export async function getStaticProps() {
+  const [initialFeatured, initialPopular, initialCategories] = await Promise.all([
+    fetchApiResource("products/featured"),
+    fetchApiResource("products/popular"),
+    fetchApiResource("categories"),
+  ]);
+
+  return {
+    props: {
+      initialFeatured,
+      initialPopular,
+      initialCategories,
+    },
+    revalidate: 120,
+  };
 }

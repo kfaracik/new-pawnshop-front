@@ -7,11 +7,12 @@ const fetchFeaturedProducts = async () => {
   return response.data;
 };
 
-export const useFeaturedProducts = () => {
+export const useFeaturedProducts = (initialData) => {
   return useQuery({
     queryKey: ["featuredProducts"],
     queryFn: fetchFeaturedProducts,
     retry: 1,
     refetchOnWindowFocus: false,
+    initialData: initialData ?? undefined,
   });
 };

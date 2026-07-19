@@ -14,6 +14,47 @@ const LOCATION_BUILD_TIMEOUT_MS = Number(
   process.env.LOCATIONS_BUILD_TIMEOUT_MS || 1500
 );
 
+// Shown on /contact when the backend returns no locations at build time —
+// e.g. the free Render instance is cold-starting and the fetch times out. Keeps
+// the contact page from rendering empty. This is a SNAPSHOT of the locations
+// published in the admin; as soon as the backend responds (build or ISR
+// revalidate) the live list is used instead and these are ignored.
+//
+// Keep in sync with the admin "Lokalizacje" if branches/hours change.
+export const FALLBACK_LOCATIONS: FrontLocation[] = [
+  {
+    _id: "69fb40e92dcac56e3194869b",
+    name: "Częstochowa Raków",
+    city: "Częstochowa",
+    addressLine1: "ul. Brzozowa 16",
+    addressLine2: "Częstochowa - Raków",
+    postalCode: "42-216",
+    phone: "515671666",
+    email: "kontakt@lombard.pl",
+    description: "Pon-Pt 9:00-18:30, Sob 9:00-15:00",
+  },
+  {
+    _id: "69fb41482dcac56e319486a2",
+    name: "Katowice",
+    city: "Katowice",
+    addressLine1: "ul. Warszawska 13",
+    postalCode: "40-009",
+    phone: "515671666",
+    email: "kontakt@lombard.pl",
+    description: "Pon-Pt 9:00-18:30, Sob 9:00-15:00",
+  },
+  {
+    _id: "69f923e2edbec9bc375ca573",
+    name: "Nowy Lombard NMP 6",
+    city: "Częstochowa",
+    addressLine1: "Aleja Najświętszej Maryi Panny 6",
+    postalCode: "42-200",
+    phone: "515671666",
+    email: "kontakt@lombard.pl",
+    description: "Pon-Pt 9:00-18:30, Sob 9:00-15:00",
+  },
+];
+
 export const getLocationLabel = (location?: FrontLocation | null) =>
   location?.name ||
   [location?.city, location?.addressLine1].filter(Boolean).join(" - ") ||
@@ -31,7 +72,7 @@ export const getLocationMapUrl = (location?: FrontLocation | null) => {
     : "";
 };
 
-export async function fetchLocationsForBuild() {
+async function fetchLocationsFromApi(): Promise<FrontLocation[]> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   if (!baseUrl) {
@@ -61,4 +102,11 @@ export async function fetchLocationsForBuild() {
   } catch (_error) {
     return [];
   }
+}
+
+export async function fetchLocationsForBuild(): Promise<FrontLocation[]> {
+  const locations = await fetchLocationsFromApi();
+  // If the backend returned nothing (cold-start timeout, error, or none
+  // published yet), fall back to the default location so /contact is never empty.
+  return locations.length > 0 ? locations : FALLBACK_LOCATIONS;
 }

@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import Image from "next/image";
+import SmartImage from "components/SmartImage";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FiShoppingCart } from "react-icons/fi";
@@ -191,16 +191,23 @@ const ItemCard = styled.div`
   }
 `;
 
-const ProductImageWrapper = styled.div`
+const ProductImageWrapper = styled(Link)`
+  display: block;
   position: relative;
   width: 72px;
   height: 72px;
   border-radius: 9px;
   border: 1px solid #f0f0f0;
   overflow: hidden;
+  cursor: pointer;
 
   img {
     object-fit: cover;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.05);
   }
 
   @media (max-width: 420px) {
@@ -209,11 +216,21 @@ const ProductImageWrapper = styled.div`
   }
 `;
 
+const ProductNameLink = styled(Link)`
+  text-decoration: none;
+
+  &:hover h3 {
+    color: ${colors.primaryDark};
+    text-decoration: underline;
+  }
+`;
+
 const ProductName = styled.h3`
   margin: 0;
   font-size: 0.96rem;
   color: ${colors.textPrimary};
   line-height: 1.3;
+  transition: color 0.2s ease;
 `;
 
 const ProductMeta = styled.div`
@@ -343,59 +360,64 @@ const CheckoutHeader = styled.div`
   margin-bottom: 16px;
 `;
 
-const Stepper = styled.ol`
+const Progress = styled.ol`
   list-style: none;
-  display: grid;
-  gap: 10px;
-  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  margin: 4px 0 20px;
   padding: 0;
-
-  @media (min-width: 700px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 `;
 
-const StepItem = styled.li`
-  border-radius: 12px;
-  border: 1px solid ${(props) => (props.$active ? colors.primary : "#e9dfc2")};
-  background: ${(props) => (props.$active ? "#fff9eb" : "#fff")};
-  padding: 12px;
-  display: grid;
-  gap: 8px;
+const ProgressStep = styled.li`
+  display: flex;
+  align-items: center;
+  gap: 10px;
   cursor: ${(props) => (props.$clickable ? "pointer" : "default")};
 `;
 
-const StepTop = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-`;
-
-const StepTitle = styled.strong`
-  color: ${colors.textPrimary};
-  font-size: 0.96rem;
-`;
-
-const StepIndex = styled.span`
-  font-size: 0.76rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: ${colors.primaryDark};
-`;
-
-const StepCheck = styled.span`
-  width: 22px;
-  height: 22px;
+const ProgressDot = styled.span`
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: ${colors.primaryDark};
-  color: #fff;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
+  border: 2px solid
+    ${(props) =>
+      props.$done ? colors.success : props.$active ? colors.primary : "#dcdcdc"};
+  background: ${(props) =>
+    props.$done ? colors.success : props.$active ? colors.primary : "#fff"};
+  color: ${(props) =>
+    props.$done ? "#fff" : props.$active ? colors.primaryContrastText : "#9a9a9a"};
+  transition: all 0.2s ease;
+`;
+
+const ProgressLabel = styled.span`
+  font-size: 0.92rem;
+  font-weight: ${(props) => (props.$active || props.$done ? 700 : 500)};
+  color: ${(props) =>
+    props.$active
+      ? colors.textPrimary
+      : props.$done
+        ? colors.success
+        : colors.textSecondary};
+  white-space: nowrap;
+
+  @media (max-width: 480px) {
+    display: ${(props) => (props.$active ? "inline" : "none")};
+  }
+`;
+
+const ProgressLine = styled.span`
+  flex: 1;
+  height: 2px;
+  margin: 0 12px;
+  border-radius: 2px;
+  background: ${(props) => (props.$filled ? colors.success : "#e6e6e6")};
+  transition: background 0.2s ease;
 `;
 
 const PrimaryButton = styled.button`
@@ -555,33 +577,114 @@ const TotalsList = styled.div`
 
 const TotalsRow = styled.div`
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: 10px;
   color: ${colors.textPrimary};
-  font-size: ${(props) => (props.$strong ? "1rem" : "0.9rem")};
-  font-weight: ${(props) => (props.$strong ? 700 : 500)};
+  font-size: 0.9rem;
+  font-weight: 500;
+
+  span:last-child {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+`;
+
+const TotalsSub = styled.span`
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: ${colors.textSecondary};
+  margin-top: 1px;
+`;
+
+const GrandTotalBox = styled.div`
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #fff8e8;
+  border: 1px solid #ecd98f;
+`;
+
+const GrandTotalRow = styled.div`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+`;
+
+const GrandTotalLabel = styled.span`
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: ${colors.textPrimary};
+`;
+
+const GrandTotalValue = styled.strong`
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: ${colors.primaryDark};
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+`;
+
+const GrandTotalSecure = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: ${colors.textSecondary};
+
+  svg {
+    color: ${colors.success};
+    flex-shrink: 0;
+  }
 `;
 
 const CompactOrderList = styled.div`
   display: grid;
-  gap: 8px;
+  gap: 12px;
 `;
 
 const CompactOrderItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
   color: ${colors.textPrimary};
   font-size: 0.9rem;
+`;
 
-  span:first-child {
+const SummaryThumb = styled.div`
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f2efe6;
+  border: 1px solid #ece7da;
+  flex-shrink: 0;
+`;
+
+const SummaryName = styled.span`
+  min-width: 0;
+  color: ${colors.textPrimary};
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  em {
+    font-style: normal;
     color: ${colors.textSecondary};
   }
+`;
 
-  strong {
-    white-space: nowrap;
-  }
+const SummaryPrice = styled.strong`
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 `;
 
 const SecureHint = styled.p`
@@ -689,8 +792,13 @@ const PanelNum = styled.span`
   font-size: 0.85rem;
   font-weight: 700;
   background: ${(props) =>
-    props.$done ? colors.primaryDark : props.$active ? colors.primary : "#ececec"};
-  color: ${(props) => (props.$active || props.$done ? "#fff" : colors.textSecondary)};
+    props.$done ? colors.success : props.$active ? colors.primary : "#ececec"};
+  color: ${(props) =>
+    props.$done
+      ? "#fff"
+      : props.$active
+        ? colors.primaryContrastText
+        : colors.textSecondary};
 `;
 
 const PanelTitleWrap = styled.div`
@@ -803,7 +911,7 @@ const TextInput = styled.input`
   min-width: 0;
   box-sizing: border-box;
   padding: 12px 14px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid ${(props) => (props.$invalid ? colors.error : "#e0e0e0")};
   border-radius: 11px;
   background: #fff;
   color: ${colors.textPrimary};
@@ -816,8 +924,22 @@ const TextInput = styled.input`
 
   &:focus {
     outline: none;
-    border-color: ${colors.primary};
-    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.2);
+    border-color: ${(props) => (props.$invalid ? colors.error : colors.primary)};
+    box-shadow: 0 0 0 3px
+      ${(props) =>
+        props.$invalid ? "rgba(211, 47, 47, 0.18)" : "rgba(201, 162, 39, 0.2)"};
+  }
+`;
+
+const FieldError = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  color: ${colors.error};
+
+  svg {
+    flex-shrink: 0;
   }
 `;
 
@@ -904,6 +1026,7 @@ const CartPage = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [createdOrder, setCreatedOrder] = useState(null);
   const [formError, setFormError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
   const [activeStep, setActiveStep] = useState(1);
@@ -1334,9 +1457,51 @@ const CartPage = () => {
     setActiveStep(2);
   };
 
+  const validateContactFields = () => {
+    const errors = {};
+    if (!name.trim()) errors.name = "Podaj imię i nazwisko.";
+    if (!email.trim()) errors.email = "Podaj adres e-mail.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+      errors.email = "Podaj poprawny adres e-mail.";
+    if (!city.trim()) errors.city = "Podaj miasto.";
+    if (!postalCode.trim()) errors.postalCode = "Podaj kod pocztowy.";
+    else if (!/^\d{2}-\d{3}$/.test(postalCode.trim()))
+      errors.postalCode = "Kod pocztowy w formacie 00-000.";
+    if (!streetAddress.trim()) errors.streetAddress = "Podaj ulicę i numer.";
+    if (!country.trim()) errors.country = "Podaj kraj.";
+    return errors;
+  };
+
+  const clearFieldError = (field) =>
+    setFieldErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
+
+  const renderFieldError = (field) =>
+    fieldErrors[field] ? (
+      <FieldError role="alert">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 8v4M12 16h.01" />
+        </svg>
+        {fieldErrors[field]}
+      </FieldError>
+    ) : null;
+
+  const handlePostalCodeChange = (value) => {
+    const digits = value.replace(/\D/g, "").slice(0, 5);
+    setPostalCode(digits.length > 2 ? `${digits.slice(0, 2)}-${digits.slice(2)}` : digits);
+    clearFieldError("postalCode");
+  };
+
   const advanceFromContact = () => {
-    if (!contactFieldsValid) {
-      setFormError("Uzupełnij wszystkie dane odbiorcy, aby przejść dalej.");
+    const errors = validateContactFields();
+    setFieldErrors(errors);
+    const order = ["name", "email", "city", "postalCode", "streetAddress", "country"];
+    const firstInvalid = order.find((field) => errors[field]);
+    if (firstInvalid) {
+      setFormError("");
+      if (typeof document !== "undefined") {
+        document.getElementById(`co-${firstInvalid}`)?.focus();
+      }
       return;
     }
     setFormError("");
@@ -1410,30 +1575,34 @@ const CartPage = () => {
       {hasCheckoutItems && (
         <CheckoutHeader>
           <Title>Finalizacja zamówienia</Title>
-          <Stepper aria-label="Etapy zamówienia">
-            {CHECKOUT_STEPS.map((step) => {
+          <Progress aria-label="Etapy zamówienia">
+            {CHECKOUT_STEPS.map((step, index) => {
               const isCompleted =
                 (step.id === 1 && stepOneComplete) ||
                 (step.id === 2 && stepTwoComplete);
+              const isActive = activeStep === step.id;
               const isClickable =
                 step.id === 1 || (step.id === 2 && stepOneComplete);
 
               return (
-                <StepItem
-                  key={step.id}
-                  $active={activeStep === step.id}
-                  $clickable={isClickable}
-                  onClick={() => isClickable && goToStep(step.id)}
-                >
-                  <StepTop>
-                    <StepIndex>Krok {step.id}</StepIndex>
-                    {isCompleted && <StepCheck>✓</StepCheck>}
-                  </StepTop>
-                  <StepTitle>{step.label}</StepTitle>
-                </StepItem>
+                <React.Fragment key={step.id}>
+                  {index > 0 && <ProgressLine $filled={activeStep >= step.id} />}
+                  <ProgressStep
+                    $clickable={isClickable}
+                    onClick={() => isClickable && goToStep(step.id)}
+                    aria-current={isActive ? "step" : undefined}
+                  >
+                    <ProgressDot $active={isActive} $done={isCompleted && !isActive}>
+                      {isCompleted && !isActive ? "✓" : step.id}
+                    </ProgressDot>
+                    <ProgressLabel $active={isActive} $done={isCompleted && !isActive}>
+                      {step.label}
+                    </ProgressLabel>
+                  </ProgressStep>
+                </React.Fragment>
               );
             })}
-          </Stepper>
+          </Progress>
         </CheckoutHeader>
       )}
 
@@ -1496,62 +1665,102 @@ const CartPage = () => {
                     <Field $full>
                       <FieldLabel>Imię i nazwisko</FieldLabel>
                       <TextInput
+                        id="co-name"
                         type="text"
                         autoComplete="name"
                         placeholder="np. Jan Kowalski"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        $invalid={Boolean(fieldErrors.name)}
+                        aria-invalid={Boolean(fieldErrors.name)}
+                        onChange={(e) => {
+                          setName(e.target.value);
+                          clearFieldError("name");
+                        }}
                       />
+                      {renderFieldError("name")}
                     </Field>
                     <Field $full>
                       <FieldLabel>Adres e-mail</FieldLabel>
                       <TextInput
+                        id="co-email"
                         type="email"
                         autoComplete="email"
                         placeholder="np. jan@example.com"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        $invalid={Boolean(fieldErrors.email)}
+                        aria-invalid={Boolean(fieldErrors.email)}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          clearFieldError("email");
+                        }}
                       />
+                      {renderFieldError("email")}
                     </Field>
                     <Field>
                       <FieldLabel>Miasto</FieldLabel>
                       <TextInput
+                        id="co-city"
                         type="text"
                         autoComplete="address-level2"
                         placeholder="np. Częstochowa"
                         value={city}
-                        onChange={(e) => setCity(e.target.value)}
+                        $invalid={Boolean(fieldErrors.city)}
+                        aria-invalid={Boolean(fieldErrors.city)}
+                        onChange={(e) => {
+                          setCity(e.target.value);
+                          clearFieldError("city");
+                        }}
                       />
+                      {renderFieldError("city")}
                     </Field>
                     <Field>
                       <FieldLabel>Kod pocztowy</FieldLabel>
                       <TextInput
+                        id="co-postalCode"
                         type="text"
+                        inputMode="numeric"
                         autoComplete="postal-code"
                         placeholder="np. 42-200"
                         value={postalCode}
-                        onChange={(e) => setPostalCode(e.target.value)}
+                        $invalid={Boolean(fieldErrors.postalCode)}
+                        aria-invalid={Boolean(fieldErrors.postalCode)}
+                        onChange={(e) => handlePostalCodeChange(e.target.value)}
                       />
+                      {renderFieldError("postalCode")}
                     </Field>
                     <Field $full>
                       <FieldLabel>Ulica i numer</FieldLabel>
                       <TextInput
+                        id="co-streetAddress"
                         type="text"
                         autoComplete="street-address"
                         placeholder="np. Al. NMP 1/2"
                         value={streetAddress}
-                        onChange={(e) => setStreetAddress(e.target.value)}
+                        $invalid={Boolean(fieldErrors.streetAddress)}
+                        aria-invalid={Boolean(fieldErrors.streetAddress)}
+                        onChange={(e) => {
+                          setStreetAddress(e.target.value);
+                          clearFieldError("streetAddress");
+                        }}
                       />
+                      {renderFieldError("streetAddress")}
                     </Field>
                     <Field $full>
                       <FieldLabel>Kraj</FieldLabel>
                       <TextInput
+                        id="co-country"
                         type="text"
                         autoComplete="country-name"
                         placeholder="np. Polska"
                         value={country}
-                        onChange={(e) => setCountry(e.target.value)}
+                        $invalid={Boolean(fieldErrors.country)}
+                        aria-invalid={Boolean(fieldErrors.country)}
+                        onChange={(e) => {
+                          setCountry(e.target.value);
+                          clearFieldError("country");
+                        }}
                       />
+                      {renderFieldError("country")}
                     </Field>
                   </FieldsGrid>
                   {formError && <Feedback>{formError}</Feedback>}
@@ -1680,6 +1889,12 @@ const CartPage = () => {
                     onClick={handleSubmit}
                     disabled={isSubmitting || !stepTwoComplete}
                   >
+                    {!isSubmitting && paymentMethod === "stripe_card" && (
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <rect x="3" y="11" width="18" height="11" rx="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                      </svg>
+                    )}
                     {isSubmitting
                       ? "Przetwarzanie..."
                       : paymentMethod === "stripe_card"
@@ -1702,10 +1917,21 @@ const CartPage = () => {
             <CompactOrderList>
               {cartItems.map((item) => (
                 <CompactOrderItem key={`summary-${item._id}`}>
-                  <span>
-                    {item.title} × {item.cartQuantity}
-                  </span>
-                  <strong>{item.total.toFixed(2)} zł</strong>
+                  <SummaryThumb>
+                    <SmartImage
+                      src={
+                        item.images?.[0] ||
+                        "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
+                      }
+                      alt={item.title}
+                      fill
+                      sizes="44px"
+                    />
+                  </SummaryThumb>
+                  <SummaryName>
+                    {item.title} <em>× {item.cartQuantity}</em>
+                  </SummaryName>
+                  <SummaryPrice>{item.total.toFixed(2)} zł</SummaryPrice>
                 </CompactOrderItem>
               ))}
             </CompactOrderList>
@@ -1716,17 +1942,26 @@ const CartPage = () => {
                 <span>{cartTotal.toFixed(2)} zł</span>
               </TotalsRow>
               <TotalsRow>
-                <span>Dostawa</span>
+                <span>
+                  Dostawa
+                  <TotalsSub>{selectedDelivery.title}</TotalsSub>
+                </span>
                 <span>{shippingTotal === 0 ? "Gratis" : `${shippingTotal.toFixed(2)} zł`}</span>
               </TotalsRow>
             </TotalsList>
-            <SideDivider />
-            <TotalsList>
-              <TotalsRow $strong>
-                <span>Do zapłaty</span>
-                <span>{orderGrandTotal.toFixed(2)} zł</span>
-              </TotalsRow>
-            </TotalsList>
+            <GrandTotalBox>
+              <GrandTotalRow>
+                <GrandTotalLabel>Do zapłaty</GrandTotalLabel>
+                <GrandTotalValue>{orderGrandTotal.toFixed(2)} zł</GrandTotalValue>
+              </GrandTotalRow>
+              <GrandTotalSecure>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                Cena zawiera VAT · płatność szyfrowana
+              </GrandTotalSecure>
+            </GrandTotalBox>
             <SideDivider />
             <CheckoutTrust>
               <li>
@@ -1787,8 +2022,8 @@ const CartPage = () => {
                 <ItemsList>
                   {cartItems.map((item) => (
                     <ItemCard key={item._id}>
-                      <ProductImageWrapper>
-                        <Image
+                      <ProductImageWrapper href={`/product/${item._id}`}>
+                        <SmartImage
                           src={
                             item.images?.[0] ||
                             "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
@@ -1796,12 +2031,12 @@ const CartPage = () => {
                           alt={item.title}
                           fill
                           sizes="(max-width: 420px) 100vw, 72px"
-                          loader={({ src }) => src}
-                          unoptimized
                         />
                       </ProductImageWrapper>
                       <div>
-                        <ProductName>{item.title}</ProductName>
+                        <ProductNameLink href={`/product/${item._id}`}>
+                          <ProductName>{item.title}</ProductName>
+                        </ProductNameLink>
                         <ProductMeta>
                           <QuantityControl>
                             <QtyButton

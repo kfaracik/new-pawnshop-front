@@ -10,9 +10,18 @@ const GlobalStyles = createGlobalStyle`
     background-color: ${colors.backgroundDefault};
     padding: 0;
     margin: 0;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--app-font, system-ui), sans-serif;
     color: ${colors.textPrimary};
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-family: inherit;
   }
 
   #__next {

@@ -3,7 +3,7 @@ export const DEFAULT_TITLE = `${SITE_NAME} | Lombard online, sprzedaż i licytac
 export const DEFAULT_DESCRIPTION =
   "Nowy Lombard oferuje sprzedaż produktów, rezerwacje oraz licytacje online. Sprawdź aktualne oferty i skontaktuj się z najbliższym oddziałem.";
 
-const FALLBACK_SITE_URL = "https://www.twoj-lombard.pl";
+const FALLBACK_SITE_URL = "https://www.nowylombard.com";
 
 export const getSiteUrl = () =>
   (process.env.NEXT_PUBLIC_SITE_URL || FALLBACK_SITE_URL).replace(/\/$/, "");

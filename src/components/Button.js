@@ -14,7 +14,7 @@ export const buttonBaseStyle = css`
   justify-content: center;
   gap: 8px;
   text-decoration: none;
-  font-family: "Poppins", sans-serif;
+  font-family: inherit;
   font-weight: 700;
   font-size: 0.95rem;
   line-height: 1;

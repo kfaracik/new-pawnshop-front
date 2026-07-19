@@ -18,7 +18,7 @@ type SeoHeadProps = {
 
 const getImageUrl = (image?: string) => {
   if (!image || image.startsWith("data:")) {
-    return `${getSiteUrl()}/favicon.ico`;
+    return `${getSiteUrl()}/og-image.png`;
   }
 
   if (image.startsWith("http://") || image.startsWith("https://")) {

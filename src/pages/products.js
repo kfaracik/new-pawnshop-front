@@ -48,6 +48,42 @@ const FilterChip = styled.button`
   }
 `;
 
+const SortRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 16px;
+`;
+
+const SortLabel = styled.label`
+  font-size: 0.88rem;
+  color: ${colors.textSecondary};
+  font-weight: 500;
+`;
+
+const SortSelect = styled.select`
+  height: 40px;
+  padding: 0 34px 0 14px;
+  border-radius: 10px;
+  border: 1px solid #e3e3e3;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  color: ${colors.textPrimary};
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  appearance: none;
+  transition: border-color 0.15s;
+
+  &:hover,
+  &:focus-visible {
+    border-color: ${colors.primary};
+  }
+`;
+
 const ErrorState = styled.div`
   display: grid;
   gap: 10px;
@@ -77,6 +113,7 @@ export default function ProductsPage() {
   const router = useRouter();
   const [page, setPage] = useState(Number(router.query.page) || 1);
   const selectedCategory = router.query.category || "";
+  const selectedSort = router.query.sort || "";
   const { data: categoriesData } = useCategories();
   const categories = useMemo(() => {
     if (Array.isArray(categoriesData)) return categoriesData;
@@ -87,31 +124,47 @@ export default function ProductsPage() {
   const { data, isLoading, isError } = useProducts(
     page,
     PRODUCTS_PER_PAGE,
-    selectedCategory
+    selectedCategory,
+    selectedSort
   );
 
   const totalPages = Math.ceil((data?.total || 0) / PRODUCTS_PER_PAGE);
 
   useEffect(() => {
     setPage(Number(router.query.page) || 1);
-  }, [router.query.page, selectedCategory]);
+  }, [router.query.page, selectedCategory, selectedSort]);
+
+  const buildParams = ({ page: nextPage, category, sort }) => {
+    const params = new URLSearchParams({ page: String(nextPage) });
+    if (category) {
+      params.set("category", String(category));
+    }
+    if (sort) {
+      params.set("sort", String(sort));
+    }
+    return params;
+  };
 
   const navigateWithCategory = (categoryId = "") => {
-    const params = new URLSearchParams({ page: "1" });
-    if (categoryId) {
-      params.set("category", String(categoryId));
-    }
     setPage(1);
+    const params = buildParams({ page: 1, category: categoryId, sort: selectedSort });
+    router.push(`/products?${params.toString()}`, undefined, { shallow: true });
+  };
+
+  const handleSortChange = (sort) => {
+    setPage(1);
+    const params = buildParams({ page: 1, category: selectedCategory, sort });
     router.push(`/products?${params.toString()}`, undefined, { shallow: true });
   };
 
   const handlePageChange = (newPage) => {
     if (newPage !== page) {
       setPage(newPage);
-      const params = new URLSearchParams({ page: String(newPage) });
-      if (selectedCategory) {
-        params.set("category", String(selectedCategory));
-      }
+      const params = buildParams({
+        page: newPage,
+        category: selectedCategory,
+        sort: selectedSort,
+      });
       router.push(`/products?${params.toString()}`, undefined, { shallow: true });
     }
   };
@@ -160,6 +213,19 @@ export default function ProductsPage() {
         )}
       </PageHead>
       {filterBar}
+      <SortRow>
+        <SortLabel htmlFor="product-sort">Sortuj:</SortLabel>
+        <SortSelect
+          id="product-sort"
+          value={selectedSort}
+          onChange={(event) => handleSortChange(event.target.value)}
+        >
+          <option value="">Najnowsze</option>
+          <option value="price_asc">Cena: od najniższej</option>
+          <option value="price_desc">Cena: od najwyższej</option>
+          <option value="popular">Najpopularniejsze</option>
+        </SortSelect>
+      </SortRow>
       {isError ? (
         <ErrorState>
           <h2>Nie udało się załadować produktów</h2>

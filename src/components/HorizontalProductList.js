@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import styled from "styled-components";
-import Skeleton from "@mui/material/Skeleton";
+import styled, { keyframes } from "styled-components";
 import { FaBoxOpen } from "react-icons/fa";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import colors from "styles/colors";
@@ -18,12 +17,23 @@ const Head = styled.div`
   margin-bottom: 16px;
 `;
 
+const TitleGroup = styled.div`
+  min-width: 0;
+`;
+
 const Title = styled.h2`
   margin: 0;
   font-size: clamp(22px, 3vw, 30px);
   font-weight: 800;
   letter-spacing: -0.01em;
   color: ${colors.textPrimary};
+`;
+
+const Subtitle = styled.p`
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: ${colors.grayDark};
 `;
 
 const Arrows = styled.div`
@@ -143,12 +153,23 @@ const ItemSlot = styled.div`
   }
 `;
 
-const StyledSkeleton = styled(Skeleton)`
+const shimmer = keyframes`
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+`;
+
+const StyledSkeleton = styled.div`
+  width: 100%;
+  height: 340px;
   border-radius: 16px;
+  background: linear-gradient(90deg, #eeeeee 25%, #f6f6f6 37%, #eeeeee 63%);
+  background-size: 800px 100%;
+  animation: ${shimmer} 1.4s ease-in-out infinite;
 `;
 
 const HorizontalProductList = ({
   title,
+  subtitle,
   products,
   loading,
   searchQuery = "",
@@ -189,7 +210,10 @@ const HorizontalProductList = ({
   return (
     <Wrapper>
       <Head>
-        <Title>{title}</Title>
+        <TitleGroup>
+          <Title>{title}</Title>
+          {subtitle && <Subtitle>{subtitle}</Subtitle>}
+        </TitleGroup>
         {hasProducts && !loading && (
           <Arrows>
             <ArrowButton
@@ -216,7 +240,7 @@ const HorizontalProductList = ({
         <Track>
           {Array.from({ length: 6 }).map((_, index) => (
             <ItemSlot key={index}>
-              <StyledSkeleton variant="rectangular" width="100%" height={340} />
+              <StyledSkeleton />
             </ItemSlot>
           ))}
         </Track>

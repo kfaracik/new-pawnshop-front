@@ -1,9 +1,15 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/router";
 import styled, { keyframes } from "styled-components";
 import Modal from "react-modal";
 import Link from "next/link";
-import { Chip } from "@mui/material";
 import PageContainer from "components/PageContainer";
 import SeoHead from "components/SeoHead";
 import Title from "components/Title";
@@ -120,6 +126,20 @@ const MetaRow = styled.div`
   flex-wrap: wrap;
 `;
 
+const AuctionChip = styled.span`
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background-color: ${colors.secondaryDark};
+  color: ${colors.primaryLight};
+  border: 1px solid ${colors.primaryDark};
+`;
+
 const Price = styled.span`
   font-size: clamp(1.7rem, 3vw, 2.2rem);
   color: ${colors.primaryDark};
@@ -139,6 +159,60 @@ const ActionGroup = styled.div`
 
 const ImagesWrapper = styled.div`
   display: contents;
+`;
+
+const StickyBar = styled.div`
+  display: none;
+
+  @media screen and (max-width: 768px) {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 900;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid #ececec;
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.08);
+  }
+`;
+
+const StickyInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+`;
+
+const StickyLabel = styled.span`
+  font-size: 0.72rem;
+  color: ${colors.textSecondary};
+  line-height: 1.2;
+`;
+
+const StickyPrice = styled.span`
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: ${colors.primaryDark};
+  white-space: nowrap;
+`;
+
+const StickyButton = styled(Button)`
+  flex: 1;
+  justify-content: center;
+  white-space: nowrap;
+`;
+
+const StickySpacer = styled.div`
+  display: none;
+
+  @media screen and (max-width: 768px) {
+    display: block;
+    height: 76px;
+  }
 `;
 
 const Breadcrumbs = styled.nav`
@@ -632,6 +706,18 @@ const ProductPage = ({ initialProduct = null }) => {
       window.scrollTo(0, 0);
     }
   }, [id]);
+
+  const trackedViewRef = useRef(null);
+  useEffect(() => {
+    const viewId = product?._id || id;
+    if (!viewId || trackedViewRef.current === viewId) {
+      return;
+    }
+    trackedViewRef.current = viewId;
+    axiosInstance
+      .get(versionedApiPath(`products/${viewId}`), { params: { trackView: 1 } })
+      .catch(() => {});
+  }, [product?._id, id]);
   const resolveAvailableQuantity = useCallback((productData = product) => {
     const fromQuantity = Number(productData?.quantity);
     if (Number.isFinite(fromQuantity)) {
@@ -671,6 +757,12 @@ const ProductPage = ({ initialProduct = null }) => {
       }, 0),
     [cartProducts, id]
   );
+  const addToCartDisabled =
+    isModalOpen ||
+    isCheckingAvailability ||
+    currentInCart >= maxProductQuantity ||
+    product?.availabilityStatus === "reserved" ||
+    product?.availabilityStatus === "unavailable";
   const reservationCountdown = useMemo(() => {
     if (!product?.reservationExpiresAt) return "";
     const remaining = Math.max(
@@ -996,18 +1088,7 @@ const ProductPage = ({ initialProduct = null }) => {
             <InfoCard>
               <MetaRow>
                 <StyledTitle>{product.title}</StyledTitle>
-                {product.isAuction && (
-                  <Chip
-                    label="Licytacja"
-                    size="small"
-                    sx={{
-                      backgroundColor: colors.secondaryDark,
-                      color: colors.primaryLight,
-                      border: `1px solid ${colors.primaryDark}`,
-                      fontWeight: 600,
-                    }}
-                  />
-                )}
+                {product.isAuction && <AuctionChip>Licytacja</AuctionChip>}
               </MetaRow>
               <Price>{product.price.toFixed(2)} zł</Price>
               {!product.isAuction &&
@@ -1102,13 +1183,7 @@ const ProductPage = ({ initialProduct = null }) => {
                   <Button
                     primary
                     onClick={handleAddToCart}
-                    disabled={
-                      isModalOpen ||
-                      isCheckingAvailability ||
-                      currentInCart >= maxProductQuantity ||
-                      product?.availabilityStatus === "reserved" ||
-                      product?.availabilityStatus === "unavailable"
-                    }
+                    disabled={addToCartDisabled}
                     style={{
                       fontSize: "1.05rem",
                       padding: "13px 22px",
@@ -1167,6 +1242,24 @@ const ProductPage = ({ initialProduct = null }) => {
               />
             </div>
           )}
+          {!product.isAuction && (
+            <>
+              <StickySpacer />
+              <StickyBar>
+                <StickyInfo>
+                  <StickyLabel>Cena</StickyLabel>
+                  <StickyPrice>{product.price.toFixed(2)} zł</StickyPrice>
+                </StickyInfo>
+                <StickyButton
+                  primary
+                  onClick={handleAddToCart}
+                  disabled={addToCartDisabled}
+                >
+                  <CartIcon /> Do koszyka
+                </StickyButton>
+              </StickyBar>
+            </>
+          )}
           <Modal
             isOpen={isModalOpen}
             onRequestClose={closeModal}
@@ -1210,13 +1303,17 @@ const ProductPage = ({ initialProduct = null }) => {
 
 export default ProductPage;
 
-export async function getServerSideProps(context) {
+export async function getStaticPaths() {
+  return { paths: [], fallback: "blocking" };
+}
+
+export async function getStaticProps(context) {
   const { id } = context.params || {};
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   const apiVersion = (process.env.NEXT_PUBLIC_API_VERSION || "v1").replace(/^\/+|\/+$/g, "");
 
   if (!id || !apiBaseUrl) {
-    return { props: { initialProduct: null } };
+    return { props: { initialProduct: null }, revalidate: 30 };
   }
 
   try {
@@ -1224,12 +1321,13 @@ export async function getServerSideProps(context) {
     const productPath = new RegExp(`/${apiVersion}$`).test(normalizedBaseUrl)
       ? `products/${encodeURIComponent(id)}`
       : `${apiVersion}/products/${encodeURIComponent(id)}`;
-    const response = await fetch(
-      `${normalizedBaseUrl}/${productPath}?trackView=1`
-    );
+    const response = await fetch(`${normalizedBaseUrl}/${productPath}`);
 
     if (!response.ok) {
-      return { props: { initialProduct: null } };
+      if (response.status === 404) {
+        return { notFound: true, revalidate: 60 };
+      }
+      return { props: { initialProduct: null }, revalidate: 30 };
     }
 
     const initialProduct = await response.json();
@@ -1237,12 +1335,14 @@ export async function getServerSideProps(context) {
       props: {
         initialProduct,
       },
+      revalidate: 120,
     };
   } catch (_error) {
     return {
       props: {
         initialProduct: null,
       },
+      revalidate: 30,
     };
   }
 }
