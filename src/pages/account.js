@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
+import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -103,32 +104,62 @@ const EmailLine = styled.p`
 
 const TabBar = styled.div`
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 18px;
+  gap: 4px;
+  padding: 5px;
+  margin-bottom: 20px;
+  background: #f4f1e9;
+  border: 1px solid #ece6d6;
+  border-radius: 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const Tab = styled.button`
   ${buttonBaseStyle}
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 40px;
+  position: relative;
+  flex: 1 1 auto;
+  justify-content: center;
+  min-height: 42px;
   padding: 8px 14px;
   border: 0;
-  border-bottom: 2px solid
-    ${(props) => (props.$active ? colors.primary : "transparent")};
-  border-radius: 8px 8px 0 0;
-  background: ${(props) => (props.$active ? "#fff8e8" : "transparent")};
+  border-radius: 10px;
+  background: transparent;
   color: ${(props) => (props.$active ? colors.primaryDark : colors.textSecondary)};
   font-size: 0.92rem;
-  font-weight: ${(props) => (props.$active ? 700 : 500)};
+  font-weight: ${(props) => (props.$active ? 700 : 600)};
+  white-space: nowrap;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: ${colors.primaryDark};
+    transform: none;
+  }
+
+  .tab-content {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
 
   svg {
     width: 16px;
     height: 16px;
   }
+`;
+
+const TabIndicator = styled(motion.span)`
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(201, 162, 39, 0.35);
 `;
 
 const FieldsGrid = styled.div`
@@ -890,31 +921,50 @@ const AccountPage = () => {
           <TabBar role="tablist">
             {TABS.map((tab) => {
               const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
               return (
                 <Tab
                   key={tab.id}
                   type="button"
                   role="tab"
-                  aria-selected={activeTab === tab.id}
-                  $active={activeTab === tab.id}
+                  aria-selected={isActive}
+                  $active={isActive}
                   onClick={() => setActiveTab(tab.id)}
                 >
-                  <Icon />
-                  {tab.label}
+                  {isActive && (
+                    <TabIndicator
+                      layoutId="account-tab-indicator"
+                      transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                    />
+                  )}
+                  <span className="tab-content">
+                    <Icon />
+                    {tab.label}
+                  </span>
                 </Tab>
               );
             })}
           </TabBar>
 
-          {activeTab === "profile" && <ProfileTab profile={profile} />}
-          {activeTab === "orders" && <OrdersTab orders={orders} />}
-          {activeTab === "settings" && (
-            <SettingsTab
-              email={data.email}
-              onLoggedOutEverywhere={handleLogout}
-            />
-          )}
-          {activeTab === "danger" && <DangerTab onDeleted={handleDeleted} />}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {activeTab === "profile" && <ProfileTab profile={profile} />}
+              {activeTab === "orders" && <OrdersTab orders={orders} />}
+              {activeTab === "settings" && (
+                <SettingsTab
+                  email={data.email}
+                  onLoggedOutEverywhere={handleLogout}
+                />
+              )}
+              {activeTab === "danger" && <DangerTab onDeleted={handleDeleted} />}
+            </motion.div>
+          </AnimatePresence>
         </ProfileCard>
       </AccountWrapper>
     </PageContainer>

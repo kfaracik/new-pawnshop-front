@@ -55,6 +55,10 @@ const ArrowButton = styled.button`
     color: ${colors.primaryDark};
   }
 
+  &:active:not(:disabled) {
+    transform: scale(0.9);
+  }
+
   &:disabled {
     opacity: 0.35;
     cursor: default;
@@ -63,10 +67,13 @@ const ArrowButton = styled.button`
 
 const Track = styled.div`
   --track-inset: 16px;
+  --fade: 40px;
+  --fade-left: ${(props) => (props.$left ? "var(--fade)" : "0px")};
+  --fade-right: ${(props) => (props.$right ? "var(--fade)" : "0px")};
   display: flex;
   gap: 14px;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: x proximity;
   scroll-padding-inline: var(--track-inset);
   /* Generous padding + matching negative margin so card shadows (and the hover
      lift) are never clipped by the scroll container, while cards stay flush
@@ -75,6 +82,22 @@ const Track = styled.div`
   margin-inline: calc(var(--track-inset) * -1);
   scroll-behavior: smooth;
   scrollbar-width: none;
+  /* Soft fade at the edges that only appears on the side you can scroll toward,
+     signalling there is more content. */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-left),
+    #000 calc(100% - var(--fade-right)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-left),
+    #000 calc(100% - var(--fade-right)),
+    transparent 100%
+  );
 
   &::-webkit-scrollbar {
     display: none;
@@ -203,7 +226,7 @@ const HorizontalProductList = ({
           <p>Nie mamy aktualnie dostępnych produktów.</p>
         </EmptyState>
       ) : (
-        <Track ref={trackRef}>
+        <Track ref={trackRef} $left={canScrollLeft} $right={canScrollRight}>
           {normalizedProducts.map((product) => (
             <ItemSlot key={product._id}>
               <ProductItem product={product} searchQuery={searchQuery} />
