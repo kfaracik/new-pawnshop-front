@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from "re
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { FiShoppingCart } from "react-icons/fi";
 import {
   createOrder,
   createCheckoutSession,
@@ -106,6 +107,23 @@ const EmptyState = styled.div`
   color: ${colors.textSecondary};
 `;
 
+const EmptyStateIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  background: #fff6df;
+  color: ${colors.primaryDark};
+
+  svg {
+    width: 34px;
+    height: 34px;
+  }
+`;
+
 const EmptyStateEyebrow = styled.span`
   display: inline-block;
   margin-bottom: 10px;
@@ -120,14 +138,6 @@ const EmptyStateTitle = styled.h2`
   margin: 0;
   font-size: 1.25rem;
   color: ${colors.textPrimary};
-`;
-
-const EmptyStateText = styled.p`
-  margin: 10px auto 0;
-  max-width: 440px;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: ${colors.textSecondary};
 `;
 
 const EmptyStateActions = styled.div`
@@ -1700,12 +1710,11 @@ const CartPage = () => {
               </ItemsList>
             ) : !cartItems.length ? (
               <EmptyState>
+                <EmptyStateIcon aria-hidden="true">
+                  <FiShoppingCart />
+                </EmptyStateIcon>
                 <EmptyStateEyebrow>Pusty koszyk</EmptyStateEyebrow>
                 <EmptyStateTitle>Nie masz jeszcze żadnych produktów</EmptyStateTitle>
-                <EmptyStateText>
-                  Dodaj produkty do koszyka, aby przejść do wyboru dostawy, metody
-                  płatności i potwierdzenia zamówienia.
-                </EmptyStateText>
                 <EmptyStateActions>
                   <EmptyStatePrimaryButton as={Link} href="/products">
                     Przeglądaj produkty

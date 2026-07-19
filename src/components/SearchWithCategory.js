@@ -19,8 +19,8 @@ const SearchWrapper = styled.div`
   margin: 0;
 
   @media screen and (max-width: 768px) {
-    flex-direction: column;
     align-items: stretch;
+    gap: 8px;
     padding: 0 12px;
     box-sizing: border-box;
   }
@@ -38,7 +38,7 @@ const SearchForm = styled.form`
   transition: box-shadow 0.18s ease;
 
   &:focus-within {
-    box-shadow: 0 4px 16px rgba(201, 162, 39, 0.16), 0 0 0 2px rgba(201, 162, 39, 0.22);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(201, 162, 39, 0.4);
   }
 `;
 
@@ -73,7 +73,7 @@ const VisuallyHiddenLabel = styled.label`
 const SearchInput = styled.input`
   width: 100%;
   min-width: 0;
-  padding: 15px 44px 15px 48px;
+  padding: 10px 44px 10px 48px;
   background-color: #faf9f6;
   border: 1px solid #e6e2d6;
   border-right: 0;
@@ -129,7 +129,7 @@ const SearchButton = styled.button`
   ${buttonPrimaryStyle}
   min-height: auto;
   border-radius: 0 16px 16px 0;
-  padding: 12px 26px;
+  padding: 10px 26px;
   font-weight: 700;
   letter-spacing: 0.01em;
   transform: none !important;
@@ -202,8 +202,7 @@ const DropdownWrapper = styled.div`
   align-items: center;
 
   @media screen and (max-width: 768px) {
-    width: auto;
-    align-self: flex-start;
+    align-self: stretch;
   }
 `;
 
@@ -211,42 +210,49 @@ const MobileFilterButton = styled.button`
   display: none;
 
   @media screen and (max-width: 768px) {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    min-height: 40px;
-    padding: 0 15px;
-    border-radius: 999px;
+    justify-content: center;
+    align-self: stretch;
+    width: 46px;
+    min-height: 0;
+    padding: 0;
+    border-radius: 14px;
     border: 1px solid #e6e2d6;
     background: #fff;
     color: ${colors.textSecondary};
-    font-size: 0.88rem;
-    font-weight: 600;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     cursor: pointer;
     transition: border-color 0.15s, background 0.15s, color 0.15s;
 
     svg {
-      width: 16px;
-      height: 16px;
+      width: 19px;
+      height: 19px;
     }
-  }
 
-  &[aria-expanded="true"] {
-    border-color: ${colors.primary};
-    color: ${colors.primaryDark};
-    background: #fff8e8;
+    &[aria-expanded="true"],
+    &[data-active="true"] {
+      border-color: ${colors.primary};
+      color: ${colors.primaryDark};
+      background: #fff8e8;
+    }
   }
 `;
 
-const ActiveBadge = styled.span`
-  color: ${colors.primaryDark};
-  font-weight: 700;
+const FilterActiveDot = styled.span`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: ${colors.primaryDark};
 `;
 
 const DropdownButton = styled.button`
   ${buttonBaseStyle}
-  min-height: 46px;
+  min-height: 42px;
   padding: 0 14px;
   border: 1px solid #e6e2d6;
   border-radius: 16px;
@@ -297,8 +303,8 @@ const DropdownMenu = styled.ul`
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.12);
 
   @media screen and (max-width: 768px) {
-    right: auto;
-    left: 0;
+    right: 0;
+    left: auto;
     min-width: min(280px, 82vw);
   }
 `;
@@ -512,14 +518,19 @@ export default function SearchWithCategory() {
         </DropdownButton>
         <MobileFilterButton
           type="button"
+          aria-label={
+            selectedCategory
+              ? `Filtry — wybrano: ${selectedCategoryName}`
+              : "Filtry"
+          }
           aria-haspopup="menu"
           aria-expanded={dropdownOpen}
           aria-controls="category-menu"
+          data-active={selectedCategory ? "true" : undefined}
           onClick={() => setDropdownOpen((isOpen) => !isOpen)}
         >
           <FiSliders />
-          Filtry
-          {selectedCategory && <ActiveBadge>· {selectedCategoryName}</ActiveBadge>}
+          {selectedCategory && <FilterActiveDot aria-hidden="true" />}
         </MobileFilterButton>
         <DropdownMenu id="category-menu" role="menu" $open={dropdownOpen}>
           <DropdownItem>
