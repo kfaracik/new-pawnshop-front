@@ -552,6 +552,14 @@ const ProductPage = ({ initialProduct = null }) => {
       Modal.setAppElement("#__next");
     }
   }, []);
+
+  // Always start a product detail view at the top, including when navigating
+  // between products (e.g. from the related-products section).
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+    }
+  }, [id]);
   const resolveAvailableQuantity = useCallback((productData = product) => {
     const fromQuantity = Number(productData?.quantity);
     if (Number.isFinite(fromQuantity)) {
