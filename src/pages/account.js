@@ -554,9 +554,12 @@ const OrdersTab = ({ orders }) => {
                 <StatusPill $tone={orderStatusTone(order.orderStatus)}>
                   {ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus || "-"}
                 </StatusPill>
-                <StatusPill $tone={paymentStatusTone(order.paymentStatus)}>
-                  {PAYMENT_STATUS_LABELS[order.paymentStatus] || order.paymentStatus || "-"}
-                </StatusPill>
+                {(PAYMENT_STATUS_LABELS[order.paymentStatus] || order.paymentStatus || "-") !==
+                  (ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus || "-") && (
+                  <StatusPill $tone={paymentStatusTone(order.paymentStatus)}>
+                    {PAYMENT_STATUS_LABELS[order.paymentStatus] || order.paymentStatus || "-"}
+                  </StatusPill>
+                )}
               </OrderPills>
             </OrderTop>
             <OrderDetailGrid>
