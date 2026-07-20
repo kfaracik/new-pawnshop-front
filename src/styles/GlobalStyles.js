@@ -6,6 +6,10 @@ const GlobalStyles = createGlobalStyle`
     box-sizing: border-box;
   }
 
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
     background-color: ${colors.backgroundDefault};
     padding: 0;
@@ -15,6 +19,12 @@ const GlobalStyles = createGlobalStyle`
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: rgba(201, 162, 39, 0.28);
+    color: ${colors.textPrimary};
   }
 
   button,
@@ -27,8 +37,27 @@ const GlobalStyles = createGlobalStyle`
   #__next {
     overflow-y: scroll;
     height: 100vh;
+    scroll-behavior: smooth;
     scrollbar-width: thin;
-    scrollbar-color: #6c757d #dfe6e9;
+    scrollbar-color: #b5b0a2 transparent;
+  }
+
+  #__next::-webkit-scrollbar {
+    width: 9px;
+  }
+
+  #__next::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  #__next::-webkit-scrollbar-thumb {
+    background: #c3beb0;
+    border-radius: 999px;
+    border: 2px solid ${colors.backgroundDefault};
+  }
+
+  #__next::-webkit-scrollbar-thumb:hover {
+    background: ${colors.primary};
   }
 
   a {

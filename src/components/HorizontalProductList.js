@@ -160,11 +160,17 @@ const shimmer = keyframes`
 
 const StyledSkeleton = styled.div`
   width: 100%;
-  height: 340px;
+  aspect-ratio: 5 / 7;
   border-radius: 16px;
+  border: 1px solid #ececec;
   background: linear-gradient(90deg, #eeeeee 25%, #f6f6f6 37%, #eeeeee 63%);
   background-size: 800px 100%;
   animation: ${shimmer} 1.4s ease-in-out infinite;
+
+  @media screen and (max-width: 600px) {
+    aspect-ratio: 4 / 5;
+    border-radius: 14px;
+  }
 `;
 
 const HorizontalProductList = ({

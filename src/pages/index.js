@@ -1,7 +1,8 @@
 import React from "react";
 import Link from "next/link";
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import PageContainer from "components/PageContainer";
+import Reveal from "components/Reveal";
 import SeoHead from "components/SeoHead";
 import { useFeaturedProducts } from "services/api/featuredProductsApi";
 import { usePopularProducts } from "services/api/popularProductsApi";
@@ -13,6 +14,24 @@ import { fetchApiResource } from "lib/serverApi";
 
 const FACEBOOK_AUCTIONS_URL =
   process.env.NEXT_PUBLIC_FACEBOOK_AUCTIONS_URL || "https://www.facebook.com/";
+
+const heroFadeUp = keyframes`
+  0% { opacity: 0; transform: translateY(18px); }
+  100% { opacity: 1; transform: translateY(0); }
+`;
+
+const heroEntrance = (delay) => css`
+  animation: ${heroFadeUp} 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`;
+
+const glowBreathe = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.68; }
+`;
 
 const Hero = styled.section`
   position: relative;
@@ -43,6 +62,11 @@ const HeroGlow = styled.div`
     rgba(225, 199, 106, 0.24) 0%,
     rgba(225, 199, 106, 0) 55%
   );
+  animation: ${glowBreathe} 9s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 const HeroInner = styled.div`
@@ -63,6 +87,7 @@ const Badge = styled.span`
   text-transform: uppercase;
   color: ${colors.primaryLight};
   margin-bottom: 22px;
+  ${heroEntrance(0)}
 
   span {
     width: 6px;
@@ -78,6 +103,7 @@ const HeroTitle = styled.h1`
   line-height: 1.04;
   font-weight: 800;
   letter-spacing: -0.02em;
+  ${heroEntrance(80)}
 
   span {
     color: ${colors.primaryLight};
@@ -90,6 +116,7 @@ const HeroText = styled.p`
   font-size: clamp(15px, 1.5vw, 18px);
   line-height: 1.6;
   color: #bdbdbd;
+  ${heroEntrance(160)}
 `;
 
 const HeroActions = styled.div`
@@ -97,9 +124,12 @@ const HeroActions = styled.div`
   gap: 13px;
   flex-wrap: wrap;
   margin-top: 30px;
+  ${heroEntrance(240)}
 `;
 
 const HeroPrimary = styled(Link)`
+  position: relative;
+  overflow: hidden;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -111,12 +141,44 @@ const HeroPrimary = styled(Link)`
   background: ${colors.primary};
   border: 1px solid ${colors.primaryDark};
   color: ${colors.black};
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -80%;
+    width: 55%;
+    background: linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.45) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transform: skewX(-18deg);
+    transition: left 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
 
   &:hover {
     background: ${colors.primaryLight};
-    transform: translateY(-1px);
-    box-shadow: 0 12px 28px rgba(201, 162, 39, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(201, 162, 39, 0.34);
+
+    &::after {
+      left: 130%;
+    }
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      display: none;
+    }
   }
 `;
 
@@ -132,11 +194,17 @@ const HeroGhost = styled.a`
   background: transparent;
   border: 1px solid #3a3a3a;
   color: #f5f5f5;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 
   &:hover {
     border-color: ${colors.primary};
     color: ${colors.primaryLight};
+    transform: translateY(-2px);
+    background: rgba(201, 162, 39, 0.08);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
   }
 `;
 
@@ -230,6 +298,7 @@ const TrustGrid = styled.div`
 `;
 
 const TrustCard = styled.div`
+  height: 100%;
   background: ${colors.backgroundPaper};
   border: 1px solid #ececec;
   border-radius: 16px;
@@ -388,6 +457,7 @@ const HeroStats = styled.div`
   margin-top: 32px;
   padding-top: 26px;
   border-top: 1px solid #242424;
+  ${heroEntrance(340)}
 `;
 
 const HeroStat = styled.div`
@@ -435,6 +505,7 @@ const Steps = styled.div`
 
 const StepCard = styled.div`
   position: relative;
+  height: 100%;
   background: ${colors.backgroundPaper};
   border: 1px solid #ececec;
   border-radius: 16px;
@@ -639,104 +710,120 @@ export default function HomePage({
 
       {categoryList.length > 0 && (
         <Section>
-          <SectionHead>
-            <SectionTitle>Kategorie</SectionTitle>
-            <SectionLink href="/products">Zobacz wszystko →</SectionLink>
-          </SectionHead>
-          <CategoryRow>
-            {categoryList.map((category) => (
-              <CategoryChip
-                key={category._id}
-                href={`/products?category=${category._id}&page=1`}
-              >
-                <CategoryIcon>
-                  <GemIcon />
-                </CategoryIcon>
-                <CategoryName>{category.name}</CategoryName>
-              </CategoryChip>
-            ))}
-          </CategoryRow>
+          <Reveal>
+            <SectionHead>
+              <SectionTitle>Kategorie</SectionTitle>
+              <SectionLink href="/products">Zobacz wszystko →</SectionLink>
+            </SectionHead>
+            <CategoryRow>
+              {categoryList.map((category) => (
+                <CategoryChip
+                  key={category._id}
+                  href={`/products?category=${category._id}&page=1`}
+                >
+                  <CategoryIcon>
+                    <GemIcon />
+                  </CategoryIcon>
+                  <CategoryName>{category.name}</CategoryName>
+                </CategoryChip>
+              ))}
+            </CategoryRow>
+          </Reveal>
         </Section>
       )}
 
       <Section>
-        <HorizontalProductList
-          title="Polecane okazje"
-          subtitle="Świeżo wycenione przedmioty w cenach, które szybko znikają."
-          products={newProducts}
-          loading={isLoadingNew}
-        />
+        <Reveal>
+          <HorizontalProductList
+            title="Polecane okazje"
+            subtitle="Świeżo wycenione przedmioty w cenach, które szybko znikają."
+            products={newProducts}
+            loading={isLoadingNew}
+          />
+        </Reveal>
       </Section>
 
       <Section>
-        <HorizontalProductList
-          title="Popularne"
-          subtitle="To, po co klienci wracają najczęściej."
-          products={popularProducts}
-          loading={isLoadingPopular}
-        />
+        <Reveal>
+          <HorizontalProductList
+            title="Popularne"
+            subtitle="To, po co klienci wracają najczęściej."
+            products={popularProducts}
+            loading={isLoadingPopular}
+          />
+        </Reveal>
       </Section>
 
       <Section>
-        <SectionEyebrow>Prosto i bez stresu</SectionEyebrow>
-        <SectionTitle>Jak to działa</SectionTitle>
-        <SectionSub>
-          Trzy kroki dzielą Cię od gotówki — bez kolejek i papierologii.
-        </SectionSub>
+        <Reveal>
+          <SectionEyebrow>Prosto i bez stresu</SectionEyebrow>
+          <SectionTitle>Jak to działa</SectionTitle>
+          <SectionSub>
+            Trzy kroki dzielą Cię od gotówki — bez kolejek i papierologii.
+          </SectionSub>
+        </Reveal>
         <Steps>
-          {STEPS.map((step) => (
-            <StepCard key={step.n}>
-              <StepNum>{step.n}</StepNum>
-              <StepTitle>{step.title}</StepTitle>
-              <StepText>{step.text}</StepText>
-            </StepCard>
+          {STEPS.map((step, index) => (
+            <Reveal key={step.n} delay={index * 110}>
+              <StepCard>
+                <StepNum>{step.n}</StepNum>
+                <StepTitle>{step.title}</StepTitle>
+                <StepText>{step.text}</StepText>
+              </StepCard>
+            </Reveal>
           ))}
         </Steps>
       </Section>
 
-      <AuctionsBanner>
-        <CloverPattern />
-        <HeroGlow />
-        <AuctionsRow>
-          <AuctionsInfo>
-            <FbTile>
-              <FacebookGlyph />
-            </FbTile>
-            <div style={{ minWidth: 0 }}>
-              <AuctionsBadge>
-                <span /> Aukcje na żywo
-              </AuctionsBadge>
-              <AuctionsTitle>
-                Licytacje na żywo — najlepsze okazje znikają pierwsze
-              </AuctionsTitle>
-              <AuctionsText>
-                Nowe przedmioty i licytacje ogłaszamy na bieżąco w naszej
-                społeczności na Facebooku. Dołącz i licytuj, zanim zrobią to inni.
-              </AuctionsText>
-            </div>
-          </AuctionsInfo>
-          <AuctionsButton href={FACEBOOK_AUCTIONS_URL} target="_blank" rel="noreferrer">
-            <FacebookGlyph size={20} fill={colors.black} />
-            Przejdź do licytacji
-          </AuctionsButton>
-        </AuctionsRow>
-      </AuctionsBanner>
+      <Reveal>
+        <AuctionsBanner>
+          <CloverPattern />
+          <HeroGlow />
+          <AuctionsRow>
+            <AuctionsInfo>
+              <FbTile>
+                <FacebookGlyph />
+              </FbTile>
+              <div style={{ minWidth: 0 }}>
+                <AuctionsBadge>
+                  <span /> Aukcje na żywo
+                </AuctionsBadge>
+                <AuctionsTitle>
+                  Licytacje na żywo — najlepsze okazje znikają pierwsze
+                </AuctionsTitle>
+                <AuctionsText>
+                  Nowe przedmioty i licytacje ogłaszamy na bieżąco w naszej
+                  społeczności na Facebooku. Dołącz i licytuj, zanim zrobią to inni.
+                </AuctionsText>
+              </div>
+            </AuctionsInfo>
+            <AuctionsButton href={FACEBOOK_AUCTIONS_URL} target="_blank" rel="noreferrer">
+              <FacebookGlyph size={20} fill={colors.black} />
+              Przejdź do licytacji
+            </AuctionsButton>
+          </AuctionsRow>
+        </AuctionsBanner>
+      </Reveal>
 
       <Section>
-        <SectionEyebrow>Dlaczego my</SectionEyebrow>
-        <SectionTitle>Lombard, któremu zaufasz</SectionTitle>
-        <SectionSub>
-          Uczciwe zasady, konkretne warunki i dyskrecja na każdym kroku.
-        </SectionSub>
+        <Reveal>
+          <SectionEyebrow>Dlaczego my</SectionEyebrow>
+          <SectionTitle>Lombard, któremu zaufasz</SectionTitle>
+          <SectionSub>
+            Uczciwe zasady, konkretne warunki i dyskrecja na każdym kroku.
+          </SectionSub>
+        </Reveal>
         <TrustGrid style={{ marginTop: 22 }}>
-          {TRUST.map((item) => (
-            <TrustCard key={item.title}>
-              <TrustIcon>{item.icon}</TrustIcon>
-              <div>
-                <TrustTitle>{item.title}</TrustTitle>
-                <TrustSub>{item.sub}</TrustSub>
-              </div>
-            </TrustCard>
+          {TRUST.map((item, index) => (
+            <Reveal key={item.title} delay={index * 110}>
+              <TrustCard>
+                <TrustIcon>{item.icon}</TrustIcon>
+                <div>
+                  <TrustTitle>{item.title}</TrustTitle>
+                  <TrustSub>{item.sub}</TrustSub>
+                </div>
+              </TrustCard>
+            </Reveal>
           ))}
         </TrustGrid>
       </Section>

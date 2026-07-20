@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { FiShoppingCart, FiUser, FiHeart } from "react-icons/fi";
 import { CartContext } from "../context/CartContext";
@@ -78,6 +78,12 @@ const CartIcon = styled(FiShoppingCart)`
   cursor: pointer;
 `;
 
+const badgePop = keyframes`
+  0% { transform: scale(0.4); }
+  55% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+`;
+
 const Badge = styled.div`
   position: absolute;
   top: -4px;
@@ -93,6 +99,11 @@ const Badge = styled.div`
   justify-content: center;
   font-size: 10px;
   font-weight: bold;
+  animation: ${badgePop} 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 const StyledNav = styled.nav`
@@ -456,13 +467,13 @@ export default function Menu() {
             <IconButton as="span">
               <FiHeart />
             </IconButton>
-            {wishlistCount > 0 && <Badge>{wishlistCount}</Badge>}
+            {wishlistCount > 0 && <Badge key={wishlistCount}>{wishlistCount}</Badge>}
           </CartIconWrapper>
         </Link>
         <Link href="/cart" aria-label={`Koszyk, liczba produktów: ${cartItemCount}`}>
           <CartIconWrapper>
             <CartIcon />
-            {cartItemCount > 0 && <Badge>{cartItemCount}</Badge>}
+            {cartItemCount > 0 && <Badge key={cartItemCount}>{cartItemCount}</Badge>}
           </CartIconWrapper>
         </Link>
         <MenuButton

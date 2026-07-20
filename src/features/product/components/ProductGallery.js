@@ -33,6 +33,7 @@ export default function ProductGallery({
     <>
       <GalleryCard>
         <MainImage
+          key={selectedImageIndex}
           src={product.images[selectedImageIndex]}
           alt={`${product.title} - ${selectedImageIndex + 1}`}
           onClick={() => handleImageClick(selectedImageIndex)}

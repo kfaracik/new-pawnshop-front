@@ -60,6 +60,21 @@ const ProductImageWrapper = styled.div`
   }
 `;
 
+const SecondaryImage = styled.div`
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+
+  ${CardContainer}:hover & {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+`;
+
 const Placeholder = styled.div`
   position: absolute;
   inset: 0;
@@ -246,6 +261,7 @@ const PinIcon = () => (
 
 export const ProductItem = ({ product, searchQuery }) => {
   const [imageFailed, setImageFailed] = React.useState(false);
+  const [secondImageFailed, setSecondImageFailed] = React.useState(false);
   const { isWishlisted, toggleWishlist } = React.useContext(WishlistContext);
   const wished = isWishlisted(product._id);
 
@@ -257,6 +273,9 @@ export const ProductItem = ({ product, searchQuery }) => {
   const url = `/product/${product._id}`;
   const availabilityStatus = product?.availabilityStatus || "available";
   const hasImage = !imageFailed && Boolean(product.images?.[0]);
+  const secondImage = product.images?.[1];
+  const hasSecondImage =
+    hasImage && Boolean(secondImage) && secondImage !== product.images[0] && !secondImageFailed;
 
   const reservationLabel = (() => {
     if (!product?.reservationExpiresAt) return "";
@@ -292,13 +311,26 @@ export const ProductItem = ({ product, searchQuery }) => {
       <CardContainer>
         <ProductImageWrapper>
           {hasImage ? (
-            <SmartImage
-              src={product.images[0]}
-              alt={product.title}
-              fill
-              sizes="(max-width: 600px) 50vw, (max-width: 1200px) 33vw, 25vw"
-              onError={() => setImageFailed(true)}
-            />
+            <>
+              <SmartImage
+                src={product.images[0]}
+                alt={product.title}
+                fill
+                sizes="(max-width: 600px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                onError={() => setImageFailed(true)}
+              />
+              {hasSecondImage && (
+                <SecondaryImage aria-hidden="true">
+                  <SmartImage
+                    src={secondImage}
+                    alt=""
+                    fill
+                    sizes="(max-width: 600px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                    onError={() => setSecondImageFailed(true)}
+                  />
+                </SecondaryImage>
+              )}
+            </>
           ) : (
             <Placeholder>
               <CloverMark size={40} color="#2a2a2a" />

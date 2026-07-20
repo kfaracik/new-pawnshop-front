@@ -19,11 +19,11 @@ export const buttonBaseStyle = css`
   font-size: 0.95rem;
   line-height: 1;
   transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
+    background-color 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 
   svg {
     height: 18px;
@@ -32,6 +32,11 @@ export const buttonBaseStyle = css`
 
   &:hover {
     transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled):not([aria-disabled="true"]) {
+    transform: translateY(0) scale(0.97);
+    transition-duration: 0.08s;
   }
 
   &:disabled,

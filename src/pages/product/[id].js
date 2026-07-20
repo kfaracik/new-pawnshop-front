@@ -83,12 +83,23 @@ const InfoCard = styled.section`
   }
 `;
 
+const mainImageFade = keyframes`
+  0% { opacity: 0.4; transform: scale(1.015); }
+  100% { opacity: 1; transform: scale(1); }
+`;
+
 const MainImage = styled.img`
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: 10px;
   border: 1px solid #efefef;
+  cursor: zoom-in;
+  animation: ${mainImageFade} 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 
   @media screen and (max-width: 600px) {
     aspect-ratio: 1 / 1;

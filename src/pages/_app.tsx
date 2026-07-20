@@ -6,6 +6,7 @@ import { Poppins } from "next/font/google";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
 import CookieBanner from "components/CookieBanner";
+import RouteProgress from "components/RouteProgress";
 import { CartContextProvider } from "context/CartContext";
 import { WishlistContextProvider } from "context/WishlistContext";
 import queryClient from "lib/queryClient";
@@ -41,6 +42,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <div className={poppins.className} style={{ display: "contents" }}>
         <CartContextProvider>
           <WishlistContextProvider>
+            <RouteProgress />
             <AnimatePresence mode="wait">
               <Component {...pageProps} />
             </AnimatePresence>
