@@ -8,7 +8,7 @@ import {
   createCheckoutSession,
   confirmPayment,
 } from "services/api/orderApi";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   buttonBaseStyle,
@@ -454,7 +454,18 @@ const StepButton = styled.button`
   min-width: 140px;
 `;
 
+const toastIn = keyframes`
+  0% { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: translateY(0); }
+`;
+
 const Toast = styled.div`
+  animation: ${toastIn} 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+
   position: fixed;
   right: 16px;
   bottom: 16px;

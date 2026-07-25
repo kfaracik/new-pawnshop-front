@@ -46,6 +46,11 @@ const FilterChip = styled.button`
     background: ${(props) => (props.$active ? colors.primaryLight : "#fff8e8")};
     transform: translateY(-1px);
   }
+
+  &:active {
+    transform: translateY(0) scale(0.97);
+    transition-duration: 0.08s;
+  }
 `;
 
 const SortRow = styled.div`

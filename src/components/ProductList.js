@@ -25,6 +25,21 @@ const shimmer = keyframes`
   100% { background-position: 0 0; }
 `;
 
+const fadeUp = keyframes`
+  0% { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: translateY(0); }
+`;
+
+const GridItem = styled.div`
+  min-width: 0;
+  animation: ${fadeUp} 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: ${(props) => props.$delay}ms;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`;
+
 const SkeletonCard = styled.div`
   width: 100%;
   border-radius: 16px;
@@ -107,8 +122,10 @@ const ProductList = ({
   return (
     <>
       <Grid>
-        {items.map((product) => (
-          <ProductItem key={product._id} product={product} searchQuery={searchQuery} />
+        {items.map((product, index) => (
+          <GridItem key={product._id} $delay={(index % 12) * 45}>
+            <ProductItem product={product} searchQuery={searchQuery} />
+          </GridItem>
         ))}
       </Grid>
       {totalPages > 1 && (
