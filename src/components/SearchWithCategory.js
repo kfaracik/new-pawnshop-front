@@ -107,7 +107,7 @@ const SearchInput = styled.input`
   }
 
   @media screen and (max-width: 480px) {
-    padding: 10px 40px 10px 42px;
+    padding: 10px ${(props) => (props.$hasValue ? "40px" : "10px")} 10px 42px;
   }
 `;
 
@@ -478,6 +478,7 @@ export default function SearchWithCategory() {
             autoComplete="off"
             placeholder="Czego szukasz?"
             value={searchQuery}
+            $hasValue={Boolean(searchQuery)}
             onChange={(event) => {
               setSearchQuery(event.target.value.slice(0, 80));
               setSuggestionsOpen(true);
