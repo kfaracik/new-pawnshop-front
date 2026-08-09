@@ -39,8 +39,16 @@ const Tabs = styled.div`
   margin: 18px 0 10px;
 
   @media (max-width: 520px) {
-    display: grid;
-    grid-template-columns: 1fr;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 `;
 
@@ -60,8 +68,11 @@ const TabButton = styled.button`
   }
 
   @media (max-width: 520px) {
-    width: 100%;
-    justify-self: stretch;
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 0 14px;
+    font-size: 0.88rem;
+    white-space: nowrap;
   }
 `;
 
@@ -232,7 +243,8 @@ export default function ContactPage({ locations = [] }) {
                   active={String(selected?._id) === String(location._id)}
                   onClick={() => setSelectedId(String(location._id))}
                 >
-                  {getLocationLabel(location)}
+                  {getLocationLabel(location).replace(/^nowy\s+lombard\s*[-–—]?\s*/i, "") ||
+                    getLocationLabel(location)}
                 </TabButton>
               ))}
             </Tabs>

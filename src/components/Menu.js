@@ -8,6 +8,7 @@ import { FiShoppingCart, FiUser, FiHeart } from "react-icons/fi";
 import { CartContext } from "../context/CartContext";
 import { WishlistContext } from "../context/WishlistContext";
 import { buttonBaseStyle, buttonGhostStyle } from "components/Button";
+import CloverMark from "components/CloverMark";
 import colors from "styles/colors";
 import { useCategories } from "services/api/categoryApi";
 
@@ -70,18 +71,32 @@ const CartIconWrapper = styled.div`
     border-color: ${colors.primary};
     background: #fff8e8;
   }
+
+  @media screen and (max-width: 480px) {
+    min-width: 37px;
+    height: 37px;
+    border-radius: 10px;
+  }
 `;
 
 const CartIcon = styled(FiShoppingCart)`
   font-size: 20px;
   color: ${colors.textPrimary};
   cursor: pointer;
+
+  @media screen and (max-width: 480px) {
+    font-size: 17px;
+  }
 `;
 
 const HeartIcon = styled(FiHeart)`
   font-size: 20px;
   color: ${colors.textPrimary};
   cursor: pointer;
+
+  @media screen and (max-width: 480px) {
+    font-size: 17px;
+  }
 `;
 
 const badgePop = keyframes`
@@ -140,13 +155,23 @@ const DrawerBrand = styled.div`
   padding: 4px 8px 18px;
   margin-bottom: 8px;
   border-bottom: 1px solid #232323;
-  color: ${colors.primary};
+  color: #f5f5f5;
   font-weight: 800;
   font-size: 16px;
+  letter-spacing: -0.02em;
+`;
 
-  span {
-    color: #f5f5f5;
-  }
+const DrawerBrandTile = styled.span`
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #171512;
+  border: 1px solid #322c22;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${colors.primary};
+  flex-shrink: 0;
 `;
 
 const MenuButton = styled.button`
@@ -165,6 +190,14 @@ const MenuButton = styled.button`
   &:hover {
     background: #f2f2f2;
     color: ${colors.primaryDark};
+  }
+
+  @media screen and (max-width: 480px) {
+    width: 37px;
+    height: 37px;
+    min-height: 37px;
+    border-radius: 10px;
+    font-size: 19px;
   }
 
   @media screen and (min-width: 1024px) {
@@ -385,7 +418,10 @@ export default function Menu() {
         mobileNavActive={mobileNavActive}
       >
         <DrawerBrand>
-          Nowy <span>Lombard</span>
+          <DrawerBrandTile aria-hidden="true">
+            <CloverMark size={20} />
+          </DrawerBrandTile>
+          Nowy Lombard
         </DrawerBrand>
         <CloseButton type="button" aria-label="Zamknij menu" onClick={closeMobileNav}>
           <FaTimes />
