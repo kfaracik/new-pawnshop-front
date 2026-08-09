@@ -78,6 +78,12 @@ const CartIcon = styled(FiShoppingCart)`
   cursor: pointer;
 `;
 
+const HeartIcon = styled(FiHeart)`
+  font-size: 20px;
+  color: ${colors.textPrimary};
+  cursor: pointer;
+`;
+
 const badgePop = keyframes`
   0% { transform: scale(0.4); }
   55% { transform: scale(1.25); }
@@ -277,6 +283,10 @@ const HeaderActions = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+
+  @media screen and (max-width: 480px) {
+    gap: 6px;
+  }
 `;
 
 const MobileCategorySection = styled.div`
@@ -464,9 +474,7 @@ export default function Menu() {
           aria-label={`Ulubione, liczba produktów: ${wishlistCount}`}
         >
           <CartIconWrapper>
-            <IconButton as="span">
-              <FiHeart />
-            </IconButton>
+            <HeartIcon />
             {wishlistCount > 0 && <Badge key={wishlistCount}>{wishlistCount}</Badge>}
           </CartIconWrapper>
         </Link>

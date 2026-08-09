@@ -21,8 +21,6 @@ const SearchWrapper = styled.div`
   @media screen and (max-width: 768px) {
     align-items: stretch;
     gap: 8px;
-    padding: 0 12px;
-    box-sizing: border-box;
   }
 `;
 
@@ -56,6 +54,12 @@ const SearchIcon = styled(FiSearch)`
   height: 20px;
   color: ${colors.primaryDark};
   pointer-events: none;
+
+  @media screen and (max-width: 480px) {
+    left: 13px;
+    width: 18px;
+    height: 18px;
+  }
 `;
 
 const VisuallyHiddenLabel = styled.label`
@@ -100,6 +104,10 @@ const SearchInput = styled.input`
 
   &::placeholder {
     color: #9a9488;
+  }
+
+  @media screen and (max-width: 480px) {
+    padding: 10px 40px 10px 42px;
   }
 `;
 
@@ -149,8 +157,9 @@ const SearchButton = styled.button`
     cursor: not-allowed;
   }
 
-  @media screen and (max-width: 420px) {
-    padding-inline: 18px;
+  @media screen and (max-width: 480px) {
+    padding-inline: 14px;
+    font-size: 0.92rem;
   }
 `;
 

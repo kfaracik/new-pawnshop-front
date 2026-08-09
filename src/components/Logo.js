@@ -10,11 +10,21 @@ const LogoLink = styled(Link)`
   gap: 11px;
   text-decoration: none;
   flex-shrink: 0;
+
+  @media screen and (max-width: 480px) {
+    gap: 8px;
+  }
 `;
 
 const Tile = styled.span`
   width: 40px;
   height: 40px;
+
+  @media screen and (max-width: 480px) {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
   border-radius: 12px;
   background: ${colors.black};
   border: 1px solid #232323;
@@ -37,6 +47,10 @@ const Name = styled.span`
   letter-spacing: -0.02em;
   color: ${colors.textPrimary};
   white-space: nowrap;
+
+  @media screen and (max-width: 480px) {
+    font-size: 15.5px;
+  }
 `;
 
 export default function Logo() {
