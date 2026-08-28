@@ -107,7 +107,7 @@ const BottomInner = styled(LayoutInner)`
   flex-wrap: wrap;
   gap: 10px;
   font-size: 13px;
-  color: #6f6f6f;
+  color: #8f8f8f;
 `;
 
 export default function Footer() {
