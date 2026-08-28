@@ -18,11 +18,49 @@ export const versionedBackendPath = (path: string) => {
   return `${apiVersion}/${normalizedPath}`;
 };
 
+// Customer-facing backend resources this proxy is allowed to reach. Anything
+// else (admin endpoints, arbitrary paths) is rejected so a customer session's
+// token can never be forwarded to a privileged route (confused-deputy).
+const ALLOWED_BACKEND_PREFIXES = new Set([
+  "products",
+  "categories",
+  "locations",
+  "auctions",
+  "orders",
+]);
+
+export class ForbiddenBackendPathError extends Error {
+  constructor(message = "Forbidden backend path.") {
+    super(message);
+    this.name = "ForbiddenBackendPathError";
+  }
+}
+
+export const assertAllowedBackendPath = (path: string) => {
+  const segments = path.split("/").filter(Boolean);
+  // Reject empty, traversal (".."/"."), or version-prefixed paths that could
+  // climb above the API root once resolved by new URL().
+  if (
+    segments.length === 0 ||
+    segments.some((segment) => segment === "." || segment === "..")
+  ) {
+    throw new ForbiddenBackendPathError();
+  }
+
+  const first = segments[0].toLowerCase();
+  const resource = first === "v1" ? segments[1]?.toLowerCase() : first;
+  if (!resource || !ALLOWED_BACKEND_PREFIXES.has(resource)) {
+    throw new ForbiddenBackendPathError();
+  }
+};
+
 export const buildBackendUrl = (path: string, query: NextApiRequest["query"] = {}) => {
   const baseUrl = resolveBackendBaseUrl();
   if (!baseUrl) {
     throw new Error("Missing NEXT_PUBLIC_API_BASE_URL or API_BASE_URL.");
   }
+
+  assertAllowedBackendPath(path);
 
   const targetUrl = new URL(`${baseUrl}/${path.replace(/^\/+/, "")}`);
   for (const [key, value] of Object.entries(query)) {

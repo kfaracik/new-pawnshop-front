@@ -14,9 +14,12 @@ const ALLOWED_TAGS = new Set([
 
 const stripDangerousBlocks = (value) =>
   value
+    // HTML comments can hide conditional/mutation-XSS payloads — remove first.
+    .replace(/<!--[\s\S]*?-->/g, "")
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
     .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
-    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "");
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+    .replace(/<(object|embed|svg|math|template|noscript|link|meta|base)\b[^>]*>/gi, "");
 
 const stripDangerousAttributes = (value) =>
   value

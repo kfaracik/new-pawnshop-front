@@ -21,6 +21,7 @@ import { sanitizeHtml } from "features/product/lib/sanitizeHtml";
 import { getProductSeoData } from "features/product/lib/seo";
 import axiosInstance from "lib/axiosInstance";
 import { versionedApiPath } from "lib/apiPaths";
+import { safeExternalUrl } from "utils/safeUrl";
 import { useProduct } from "services/api/useProductApi";
 import { useProducts } from "services/api/productApi";
 import HorizontalProductList from "components/HorizontalProductList";
@@ -1180,9 +1181,9 @@ const ProductPage = ({ initialProduct = null }) => {
                   }}
                 />
               )}
-              {product.auctionLink && (
+              {safeExternalUrl(product.auctionLink) && (
                 <AuctionLink
-                  href={product.auctionLink}
+                  href={safeExternalUrl(product.auctionLink)}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

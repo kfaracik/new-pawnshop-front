@@ -42,10 +42,13 @@ const nextConfig = {
     styledComponents: true,
   },
   images: {
+    // Restricted to the single known remote host; all other remote images are
+    // rendered unoptimized (see SmartImage) so the optimizer can't be abused as
+    // an SSRF/open image proxy for arbitrary https URLs.
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "upload.wikimedia.org",
       },
     ],
   },
