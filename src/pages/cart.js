@@ -16,6 +16,7 @@ import {
   buttonSecondaryStyle,
 } from "components/Button";
 import PageContainer from "components/PageContainer";
+import { safeStripeRedirectUrl } from "utils/safeUrl";
 import SeoHead from "components/SeoHead";
 import { CartContext } from "context/CartContext";
 import { useProducts } from "services/api/useProductApi";
@@ -1387,8 +1388,9 @@ const CartPage = () => {
 
         try {
           const { url, alreadyPaid } = await createCheckoutSession(stripeOrder._id);
-          if (url) {
-            window.location.href = url;
+          const safeUrl = safeStripeRedirectUrl(url);
+          if (safeUrl) {
+            window.location.href = safeUrl;
             return;
           }
           if (alreadyPaid) {

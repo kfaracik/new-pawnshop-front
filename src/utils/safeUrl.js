@@ -13,3 +13,20 @@ export const safeExternalUrl = (value) => {
   }
   return undefined;
 };
+
+// Only allow redirecting the browser to a genuine Stripe Checkout host. Guards
+// against a compromised/misbehaving backend returning an off-domain redirect.
+const STRIPE_REDIRECT_HOSTS = /(^|\.)stripe\.com$/i;
+
+export const safeStripeRedirectUrl = (value) => {
+  if (typeof value !== "string" || value.trim() === "") return undefined;
+  try {
+    const url = new URL(value);
+    if (url.protocol === "https:" && STRIPE_REDIRECT_HOSTS.test(url.hostname)) {
+      return value;
+    }
+  } catch {
+    return undefined;
+  }
+  return undefined;
+};

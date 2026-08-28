@@ -9,6 +9,7 @@ import {
   buttonSecondaryStyle,
 } from "components/Button";
 import PageContainer from "components/PageContainer";
+import { safeStripeRedirectUrl } from "utils/safeUrl";
 import SeoHead from "components/SeoHead";
 import { useUserData } from "services/api/useUserApi";
 import AuthForm from "components/AuthForm";
@@ -538,8 +539,9 @@ const OrdersTab = ({ orders }) => {
     setPayingId(orderId);
     try {
       const { url } = await createCheckoutSession(orderId);
-      if (url) {
-        window.location.href = url;
+      const safeUrl = safeStripeRedirectUrl(url);
+      if (safeUrl) {
+        window.location.href = safeUrl;
         return;
       }
       setError("Nie udało się rozpocząć płatności. Spróbuj ponownie za chwilę.");
