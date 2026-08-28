@@ -888,26 +888,30 @@ const AccountPage = () => {
 
   if (!isMounted) {
     return (
-      <PageContainer loading>
+      <>
         <SeoHead title="Konto użytkownika | Nowy Lombard" description="Panel użytkownika." path="/account" noindex />
-      </PageContainer>
+        <PageContainer loading />
+      </>
     );
   }
 
   if (!isAuthed) {
     return (
-      <PageContainer loading={isLoading}>
+      <>
         <SeoHead title="Konto użytkownika | Nowy Lombard" description="Logowanie i panel użytkownika." path="/account" noindex />
-        <AccountWrapper>
-          <AuthForm />
-        </AccountWrapper>
-      </PageContainer>
+        <PageContainer loading={isLoading}>
+          <AccountWrapper>
+            <AuthForm />
+          </AccountWrapper>
+        </PageContainer>
+      </>
     );
   }
 
   return (
-    <PageContainer loading={isLoading}>
+    <>
       <SeoHead title="Twoje konto | Nowy Lombard" description="Panel użytkownika, dane i historia zamówień." path="/account" noindex />
+      <PageContainer loading={isLoading}>
       <AccountWrapper>
         <ProfileCard>
           <Header>
@@ -967,7 +971,8 @@ const AccountPage = () => {
           </AnimatePresence>
         </ProfileCard>
       </AccountWrapper>
-    </PageContainer>
+      </PageContainer>
+    </>
   );
 };
 
