@@ -25,6 +25,12 @@ export function getProductSeoData(product, id) {
 
   const canonicalPath = product?._id ? `/product/${product._id}` : `/product/${id || ""}`;
 
+  // Google recommends Offer.priceValidUntil; default it a year out so the
+  // rich-result doesn't warn (prices are re-published on every build anyway).
+  const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+
   const productSchema = product
     ? [
         {
@@ -32,6 +38,7 @@ export function getProductSeoData(product, id) {
           "@type": "Product",
           name: product.title,
           description: stripHtml(product.description || ""),
+          ...(product._id ? { sku: String(product._id) } : {}),
           image: Array.isArray(product.images)
             ? product.images.map(toAbsoluteImageUrl).filter(Boolean)
             : [],
@@ -39,6 +46,7 @@ export function getProductSeoData(product, id) {
             "@type": "Offer",
             priceCurrency: "PLN",
             price: Number(product.price || 0).toFixed(2),
+            priceValidUntil,
             availability:
               product?.availabilityStatus === "unavailable"
                 ? "https://schema.org/OutOfStock"
