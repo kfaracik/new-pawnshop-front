@@ -6,6 +6,7 @@ import { Poppins } from "next/font/google";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
 import CookieBanner from "components/CookieBanner";
+import ErrorBoundary from "components/ErrorBoundary";
 import RouteProgress from "components/RouteProgress";
 import { CartContextProvider } from "context/CartContext";
 import { WishlistContextProvider } from "context/WishlistContext";
@@ -43,9 +44,11 @@ export default function App({ Component, pageProps }: AppProps) {
         <CartContextProvider>
           <WishlistContextProvider>
             <RouteProgress />
-            <AnimatePresence mode="wait">
-              <Component {...pageProps} />
-            </AnimatePresence>
+            <ErrorBoundary>
+              <AnimatePresence mode="wait">
+                <Component {...pageProps} />
+              </AnimatePresence>
+            </ErrorBoundary>
             <CookieBanner />
           </WishlistContextProvider>
         </CartContextProvider>
