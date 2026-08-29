@@ -1,3 +1,4 @@
+import Link from "next/link";
 import LegalLayout from "components/legal/LegalLayout";
 import { COMPANY, fullAddress } from "lib/companyInfo";
 
@@ -294,8 +295,8 @@ const sections = [
       <p>
         Administratorem danych osobowych jest Sprzedawca. Zasady przetwarzania danych
         osobowych oraz wykorzystywania plików cookies opisane są w{" "}
-        <a href="/legal/privacy">Polityce prywatności</a> oraz{" "}
-        <a href="/legal/cookies">Polityce cookies</a>.
+        <Link href="/legal/privacy">Polityce prywatności</Link> oraz{" "}
+        <Link href="/legal/cookies">Polityce cookies</Link>.
       </p>
     ),
   },

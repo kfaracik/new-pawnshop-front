@@ -2,7 +2,7 @@ import coreWebVitals from "eslint-config-next/core-web-vitals";
 
 const base = Array.isArray(coreWebVitals) ? coreWebVitals : [coreWebVitals];
 
-export default [
+const config = [
   ...base,
   {
     ignores: [".next/**", "node_modules/**", "out/**", "next-env.d.ts"],
@@ -17,3 +17,5 @@ export default [
     },
   },
 ];
+
+export default config;

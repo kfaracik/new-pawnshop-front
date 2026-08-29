@@ -17,10 +17,10 @@ const isOptimizable = (src) => {
   }
 };
 
-export default function SmartImage({ src, ...props }) {
+export default function SmartImage({ src, alt = "", ...props }) {
   if (isOptimizable(src)) {
-    return <Image src={src} {...props} />;
+    return <Image src={src} alt={alt} {...props} />;
   }
 
-  return <Image src={src} unoptimized loader={({ src: s }) => s} {...props} />;
+  return <Image src={src} alt={alt} unoptimized loader={({ src: s }) => s} {...props} />;
 }

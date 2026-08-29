@@ -1,3 +1,4 @@
+import Link from "next/link";
 import LegalLayout from "components/legal/LegalLayout";
 import { COMPANY, fullAddress } from "lib/companyInfo";
 
@@ -207,7 +208,7 @@ const sections = [
       <p>
         Sklep korzysta z plików cookies i podobnych technologii. Szczegółowe
         informacje o rodzajach cookies, celach i zarządzaniu zgodami znajdują się w{" "}
-        <a href="/legal/cookies">Polityce cookies</a>.
+        <Link href="/legal/cookies">Polityce cookies</Link>.
       </p>
     ),
   },
