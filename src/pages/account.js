@@ -402,6 +402,21 @@ const ORDER_STATUS_LABELS = {
   failed: "Nieudane",
 };
 
+const FULFILLMENT_STATUS_LABELS = {
+  unfulfilled: "Przygotowujemy",
+  processing: "W realizacji",
+  shipped: "Wysłane",
+  delivered: "Dostarczone",
+  canceled: "Anulowane",
+};
+
+const FULFILLMENT_TONE = {
+  processing: "amber",
+  shipped: "gold",
+  delivered: "green",
+  canceled: "gray",
+};
+
 const PAYMENT_STATUS_LABELS = {
   unpaid: "Nieopłacone",
   pending: "W trakcie",
@@ -593,6 +608,13 @@ const OrdersTab = ({ orders }) => {
                     {PAYMENT_STATUS_LABELS[order.paymentStatus] || order.paymentStatus || "-"}
                   </StatusPill>
                 )}
+                {order.fulfillmentStatus &&
+                  order.fulfillmentStatus !== "unfulfilled" &&
+                  FULFILLMENT_STATUS_LABELS[order.fulfillmentStatus] && (
+                    <StatusPill $tone={FULFILLMENT_TONE[order.fulfillmentStatus] || "gray"}>
+                      {FULFILLMENT_STATUS_LABELS[order.fulfillmentStatus]}
+                    </StatusPill>
+                  )}
               </OrderPills>
             </OrderTop>
             <OrderDetailGrid>
@@ -614,6 +636,12 @@ const OrdersTab = ({ orders }) => {
                   {PAYMENT_METHOD_LABELS[order.paymentMethod] || order.paymentMethod || "-"}
                 </strong>
               </span>
+              {order.trackingNote && (
+                <span>
+                  Przesyłka
+                  <strong>{order.trackingNote}</strong>
+                </span>
+              )}
             </OrderDetailGrid>
             <OrderProducts>
               {(order.products || []).length > 0 ? (
