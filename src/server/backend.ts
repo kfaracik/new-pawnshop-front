@@ -27,6 +27,7 @@ const ALLOWED_BACKEND_PREFIXES = new Set([
   "locations",
   "auctions",
   "orders",
+  "inquiries",
 ]);
 
 export class ForbiddenBackendPathError extends Error {

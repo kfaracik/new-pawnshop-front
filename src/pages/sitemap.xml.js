@@ -1,6 +1,6 @@
 import { escapeXml, getSiteUrl } from "lib/seo";
 
-const STATIC_PATHS = ["/", "/products", "/contact", "/legal/privacy", "/legal/terms", "/legal/cookies"];
+const STATIC_PATHS = ["/", "/products", "/o-nas", "/faq", "/contact", "/legal/privacy", "/legal/terms", "/legal/cookies"];
 
 const toUrlEntry = (path, lastModified) => `
   <url>

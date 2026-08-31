@@ -22,6 +22,7 @@ import { getProductSeoData } from "features/product/lib/seo";
 import axiosInstance from "lib/axiosInstance";
 import { versionedApiPath } from "lib/apiPaths";
 import { safeExternalUrl } from "utils/safeUrl";
+import NotifyAvailability from "components/NotifyAvailability";
 import { useProduct } from "services/api/useProductApi";
 import { useProducts } from "services/api/productApi";
 import HorizontalProductList from "components/HorizontalProductList";
@@ -1213,9 +1214,15 @@ const ProductPage = ({ initialProduct = null }) => {
                     </ReservationNotice>
                   )}
                   {product?.availabilityStatus === "unavailable" && (
-                    <ReservationNotice>
-                      <strong>Status:</strong> niedostępne.
-                    </ReservationNotice>
+                    <>
+                      <ReservationNotice>
+                        <strong>Status:</strong> niedostępne.
+                      </ReservationNotice>
+                      <NotifyAvailability
+                        productId={product?._id}
+                        productTitle={product?.title}
+                      />
+                    </>
                   )}
                   <Reassurance>
                     <li>

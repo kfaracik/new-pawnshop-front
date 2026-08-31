@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import styled, { css, keyframes } from "styled-components";
 import PageContainer from "components/PageContainer";
+import InquiryForm from "components/InquiryForm";
 import Reveal from "components/Reveal";
 import SeoHead from "components/SeoHead";
 import { useFeaturedProducts } from "services/api/featuredProductsApi";
@@ -826,6 +827,20 @@ export default function HomePage({
             </Reveal>
           ))}
         </TrustGrid>
+      </Section>
+
+      <Section id="wycena">
+        <Reveal>
+          <SectionEyebrow>Bez wychodzenia z domu</SectionEyebrow>
+          <SectionTitle>Zamów bezpłatną wycenę</SectionTitle>
+          <SectionSub>
+            Opisz przedmiot, a my oszacujemy jego wartość i oddzwonimy. Bez opłat
+            i bez zobowiązań — decyzję podejmujesz sam.
+          </SectionSub>
+        </Reveal>
+        <Reveal delay={110}>
+          <InquiryForm source="strona-glowna" />
+        </Reveal>
       </Section>
     </PageContainer>
   );

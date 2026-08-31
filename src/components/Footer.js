@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import NewsletterForm from "components/NewsletterForm";
 import Link from "next/link";
 import { LayoutInner } from "styles/layout";
 import colors from "styles/colors";
@@ -94,6 +95,12 @@ const ColList = styled.div`
   }
 `;
 
+const NewsletterCol = styled.div`
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  max-width: 420px;
+`;
+
 const BottomBar = styled.div`
   border-top: 1px solid #1f1f1f;
 `;
@@ -142,6 +149,8 @@ export default function Footer() {
         <div>
           <ColTitle>Informacje</ColTitle>
           <ColList>
+            <Link href="/o-nas">O nas</Link>
+            <Link href="/faq">Najczęstsze pytania</Link>
             <Link href="/contact">Kontakt</Link>
             <Link href="/legal/terms">Regulamin</Link>
             <Link href="/legal/privacy">Polityka prywatności</Link>
@@ -158,6 +167,11 @@ export default function Footer() {
             <span>pon–pt 9:00–18:30 · sob 9:00–15:00</span>
           </ColList>
         </div>
+
+        <NewsletterCol>
+          <ColTitle>Newsletter</ColTitle>
+          <NewsletterForm />
+        </NewsletterCol>
       </FooterGrid>
 
       <BottomBar>

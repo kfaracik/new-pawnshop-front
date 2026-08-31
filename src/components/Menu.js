@@ -437,6 +437,20 @@ export default function Menu() {
           Produkty
         </NavLink>
         <NavLink
+          href="/o-nas"
+          $active={router.pathname === "/o-nas"}
+          onClick={closeMobileNav}
+        >
+          O nas
+        </NavLink>
+        <NavLink
+          href="/faq"
+          $active={router.pathname === "/faq"}
+          onClick={closeMobileNav}
+        >
+          FAQ
+        </NavLink>
+        <NavLink
           href="/contact"
           $active={router.pathname === "/contact"}
           onClick={closeMobileNav}

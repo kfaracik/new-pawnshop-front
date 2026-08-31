@@ -17,6 +17,7 @@ describe("assertAllowedBackendPath — customer proxy allowlist", () => {
     allowed("v1/locations");
     allowed("v1/auctions/abc/bids");
     allowed("v1/orders/xyz/confirm-payment");
+    allowed("v1/inquiries");
   });
 
   it("blocks privileged / non-customer resources", () => {

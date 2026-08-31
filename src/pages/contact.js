@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { buttonBaseStyle } from "components/Button";
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from "react-icons/fa";
 import PageContainer from "components/PageContainer";
+import InquiryForm from "components/InquiryForm";
 import SeoHead from "components/SeoHead";
 import colors from "styles/colors";
 import {
@@ -186,6 +187,10 @@ const ContactLink = styled.a`
   }
 `;
 
+const FormBlock = styled.div`
+  margin-top: 28px;
+`;
+
 const MapCard = styled(Card)`
   padding: 10px;
 `;
@@ -323,6 +328,14 @@ export default function ContactPage({ locations = [] }) {
             </MapCard>
           </ContentGrid>
         )}
+
+        <FormBlock>
+          <InquiryForm
+            source="kontakt"
+            title="Napisz do nas"
+            lead="Wypełnij formularz, a odezwiemy się na podany kontakt — zwykle tego samego dnia roboczego."
+          />
+        </FormBlock>
       </PageSection>
     </PageContainer>
   );
